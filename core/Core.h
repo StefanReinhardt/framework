@@ -51,6 +51,8 @@ namespace core
 		void                                                   save(const QString &filename, Graph::Ptr graph );
 		int                                                    serialize( Data::Ptr data );
 		Data::Ptr                                              deserialize( int id );
+		QJsonObject                                            serialize( const QVariant &variant );
+		void                                                   deserialize( QJsonObject obj, QVariant &variant );
 	private:
 		std::vector<Plugin::Ptr>                               m_plugins;
 		std::map<QString, DataFactory::Ptr>                    m_factories;

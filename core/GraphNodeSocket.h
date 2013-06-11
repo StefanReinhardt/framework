@@ -1,6 +1,9 @@
 #pragma once
 
 #include "Data.h"
+
+#include <QVariant>
+
 #include <functional>
 
 namespace core
@@ -12,6 +15,11 @@ namespace core
 		typedef std::shared_ptr<GraphNodeSocket> Ptr;
 		typedef std::function<void ( GraphNodeSocket* )> UpdateCallback;
 
+		enum Type
+		{
+			DATA,
+			VALUE
+		};
 		enum State
 		{
 			DIRTY,
@@ -24,6 +32,7 @@ namespace core
 			OUTPUT
 		};
 
+
 		GraphNodeSocket();
 		GraphNodeSocket( const QString &name, Direction direction );
 
@@ -33,6 +42,14 @@ namespace core
 		void                                             setData( Data::Ptr data );
 		Data::Ptr                                        getData();
 		template<typename T> std::shared_ptr<T>          getData();
+
+		const QVariant&                                  getValue();
+		template<typename T> void                        setValue( const T &value);
+		QString                                          asString();
+		int                                              asInt();
+		void                                             setString( const QString &value );
+		void                                             setInt( int value );
+
 
 		void                                             update(); // makeclean
 
@@ -46,10 +63,13 @@ namespace core
 		void                                             updateFrom( GraphNodeSocket *src ); // updates this socket from remote socket
 
 		QString                                          m_name;
-		Data::Ptr                                        m_data;
+		Type                                             m_type;
 		State                                            m_state;
 		Direction                                        m_direction;
 		UpdateCallback                                   m_update;
+
+		Data::Ptr                                        m_data;
+		QVariant                                         m_value;
 	};
 
 
@@ -60,5 +80,12 @@ namespace core
 	std::shared_ptr<T> GraphNodeSocket::getData()
 	{
 		return std::dynamic_pointer_cast<T>(getData());
+	}
+
+	template<typename T>
+	void GraphNodeSocket::setValue( const T &value)
+	{
+		m_value.setValue<T>( value );
+		m_type = VALUE;
 	}
 }

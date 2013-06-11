@@ -9,11 +9,15 @@ ImportClouds::ImportClouds() : core::GraphNode()
 {
 	addInputSocket( "file" );
 	addOutputSocket( "output" );
+
+	getSocket("file")->setString("$HERE/input.bgeo");
 }
 
 void ImportClouds::update(core::GraphNodeSocket *output)
 {
-	qDebug() << "ImportClouds: update";
+	QString filename = getSocket("file")->asString();
 	SimObject::Ptr so = std::make_shared<SimObject>();
+
+	qDebug() << "ImportClouds: update " << filename;
 	getSocket( "output" )->setData(so);
 }

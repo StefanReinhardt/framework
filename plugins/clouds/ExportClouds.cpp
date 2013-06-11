@@ -10,21 +10,21 @@
 ExportClouds::ExportClouds() : core::GraphNode()
 {
 	addInputSocket( "input" );
+	addInputSocket( "file" );
+
+	getSocket("file")->setString("$HERE/output.bgeo");
 }
 
 void ExportClouds::update(core::GraphNodeSocket *output)
 {
-
 	SimObject::Ptr so = getSocket("input")->getData<SimObject>();
+	QString filename = getSocket("file")->asString();
+
 	if( so )
 	{
-		qDebug() << "ExportClouds:: got so!";
+		qDebug() << "ExportClouds:: got so! " << filename;
 	}else
-		qDebug() << "ExportClouds:: NO so!";
-/*
-  QString filename = core::expand(getSocket("file")->asString());
-  // access so data and store
- */
+		qDebug() << "ExportClouds:: NO so! " << filename;
 
 
 

@@ -1,14 +1,18 @@
 #include "GraphNodeSocket.h"
+
+#include "Core.h"
+
 #include <QDebug>
+
 
 namespace core
 {
 
-	GraphNodeSocket::GraphNodeSocket() : Data(), m_name("unnamed"), m_state(DIRTY)
+	GraphNodeSocket::GraphNodeSocket() : Data(), m_name("unnamed"), m_state(DIRTY), m_type(DATA)
 	{
 	}
 
-	GraphNodeSocket::GraphNodeSocket(const QString &name, Direction direction ) : Data(), m_name(name), m_state(DIRTY), m_direction(direction)
+	GraphNodeSocket::GraphNodeSocket(const QString &name, Direction direction ) : Data(), m_name(name), m_state(DIRTY), m_direction(direction), m_type(DATA)
 	{
 	}
 
@@ -21,6 +25,37 @@ namespace core
 	{
 		return m_direction;
 	}
+
+
+	const QVariant& GraphNodeSocket::getValue()
+	{
+		if( m_state == DIRTY )
+			update();
+		return m_value;
+	}
+
+	QString GraphNodeSocket::asString()
+	{
+		return m_value.toString();
+	}
+
+
+	int GraphNodeSocket::asInt()
+	{
+		return m_value.toInt();
+	}
+
+	void GraphNodeSocket::setString( const QString &value )
+	{
+		setValue<QString>(value);
+	}
+
+	void GraphNodeSocket::setInt( int value )
+	{
+		setValue<int>(value);
+	}
+
+
 
 	void GraphNodeSocket::setData( Data::Ptr data )
 	{
@@ -53,15 +88,24 @@ namespace core
 	{
 		// TODO:switch(socketType)
 		// case Data:
-		this->m_data = src->getData();
+		switch( m_type )
+		{
+		case DATA:
+			this->m_data = src->getData();break;
+		case VALUE:
+			this->m_value = src->getValue();break;
+		}
 	}
 
 
 	void GraphNodeSocket::store( QJsonObject &o, QJsonDocument &doc )
 	{
 		Data::store(o,doc);
-		o.insert( "socketname", QJsonValue(getName()) );
-		o.insert( "socketdirection", QJsonValue(int(getDirection())) );
+		o.insert( "socketname", QJsonValue(m_name) );
+		o.insert( "sockettype", QJsonValue(int(m_type)) );
+		if( m_type == VALUE )
+			o.insert( "socketvalue", instance()->serialize( m_value ) );
+		o.insert( "socketdirection", QJsonValue(int(m_direction)) );
 	}
 
 
@@ -69,8 +113,14 @@ namespace core
 	{
 		Data::load(o);
 		m_name = o["socketname"].toString();
+		m_type = Type(int(o["sockettype"].toDouble()));
 		m_direction = Direction(int(o["socketdirection"].toDouble()));
+
+		if( m_type == VALUE )
+			instance()->deserialize( o["socketvalue"].toObject(), m_value );
+
 	}
 }
+
 
 

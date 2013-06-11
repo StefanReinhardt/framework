@@ -215,6 +215,37 @@ namespace core
 		return data;
 	}
 
+	QJsonObject Core::serialize( const QVariant &variant )
+	{
+		QString vtype = variant.typeName();
+		QJsonObject obj = m_serializeDoc.object();
+		obj.insert("varianttype", vtype);
+
+		if( vtype == "QString" )
+			obj.insert( "value", QJsonValue(variant.toString()) );
+		else
+		if( vtype == "int" )
+			obj.insert( "value", QJsonValue(variant.toInt()) );
+		else
+			qCritical() <<"Core::serialize unable to serialize variant of type " << vtype;
+
+		return obj;
+	}
+
+	void Core::deserialize( QJsonObject obj, QVariant &variant )
+	{
+		QString vtype = obj["varianttype"].toString();
+
+		if( vtype == "QString" )
+			variant = obj["value"].toString();
+		else
+		if( vtype == "int" )
+			variant = int(obj["value"].toDouble());
+		else
+			qCritical() <<"Core::deserialize unable to deserialize variant of type " << vtype;
+
+		return;
+	}
 
 
 }
