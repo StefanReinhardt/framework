@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Data.h"
+#include "GraphNodeSocket.h"
+#include <map>
+
+
+
 
 
 namespace core
 {
-	struct GraphNodeSocket
-	{
-		typedef std::shared_ptr<GraphNodeSocket> Ptr;
-	};
 
 	struct GraphNode : public Data
 	{
@@ -17,16 +17,33 @@ namespace core
 		typedef std::shared_ptr<GraphNode> Ptr;
 
 		GraphNode();
-		virtual void                        update();
+
+		QString                                          getName()const;
+		GraphNodeSocket::Ptr                             addInputSocket( const QString &name );
+		GraphNodeSocket::Ptr                             addOutputSocket( const QString &name );
+		GraphNodeSocket::Ptr                             getSocket( const QString name );
+		bool                                             hasSocket( const QString &name )const;
+
+		virtual void                                     update( GraphNodeSocket *output = 0 );
 
 
 
 
+		virtual void                                     store( QJsonObject &o, QJsonDocument &doc )override;
+		virtual void                                     load( QJsonObject &o )override;
+		void                                             print()const; // prints node to console (used for debugging)
 
 
 
 
 	private:
-		std::vector<GraphNodeSocket> m_sockets;
+		friend struct Graph;
+
+		void                                             addSocket( GraphNodeSocket::Ptr socket );
+		void                                             updateAll( GraphNodeSocket* ); // adapter for GraphNodeSocket:: m_update functional (will ignore given ptr and just call update)
+
+
+		QString                                          m_name; // name which is unique within scope of graph
+		std::map<QString, GraphNodeSocket::Ptr>          m_sockets; // for fast name based lookup
 	};
 }

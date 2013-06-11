@@ -8,6 +8,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
+#include <QDebug>
+
 namespace core
 {
 	class Data : public QObject

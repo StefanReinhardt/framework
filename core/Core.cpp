@@ -9,8 +9,13 @@
 #include <QStringList>
 #include <QDebug>
 
+#include "GraphNode.h"
+#include "GraphNodeSocket.h"
+
 extern core::Plugin::Ptr getPlugin_primitives( core::Core::Ptr core );
 extern core::Plugin::Ptr getPlugin_houdini( core::Core::Ptr core );
+extern core::Plugin::Ptr getPlugin_clouds( core::Core::Ptr core );
+extern core::Plugin::Ptr getPlugin_sim( core::Core::Ptr core );
 
 namespace core
 {
@@ -48,6 +53,17 @@ namespace core
 	}
 
 	// Core =====================================================
+
+	void Core::resetFrame()
+	{
+	}
+
+
+	void Core::stepFrame()
+	{
+	}
+
+
 	Graph::Ptr Core::load( const QString &filename )
 	{
 		// open new file
@@ -60,38 +76,14 @@ namespace core
 		QJsonObject root = sd.object();
 
 		// load data =================
-		QJsonObject jsonDataList = root.value("data").toObject();
-
-		// we go over the list in 2 passes.
-		// first pass: create all instances
-		// second pass: deserialize each instance
-
-		// create all instances -------------
-		QStringList keys = jsonDataList.keys();
-		for( auto key : keys )
-		{
-			int id = key.toInt();
-			QString type = jsonDataList[key].toObject()["type"].toString();
-			auto data = createData( type );
-			m_deserializeMap[id] = data;
-		}
-
-		// deserialise each instance ----------
-		for( auto key : keys )
-		{
-			int id = key.toInt();
-			auto data = m_deserializeMap[id];
-			data->load( jsonDataList[key].toObject() );
-		}
-
-
-
+		m_deserializeJsonData = root.value("data").toObject();
 
 		Graph::Ptr graph = std::dynamic_pointer_cast<Graph>(deserialize( (int)root["graph"].toDouble() ));
 
 		// clean up
 		m_serializeMap.clear();
 		m_deserializeMap.clear();
+		m_deserializeJsonData = QJsonObject();
 
 		// get and return the graph data item
 		return graph;
@@ -110,8 +102,6 @@ namespace core
 
 
 		QJsonObject root = m_serializeDoc.object();
-
-
 
 		//
 		int graphid = serialize( graph );
@@ -140,6 +130,7 @@ namespace core
 		// clean up
 		m_serializeMap.clear();
 		m_deserializeMap.clear();
+		m_deserializeJsonData = QJsonObject();
 		m_serializeDoc = QJsonDocument();
 	}
 
@@ -171,10 +162,14 @@ namespace core
 
 		// core
 		addDataFactory( DataFactoryT<Graph>::create(Graph::staticMetaObject.className(), "organizes interconnected graph nodes") );
+		addDataFactory( DataFactoryT<GraphNode>::create(GraphNode::staticMetaObject.className(), "used to constitute graphs") );
+		addDataFactory( DataFactoryT<GraphNodeSocket>::create(GraphNodeSocket::staticMetaObject.className(), "used to establish node connections") );
 
 		// TODO: these should be loaded from dlls
 		m_plugins.push_back(getPlugin_primitives( g_core ));
 		m_plugins.push_back(getPlugin_houdini( g_core ));
+		m_plugins.push_back(getPlugin_clouds( g_core ));
+		m_plugins.push_back(getPlugin_sim( g_core ));
 	}
 
 	// used during load/save -------------------
@@ -208,8 +203,16 @@ namespace core
 		auto it = m_deserializeMap.find( id );
 		if( it != m_deserializeMap.end() )
 			return it->second;
-		qCritical() << "deserialize wasnt able to find data for id " << id;
-		return Data::Ptr();
+
+		// deserialize
+		QJsonObject jsonData = m_deserializeJsonData[QString::number( id )].toObject();
+		QString type = jsonData["type"].toString();
+		Data::Ptr data = createData( type );
+		m_deserializeMap[id] = data;
+
+		data->load( jsonData );
+
+		return data;
 	}
 
 

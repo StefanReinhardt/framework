@@ -41,6 +41,11 @@ namespace core
 		Data::Ptr                                              createData( const QString &type );
 		void                                                   addDataFactory( DataFactory::Ptr df );
 
+		// timeline
+		void                                                   resetFrame();
+		void                                                   stepFrame();
+
+
 		// used during load/save
 		Graph::Ptr                                             load(const QString &filename );
 		void                                                   save(const QString &filename, Graph::Ptr graph );
@@ -51,8 +56,11 @@ namespace core
 		std::map<QString, DataFactory::Ptr>                    m_factories;
 
 		std::map<int, Data::Ptr>                               m_deserializeMap;
+		QJsonObject                                            m_deserializeJsonData;
 		std::map<Data::Ptr, std::pair<int, QJsonObject> >      m_serializeMap;
 		QJsonDocument                                          m_serializeDoc;
+
+
 	};
 
 	Core::Ptr instance();

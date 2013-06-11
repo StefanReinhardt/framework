@@ -14,7 +14,7 @@ Application::Application( int argc, char **argv ) : QApplication(argc, argv)
 {
 	//  initialize core =======================
 	core::init();
-
+/*
 	// main window ================
 	m_mainWindow = new QMainWindow();
 	m_mainWindow->resize(800, 600);
@@ -40,7 +40,7 @@ Application::Application( int argc, char **argv ) : QApplication(argc, argv)
 	m_mainWindow->setCentralWidget( split1 );
 
 	m_mainWindow->show();
-
+*/
 
 }
 
@@ -60,16 +60,11 @@ void Application::fileOpen()
 {
 	// handle currently opened file
 	// TODO
-
-
 	core::Graph::Ptr graph = core::load( "c:\\projects\\clouds\\bin\\test.json" );
 	graph->print();
 }
 
 void Application::fileSave()
 {
-	core::Graph::Ptr graph = std::make_shared<core::Graph>();
-	graph->addNode( core::create<core::GraphNode>("ImportHouGeo") );
-
-	core::save( "c:\\projects\\clouds\\bin\\test.json", graph );
+	//core::save( "c:\\projects\\clouds\\bin\\test.json", graph );
 }

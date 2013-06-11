@@ -10,11 +10,96 @@ namespace core
 	{
 	}
 
+	GraphNode::Ptr Graph::createNode( const QString &type, const QString &name )
+	{
+		GraphNode::Ptr node = create<core::GraphNode>(type);
+		if( node )
+		{
+			qDebug() << "Graph: creating node " << node->metaObject()->className();
+			if( name.isEmpty() )
+			{
+				// generate node name
+				QString newName;
+				int i = 1;
+				do
+				{
+					newName = QString("%1%2").arg(type, QString::number(i));
+				}while( hasNode(newName) );
+				node->m_name = newName;
+			}
+			else
+				node->m_name = name;
+			addNode( node );
+		}else
+			qCritical() << "Graph: unable to create node " << node->metaObject()->className();
+
+		return node;
+	}
+
+	bool Graph::hasNode( const QString &name )const
+	{
+		auto it = m_nodes.find( name );
+		if( it != m_nodes.end() )
+			return true;
+		return false;
+	}
+
+	GraphNode::Ptr Graph::getNode(const QString &name)
+	{
+		auto it = m_nodes.find( name );
+		if( it != m_nodes.end() )
+			return it->second;
+		return GraphNode::Ptr();
+	}
 
 	void Graph::addNode( core::GraphNode::Ptr node )
 	{
-		qDebug() << "Graph: adding node " << node->metaObject()->className();
-		m_nodes.push_back( node );
+		qDebug() << "Graph: adding node " << node->getName() << "(" << node->metaObject()->className() << ")";
+		//m_nodes.push_back( node );
+		m_nodes[node->getName()] = node;
+	}
+
+	void Graph::addConnection( core::GraphNode::Ptr srcNode, const QString &srcSocketName, core::GraphNode::Ptr destNode, const QString &destSocketName )
+	{
+		GraphNodeSocket::Ptr srcSocket = srcNode->getSocket(srcSocketName);
+		GraphNodeSocket::Ptr destSocket = destNode->getSocket(destSocketName);
+
+		if( srcSocket && destSocket )
+		{
+			addConnection( srcSocket, destSocket );
+		}else
+			qCritical() << "Graph::addConnection: one of destined sockets doesnt exist.";
+	}
+
+	void Graph::addConnection(core::GraphNodeSocket::Ptr src, core::GraphNodeSocket::Ptr dest)
+	{
+		qDebug() << "adding connection";
+
+		// connect signal/slots for dirty propagation
+
+		// set updateCallback on destNode such that it pulls information from source socket
+		dest->m_update = std::bind(&Graph::updateSocket, this, std::placeholders::_1, src.get() );
+
+		m_connections.push_back( GraphNodeSocketConnection(src, dest) );
+
+	}
+
+	// fetches content from another socket
+	void Graph::updateSocket(GraphNodeSocket *dest, GraphNodeSocket *src )
+	{
+		qDebug() << "updating socket connection";
+		dest->updateFrom(src);
+	}
+
+	void Graph::render( core::GraphNode::Ptr node, int startFrame, int endFrame )
+	{
+		instance()->resetFrame();
+		// iterate all frames and evaluate node
+		for( int i=startFrame;i<=endFrame; ++i )
+		{
+			node->update();
+			instance()->stepFrame();
+		}
 	}
 
 	void Graph::load( QJsonObject &o )
@@ -23,7 +108,6 @@ namespace core
 
 		// nodes --------------
 		QJsonArray jsonNodes = o["nodes"].toArray();
-
 		for( auto jsonNode : jsonNodes )
 		{
 			int id = (int)jsonNode.toDouble();
@@ -32,7 +116,15 @@ namespace core
 		}
 
 		// connections ---------
-
+		QJsonArray jsonConnections = o["connections"].toArray();
+		for( auto jsonConnection : jsonConnections )
+		{
+			int src_id = (int)jsonConnection.toObject()["src"].toDouble();
+			int dest_id = (int)jsonConnection.toObject()["dest"].toDouble();
+			GraphNodeSocket::Ptr srcSocket = std::dynamic_pointer_cast<GraphNodeSocket>( core::instance()->deserialize(src_id) );
+			GraphNodeSocket::Ptr destSocket = std::dynamic_pointer_cast<GraphNodeSocket>( core::instance()->deserialize(dest_id) );
+			addConnection( srcSocket, destSocket );
+		}
 	}
 
 	void Graph::store( QJsonObject &o, QJsonDocument &doc )
@@ -41,16 +133,24 @@ namespace core
 
 		// nodes -------------
 		QJsonArray jsonNodes = doc.array();
-
 		for( auto node : m_nodes )
 		{
-			int id = instance()->serialize( node );
+			int id = instance()->serialize( node.second );
 			jsonNodes.append(QJsonValue(id));
 		}
-
 		o.insert("nodes", jsonNodes);
 
 		// connections ------------
+		QJsonArray jsonConnections = doc.array();
+		for( auto it = m_connections.begin(), end = m_connections.end(); it != end; ++it )
+		{
+			GraphNodeSocketConnection &c = *it;
+			QJsonObject jsonConnection = doc.object();
+			jsonConnection.insert( "src", QJsonValue( instance()->serialize(c.m_source) ) );
+			jsonConnection.insert( "dest", QJsonValue( instance()->serialize(c.m_dest) ) );
+			jsonConnections.append( QJsonValue(jsonConnection) );
+		}
+		o.insert("connections", jsonConnections);
 	}
 
 	// prints graph to console (used for debugging)
@@ -59,7 +159,7 @@ namespace core
 		qDebug() << "Graph ========================================";
 		qDebug() << "Nodes (" << m_nodes.size() << "):";
 		for( auto node : m_nodes )
-			qDebug() << "\t" << node->metaObject()->className();
+			node.second->print();
 	}
 
 }
