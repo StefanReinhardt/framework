@@ -14,7 +14,7 @@ ImportClouds::ImportClouds() : core::GraphNode()
 	addInputSocket( "file" );
 	addOutputSocket( "output" );
 
-	getSocket("file")->setString("$HERE/input.bgeo");
+	getSocket("file")->setString("$HERE/cloud_initial.bgeo");
 }
 
 void ImportClouds::update(core::GraphNodeSocket *output)

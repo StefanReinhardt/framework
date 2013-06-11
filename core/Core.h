@@ -30,6 +30,14 @@ namespace core
 		return std::dynamic_pointer_cast<T>( create( type ) );
 	}
 
+
+	// useful for filename handling
+	void                          setVariable( const QString &key, const QVariant &value );
+	QVariant                      getVariable( const QString &name );
+	QString                       expand( const QString path );
+
+
+
 	// Core ===========================
 	class Core // public QObject
 	{

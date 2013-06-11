@@ -6,6 +6,8 @@
 #include <map>
 #include <string>
 
+#include "json.h"
+
 
 namespace houdini
 {

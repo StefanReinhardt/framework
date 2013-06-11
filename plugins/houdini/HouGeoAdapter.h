@@ -10,7 +10,6 @@
 #include <vector>
 
 //#include "Geometry.h"
-//#include "core/json.h"
 #include <math/Math.h>
 
 #include "types.h"

@@ -52,6 +52,21 @@ namespace core
 		return g_core;
 	}
 
+	void setVariable( const QString &key, const QVariant &value )
+	{
+sdsdg
+	}
+
+	QVariant getVariable( const QString &name )
+	{
+	}
+
+
+	QString expand( const QString &path )
+	{
+	}
+
+
 	// Core =====================================================
 
 	void Core::resetFrame()
