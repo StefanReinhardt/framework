@@ -10,7 +10,7 @@
 namespace core
 {
 
-	struct GraphNode : public Data
+	class GraphNode : public Data
 	{
 		Q_OBJECT
 	public:
@@ -37,7 +37,7 @@ namespace core
 
 
 	private:
-		friend struct Graph;
+		friend class Graph;
 
 		void                                             addSocket( GraphNodeSocket::Ptr socket );
 		void                                             updateAll( GraphNodeSocket* ); // adapter for GraphNodeSocket:: m_update functional (will ignore given ptr and just call update)

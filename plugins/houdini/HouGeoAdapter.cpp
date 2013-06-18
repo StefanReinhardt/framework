@@ -103,12 +103,6 @@ namespace houdini
 	{
 	}
 
-	// indexBuffer
-	HouGeoAdapter::RawPointer::Ptr HouGeoAdapter::Topology::getRawPointer()
-	{
-		return HouGeoAdapter::RawPointer::Ptr();
-	}
-
 
 	// HouGeoAdapter::VolumePrimitive ==================================================
 

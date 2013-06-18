@@ -1,12 +1,13 @@
 #pragma once
 
-#include "HouGeoAdapter.h"
-//#include "Field.h"
 
 #include <map>
 #include <string>
 
+#include <plugins/primitives/ScalarField.h>
+
 #include "json.h"
+#include "HouGeoAdapter.h"
 
 
 namespace houdini
@@ -21,6 +22,9 @@ namespace houdini
 		struct HouAttribute : public Attribute
 		{
 			typedef std::shared_ptr<HouAttribute> Ptr;
+
+			HouAttribute();
+
 			virtual std::string                                            getName()const;
 			virtual Type                                                   getType()const;
 			virtual int                                               getTupleSize()const;
@@ -28,6 +32,8 @@ namespace houdini
 			virtual void                     getPacking( std::vector<int> &packing )const;
 			virtual int                                             getNumElements()const;
 			virtual RawPointer::Ptr                                       getRawPointer();
+
+			int addV4f(math::V4f value);
 
 			std::string                                                              name;
 			int                                                                 tupleSize;
@@ -40,7 +46,9 @@ namespace houdini
 		struct HouTopology : public Topology
 		{
 			typedef std::shared_ptr<HouTopology> Ptr;
-			virtual RawPointer::Ptr                                       getRawPointer(); // indexBuffer
+			virtual void                                      getIndices( std::vector<int> &indices )const override;
+			virtual void                                      addIndices( std::vector<int> &indices );
+			virtual sint64                                    getNumIndices()const;
 
 			std::vector<int>                                                  indexBuffer;
 		};
@@ -49,10 +57,14 @@ namespace houdini
 		struct HouVolume : public VolumePrimitive
 		{
 			typedef std::shared_ptr<HouVolume> Ptr;
+			virtual math::M44f                                        getTransform()const;
+			virtual int                                                  getVertex()const;
 			virtual math::Vec3i                                      getResolution()const;
 			virtual RawPointer::Ptr                                       getRawPointer(); // returns raw pointer to the data
+			virtual real32                                           getVoxel( int i, int j, int k )const;
 
-			//Field<float>::Ptr                                                       field;
+			ScalarField::Ptr                                                        field;
+			int                                                                    vertex; // hougeo uses point indices to encode translation
 		};
 
 		struct HouPoly : public PolyPrimitive
@@ -74,6 +86,9 @@ namespace houdini
 
 		static HouGeo::Ptr                                                           create();
 
+		void                                           setPointAttribute( const std::string &name, HouAttribute::Ptr attr );
+		void                                           addPrimitive( ScalarField::Ptr field );
+
 
 		// inherited from HouGeoAdapter
 		virtual sint64                                                      pointcount()const;
@@ -90,21 +105,18 @@ namespace houdini
 
 
 
-/*
 
-		void                                                  load( core::json::ObjectPtr o ); // a has to be the root of the array from hou geo
-		HouAttribute::Ptr  loadAttribute( core::json::ArrayPtr attribute, sint64 elementCount );
-		void                                          loadTopology( core::json::ObjectPtr o );
-		void                                  loadPrimitive( core::json::ArrayPtr primitive );
-		void                              loadVolumePrimitive( core::json::ObjectPtr volume );
-		void                                  loadPolyPrimitive( core::json::ObjectPtr poly );
-		void      loadPolyPrimitiveRun( core::json::ObjectPtr def, core::json::ArrayPtr run );
-*/
+		void                                                        load( json::ObjectPtr o ); // a has to be the root of the array from hou geo
+		HouAttribute::Ptr  loadAttribute( json::ArrayPtr attribute, sint64 elementCount );
+		void                                          loadTopology( json::ObjectPtr o );
+		void                                  loadPrimitive( json::ArrayPtr primitive );
+		void                              loadVolumePrimitive( json::ObjectPtr volume );
+		void                                  loadPolyPrimitive( json::ObjectPtr poly );
+		void      loadPolyPrimitiveRun( json::ObjectPtr def, json::ArrayPtr run );
 
-		//static core::json::ObjectPtr                       toObject( core::json::ArrayPtr a ); // turns json array into jsonObject (every first entry is key, every second is value)
+
+		static json::ObjectPtr                                    toObject( json::ArrayPtr a ); // turns json array into jsonObject (every first entry is key, every second is value)
 	private:
-		int                                                                       m_numPoints;
-		int                                                                     m_numVertices;
 		std::vector<Primitive::Ptr>                                              m_primitives;
 		std::map<std::string, HouAttribute::Ptr>                            m_pointAttributes;
 		std::map<std::string, HouAttribute::Ptr>                           m_vertexAttributes;

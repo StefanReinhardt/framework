@@ -368,5 +368,7 @@ namespace math
 
 
 	typedef Matrix33<float> Matrix33f;
+	typedef Matrix33<float> M33f;
 	typedef Matrix33<double> Matrix33d;
+	typedef Matrix33<double> M33d;
 }

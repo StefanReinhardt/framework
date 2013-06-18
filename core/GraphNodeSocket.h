@@ -8,7 +8,7 @@
 
 namespace core
 {
-	struct GraphNodeSocket : public Data
+	class GraphNodeSocket : public Data
 	{
 		Q_OBJECT
 	public:
@@ -57,8 +57,8 @@ namespace core
 		virtual void                                     load( QJsonObject &o )override;
 
 	//private:
-		friend struct GraphNode; // required for GraphNode deserialization
-		friend struct Graph; // required for setting update callback when making connections
+		friend class GraphNode; // required for GraphNode deserialization
+		friend class Graph; // required for setting update callback when making connections
 
 		void                                             updateFrom( GraphNodeSocket *src ); // updates this socket from remote socket
 

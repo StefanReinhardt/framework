@@ -398,60 +398,80 @@ namespace houdini
 		// JSONLogger ==================================================
 		struct JSONLogger : public Handler
 		{
-			JSONLogger() : out(std::cout)
+			JSONLogger() : out(std::cout), indentLevel(0)
 			{
 			}
-			JSONLogger( std::ostream &outputStream ) : out(outputStream)
+			JSONLogger( std::ostream &outputStream ) : out(outputStream), indentLevel(0)
 			{
+			}
+
+			void indent()
+			{
+				for( int i=0;i<indentLevel;++i )
+					out << "\t";
 			}
 
 			virtual void jsonBeginArray()
 			{
+				indent();
 				out << "jsonBeginArray\n";
+				++indentLevel;
 			}
 
 			virtual void jsonEndArray()
 			{
+				--indentLevel;
+				indent();
 				out << "jsonEndArray\n";
 			}
 
 			virtual void jsonString( const std::string &value )
 			{
+				indent();
 				out << "jsonString " << value << "\n";
 			}
 
 			virtual void jsonKey( const std::string &key )
 			{
+				indent();
 				out << "jsonKey " << key << "\n";
 			}
 
 			virtual void jsonBool( const bool &value )
 			{
+				indent();
 				out << "jsonBool " << value << "\n";
 			}
 
 			virtual void jsonInt32( const sint32 &value )
 			{
+				indent();
 				out << "jsonInt32 " << value << "\n";
 			}
 
 			virtual void jsonReal32( const real32 &value )
 			{
+				indent();
 				out << "jsonReal32 " << value << "\n";
 			}
 
 			virtual void jsonBeginMap()
 			{
+				indent();
 				out << "jsonBeginMap\n";
+				++indentLevel;
 			}
 
 			virtual void jsonEndMap()
 			{
+				--indentLevel;
+				indent();
 				out << "jsonEndMap\n";
 			}
 
 			virtual void uaBool( sint64 numElements, Parser *parser )
 			{
+				indent();
 				//In binary JSON files, uniform bool arrays are stored as bit
 				//streams.  This method decodes the bit-stream, calling jsonBool()
 				//for each element of the bit array.
@@ -474,7 +494,7 @@ namespace houdini
 				}
 				out << "jsonArray [";
 				for( std::vector<bool>::iterator it = data.begin(); it != data.end();++it )
-					std::cout << (int)(*it) << " ";
+					out << (int)(*it) << " ";
 				out << "]\n";
 			}
 
@@ -490,55 +510,62 @@ namespace houdini
 
 			virtual void uaInt16( sint64 numElements, Parser *parser )
 			{
+				out << "check3 ";
 				ua<sword>( numElements, parser );
 			}
 
 			virtual void uaInt32( sint64 numElements, Parser *parser )
 			{
+				out << "check2 ";
 				ua<sint32>( numElements, parser );
 			}
 
 			virtual void uaInt64( sint64 numElements, Parser *parser )
 			{
+				out << "check ";
 				ua<sint64>( numElements, parser );
 			}
 
 			virtual void uaUInt8( sint64 numElements, Parser *parser )
 			{
+				indent();
 				std::vector<ubyte> data(numElements);
 				if( numElements != 0 )
 					parser->read<ubyte>( &data[0], numElements );
 				out << "jsonArray [";
 				for( std::vector<ubyte>::iterator it = data.begin(); it != data.end();++it )
-					std::cout << (int)(*it) << " ";
+					out << (int)(*it) << " ";
 				out << "]\n";
 			}
 
 			virtual void uaString( sint64 numElements, Parser *parser )
 			{
+				indent();
 				std::vector<std::string> data;
 				data.reserve(numElements);
 				for(sint64 i=0;i<numElements;++i)
 					data.push_back( parser->readBinaryString() );
 				out << "jsonArray [";
 				for( std::vector<std::string>::iterator it = data.begin(); it != data.end();++it )
-					std::cout << *it << " ";
+					out << *it << " ";
 				out << "]\n";
 			}
 
 			template<typename T>
 			void ua( sint64 numElements, Parser *parser )
 			{
+				indent();
 				std::vector<T> data(numElements);
 				if( numElements != 0 )
 					parser->read<T>( (T*)&data[0], numElements );
 				out << "jsonArray [";
 				for( std::vector<T>::iterator it = data.begin(); it != data.end();++it )
-					std::cout << *it << " ";
+					out << *it << " ";
 				out << "]\n";
 			}
 
 			std::ostream &out;
+			int indentLevel;
 		};
 
 		// JSONCPP ==================================================

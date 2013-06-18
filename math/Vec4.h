@@ -266,12 +266,12 @@ namespace math
 		return v[i];
 	}
 
-
-
-
-
-	typedef Vec3<float> Vec3f;
-	typedef Vec3<double> Vec3d;
-	typedef Vec3<int> Vec3i;
 	*/
+
+
+
+	typedef Vec4<float> V4f;
+	typedef Vec4<double> V4d;
+	typedef Vec4<int> V4i;
+
 }

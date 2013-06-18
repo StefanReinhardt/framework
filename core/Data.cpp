@@ -1,6 +1,5 @@
 #include "Data.h"
 
-#include <QDebug>
 
 namespace core
 {

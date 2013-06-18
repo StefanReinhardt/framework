@@ -11,18 +11,21 @@ namespace houdini
 
 	HouGeo::HouGeo() : HouGeoAdapter()
 	{
-		m_numPoints=0;
-		m_numVertices=0;
 	}
 
 	sint64 HouGeo::pointcount()const
 	{
-		return m_numPoints;
+		auto it = m_pointAttributes.cbegin();
+		if( it != m_pointAttributes.cend() )
+			return it->second->getNumElements();
+		return 0;
 	}
 
 	sint64 HouGeo::vertexcount()const
 	{
-		return m_numVertices;
+		if( m_topology )
+			return m_topology->getNumIndices();
+		return 0;
 	}
 
 	sint64 HouGeo::primitivecount()const
@@ -95,9 +98,55 @@ namespace houdini
 		return HouGeo::Ptr( new HouGeo() );
 	}
 
+	void HouGeo::addPrimitive( ScalarField::Ptr field )
+	{
+		// add point which will encode the translation of the volume
+		HouAttribute::Ptr pAttr = std::dynamic_pointer_cast<HouAttribute>(getPointAttribute( "P" ));
 
+		// no point attribute yet?
+		if( !pAttr )
+		{
+			// add point attribute
+			pAttr = std::make_shared<HouAttribute>();
+			pAttr->name = "P";
+			pAttr->tupleSize = 4;
+			pAttr->storage = HouAttribute::ATTR_STORAGE_FPREAL32;
+			pAttr->type = HouAttribute::ATTR_TYPE_NUMERIC;
+			setPointAttribute( "P", pAttr );
+		}
+
+		math::V3f center = field->localToWorld( math::V3f(0.5f) );
+		int index = pAttr->addV4f( math::V4f(center.x, center.y, center.z, 1.0f) );
+
+
+		if( !m_topology )
+			m_topology = std::make_shared<HouTopology>();
+
+		HouVolume::Ptr hvol = std::make_shared<HouVolume>();
+		hvol->field = field;
+
+		std::vector<int> indexList;
+		indexList.push_back( index );
+		hvol->vertex = m_topology->getNumIndices();
+		m_topology->addIndices(indexList);
+
+
+		m_primitives.push_back( hvol );
+	}
+
+
+	void HouGeo::setPointAttribute( const std::string &name, HouAttribute::Ptr attr )
+	{
+		m_pointAttributes[name] = attr;
+	}
 
 	// Attribute ==============================
+
+	HouGeo::HouAttribute::HouAttribute() : Attribute()
+	{
+		name = "unnamed";
+		numElements = 0;
+	}
 
 	std::string HouGeo::HouAttribute::getName()const
 	{
@@ -125,7 +174,9 @@ namespace houdini
 
 	HouGeoAdapter::RawPointer::Ptr HouGeo::HouAttribute::getRawPointer()
 	{
-		return HouGeoAdapter::RawPointer::create( &data[0] );
+		if( !data.empty() )
+			return HouGeoAdapter::RawPointer::create( &data[0] );
+		return HouGeoAdapter::RawPointer::create( 0 );
 	}
 
 	int HouGeo::HouAttribute::getNumElements()const
@@ -134,71 +185,91 @@ namespace houdini
 	}
 
 
-
-
-
-
-	// Topology ==============================
-	HouGeoAdapter::RawPointer::Ptr HouGeo::HouTopology::getRawPointer()
+	int HouGeo::HouAttribute::addV4f( math::V4f value )
 	{
-		return HouGeoAdapter::RawPointer::create(&indexBuffer[0]);
+		// TODO: check storage
+		// TODO: check type
+
+		if( tupleSize != 4 )
+			qCritical() << "tupleSize does not match!";
+
+		int elementSize = storageSize( storage )*tupleSize;
+		data.resize( data.size() + elementSize );
+
+		//math::V4f* test = &data[ 0 ];
+
+		*((math::V4f *)(&data[ numElements * elementSize ])) = value;
+
+		return numElements++;
 	}
 
 
 
 
-/*
+	// Topology ==============================
 
+	void HouGeo::HouTopology::getIndices( std::vector<int> &indices )const
+	{
+		indices.clear();
+		indices.insert( indices.begin(), indexBuffer.begin(), indexBuffer.end() );
+	}
 
+	void HouGeo::HouTopology::addIndices( std::vector<int> &indices )
+	{
+		indexBuffer.insert( indexBuffer.begin(), indices.begin(), indices.end() );
+	}
 
-
-
-
+	sint64 HouGeo::HouTopology::getNumIndices()const
+	{
+		return indexBuffer.size();
+	}
 
 
 
 
 	// a has to be the root of the array from hou geo
-	void HouGeo::load( core::json::ObjectPtr o )
+	void HouGeo::load( json::ObjectPtr o )
 	{
+		sint64 numVertices = 0;
+		sint64 numPoints = 0;
 		if( o->hasKey("pointcount") )
-			m_numPoints = o->get<int>("pointcount", 0);
+			numPoints = o->get<int>("pointcount", 0);
 		if( o->hasKey("vertexcount") )
-			m_numVertices = o->get<int>("vertexcount", 0);
+			numVertices = o->get<int>("vertexcount", 0);
 		if( o->hasKey("attributes") )
 		{
-			core::json::ObjectPtr attributes = toObject(o->getArray("attributes"));
+			json::ObjectPtr attributes = toObject(o->getArray("attributes"));
 			if( attributes->hasKey("pointattributes") )
 			{
-				core::json::ArrayPtr pointAttributes = attributes->getArray("pointattributes");
+				json::ArrayPtr pointAttributes = attributes->getArray("pointattributes");
 				sint64 numPointAttributes = pointAttributes->size();
 				for(int i=0;i<numPointAttributes;++i)
 				{
-					core::json::ArrayPtr pointAttribute = pointAttributes->getArray(i);
-					HouAttributePtr attr = loadAttribute( pointAttribute, pointcount() );
+					json::ArrayPtr pointAttribute = pointAttributes->getArray(i);
+					HouAttribute::Ptr attr = loadAttribute( pointAttribute, numPoints );
 					m_pointAttributes.insert( std::make_pair(attr->getName(), attr) );
 				}
 			}
 			if( attributes->hasKey("vertexattributes") )
 			{
-				core::json::ArrayPtr vertexAttributes = attributes->getArray("vertexattributes");
+				json::ArrayPtr vertexAttributes = attributes->getArray("vertexattributes");
 				sint64 numVertexAttributes = vertexAttributes->size();
 				for(int i=0;i<numVertexAttributes;++i)
 				{
-					core::json::ArrayPtr vertexAttribute = vertexAttributes->getArray(i);
-					HouAttributePtr attr = loadAttribute( vertexAttribute, vertexcount() );
+					json::ArrayPtr vertexAttribute = vertexAttributes->getArray(i);
+					HouAttribute::Ptr attr = loadAttribute( vertexAttribute, numVertices );
 					m_vertexAttributes.insert( std::make_pair(attr->getName(), attr) );
 				}
 			}
 			if( attributes->hasKey("globalattributes") )
 			{
-				core::json::ArrayPtr globalAttributes = attributes->getArray("globalattributes");
+				json::ArrayPtr globalAttributes = attributes->getArray("globalattributes");
 				sint64 numGlobalAttributes = globalAttributes->size();
 				for(int i=0;i<numGlobalAttributes;++i)
 				{
-					core::json::ArrayPtr globalAttribute = globalAttributes->getArray(i);
+					json::ArrayPtr globalAttribute = globalAttributes->getArray(i);
 					// TODO: element count argument, how many?!
-					HouAttributePtr attr = loadAttribute( globalAttribute, 1 );
+					HouAttribute::Ptr attr = loadAttribute( globalAttribute, 1 );
 					m_globalAttributes.insert( std::make_pair(attr->getName(), attr) );
 				}
 			}
@@ -209,23 +280,23 @@ namespace houdini
 		}
 		if( o->hasKey("primitives") )
 		{
-			core::json::ArrayPtr primitives = o->getArray("primitives");
+			json::ArrayPtr primitives = o->getArray("primitives");
 			int numPrimitives = (int)primitives->size();
 			for( int j=0;j<numPrimitives;++j )
 			{
-				core::json::ArrayPtr primitive = primitives->getArray(j);
+				json::ArrayPtr primitive = primitives->getArray(j);
 				loadPrimitive( primitive );
 			}
 		}
 	}
 
 
-	HouGeo::HouAttributePtr HouGeo::loadAttribute( core::json::ArrayPtr attribute, sint64 elementCount )
+	HouGeo::HouAttribute::Ptr HouGeo::loadAttribute( json::ArrayPtr attribute, sint64 elementCount )
 	{
-		core::json::ObjectPtr attrDef = toObject(attribute->getArray(0));
-		core::json::ObjectPtr attrData = toObject(attribute->getArray(1));
+		json::ObjectPtr attrDef = toObject(attribute->getArray(0));
+		json::ObjectPtr attrData = toObject(attribute->getArray(1));
 
-		HouGeo::HouAttributePtr attr = std::make_shared<HouGeo::HouAttribute>();
+		HouGeo::HouAttribute::Ptr attr = std::make_shared<HouGeo::HouAttribute>();
 
 		std::string attrName = attrDef->get<std::string>("name");
 		Attribute::Type attrType = Attribute::type(attrDef->get<std::string>("type"));
@@ -240,21 +311,21 @@ namespace houdini
 	
 		if( attrData->hasKey("values") )
 		{
-			core::json::ObjectPtr values = toObject( attrData->getArray("values") );
+			json::ObjectPtr values = toObject( attrData->getArray("values") );
 			if( values->hasKey("rawpagedata") )
 			{
 				int elementsPerPage = values->get<int>("pagesize");
 				std::vector<ubyte> attrPacking;
 				if( values->hasKey("packing") )
 				{
-					core::json::ArrayPtr packingArray = values->getArray("packing");
+					json::ArrayPtr packingArray = values->getArray("packing");
 					int psize = (int)packingArray->size();
 					for( int i=0;i<psize;++i )
 						attrPacking.push_back( packingArray->get<ubyte>(i) );
 				}else
 					attrPacking.push_back( attrTupleSize );
 
-				core::json::ArrayPtr rawPageData = values->getArray("rawpagedata");
+				json::ArrayPtr rawPageData = values->getArray("rawpagedata");
 
 				// we need to repack - which when done in a generic way looks like a pain in the butt ======
 
@@ -310,15 +381,15 @@ namespace houdini
 	}
 
 
-	void HouGeo::loadTopology( core::json::ObjectPtr o )
+	void HouGeo::loadTopology( json::ObjectPtr o )
 	{
-		HouTopologyPtr top = std::make_shared<HouTopology>();
+		HouTopology::Ptr top = std::make_shared<HouTopology>();
 		if( o->hasKey("pointref") )
 		{
-			core::json::ObjectPtr pointref = toObject( o->getArray("pointref") );
+			json::ObjectPtr pointref = toObject( o->getArray("pointref") );
 			if( pointref->hasKey("indices") )
 			{
-				core::json::ArrayPtr indices = pointref->getArray("indices");
+				json::ArrayPtr indices = pointref->getArray("indices");
 				sint64 numElements = indices->size();
 				for(int i=0;i<numElements;++i)
 					top->indexBuffer.push_back( indices->get<int>(i) );
@@ -327,13 +398,13 @@ namespace houdini
 		m_topology = top;
 	}
 
-	void HouGeo::loadPrimitive( core::json::ArrayPtr primitive )
+	void HouGeo::loadPrimitive( json::ArrayPtr primitive )
 	{
 		// we follow the scheme from houdini...
 
 		// primitives have 2 arrays:
 		//primitive definition
-		core::json::ObjectPtr primdef = toObject(primitive->getArray(0));
+		json::ObjectPtr primdef = toObject(primitive->getArray(0));
 		std::string primitiveType ="";
 		if( primdef->hasKey("type") )
 			primitiveType = primdef->get<std::string>("type", "");
@@ -356,19 +427,19 @@ namespace houdini
 
 	// HouGeo::HouVolume ==================================================
 
-	void HouGeo::loadVolumePrimitive( core::json::ObjectPtr volume )
+	void HouGeo::loadVolumePrimitive( json::ObjectPtr volume )
 	{
-		HouVolumePtr vol = std::make_shared<HouVolume>();
-		vol->field = Field<float>::create();
+		HouVolume::Ptr vol = std::make_shared<HouVolume>();
+		vol->field = std::make_shared<ScalarField>();
 
 		if( volume->hasKey("res") )
 		{
-			core::json::ArrayPtr res = volume->getArray("res");
+			json::ArrayPtr res = volume->getArray("res");
 			vol->field->resize(res->get<int>(0), res->get<int>(1), res->get<int>(2));
 		}
 		if( volume->hasKey("vertex") && volume->hasKey("transform") )
 		{
-			core::json::ArrayPtr xform = volume->getArray("transform");
+			json::ArrayPtr xform = volume->getArray("transform");
 
 			// vertex indexes the indexbuffer (which lives with the topology)
 			// the index buffer references the point (which lives with the point attribute)
@@ -381,9 +452,25 @@ namespace houdini
 																			0.0, 0.0, 0.0, 1.0);
 
 
-			// TODO!!! - make this more generic - kind of hardcode
 			int v = m_topology->indexBuffer[volume->get<int>("vertex")];
-			math::Vec3f p = *(math::Vec3f *)&m_pointAttributes.find("P")->second->data[ v*3*sizeof(float) ];
+			math::V3f p(0.0f);
+
+			// TODO!!! - make this more generic - kind of hardcode
+			{
+				HouAttribute::Ptr pAttr = std::dynamic_pointer_cast<HouAttribute>( getPointAttribute("P") );
+				switch(pAttr->storage)
+				{
+				// in case of 4 component vector, w component will be ignored...
+				case Attribute::ATTR_STORAGE_FPREAL32:
+					{
+						p = *(math::V3f *)&m_pointAttributes.find("P")->second->data[ v*pAttr->tupleSize*sizeof(float) ];
+					}break;
+				case Attribute::ATTR_STORAGE_FPREAL64:
+					{
+						p = *(math::V3d *)&m_pointAttributes.find("P")->second->data[ v*pAttr->tupleSize*sizeof(double) ];
+					}break;
+				}
+			}
 
 			math::Matrix44d houLocalToWorldTranslation = math::Matrix44d::TranslationMatrix(p);
 
@@ -393,10 +480,10 @@ namespace houdini
 		}
 		if( volume->hasKey("voxels") )
 		{
-			core::json::ObjectPtr voxels = toObject(volume->getArray("voxels"));
+			json::ObjectPtr voxels = toObject(volume->getArray("voxels"));
 			if( voxels->hasKey("tiledarray") )
 			{
-				core::json::ObjectPtr tiledarray = toObject(voxels->getArray("tiledarray"));
+				json::ObjectPtr tiledarray = toObject(voxels->getArray("tiledarray"));
 
 				std::vector<int> compressionTypes;
 				// 1 = rawfull
@@ -404,7 +491,7 @@ namespace houdini
 
 				if( tiledarray->hasKey("compressiontypes") )
 				{
-					core::json::ArrayPtr ct = tiledarray->getArray("compressiontypes");
+					json::ArrayPtr ct = tiledarray->getArray("compressiontypes");
 					for( int cti=0;cti<ct->size();++cti )
 					{
 						//std::cout << ct->get<std::string>(cti) << std::endl;
@@ -423,26 +510,32 @@ namespace houdini
 				}
 				if( tiledarray->hasKey("tiles") )
 				{
-					core::json::ArrayPtr tiles = tiledarray->getArray("tiles");
+					json::ArrayPtr tiles = tiledarray->getArray("tiles");
 					sint64 numTiles = tiles->size();
+					math::Vec3i res = vol->field->getResolution();
+
 					// looks like houdini uses some spatial tiling where each tile has
 					// a resolution of 16x16x16 (or less on boundary tiles)
 					// the whole resolution domain is split into such tiles
 					// the first tile starts at 0,0,0 and the ordering is identical
 					// to the ordering of voxel values (x being the fastest and z slowest)
 
+					// get first invalid tileindex in each dimension
 					math::Vec3i tileEnd;
-					tileEnd.x = vol->field->getResolution().x / 16 + 1;
-					tileEnd.y = vol->field->getResolution().y / 16 + 1;
-					tileEnd.z = vol->field->getResolution().z / 16 + 1;
+					tileEnd.x = res.x / 16 + 1;
+					tileEnd.y = res.y / 16 + 1;
+					tileEnd.z = res.z / 16 + 1;
 
+					// sanity check - number of tiles has to match
 					if( (tileEnd.x*tileEnd.y*tileEnd.z)!=numTiles )
 						throw std::runtime_error("HouGeo::loadVolumePrimitive problem");
 
 					int currentTileIndex = 0;
-					math::Vec3i voxelOffset;
-					math::Vec3i numVoxels;
-					math::Vec3i res = vol->field->getResolution();
+					math::Vec3i voxelOffset; // start offset (in voxels) for current tile
+					math::Vec3i numVoxels;   // number of voxels for current tile (may differ in each dimension)
+
+					// we iterate all tiles starting from slowest to fastest (inner loop)
+					// in each iteration we compute the amount of remaining voxels which is either 16 or smaller for boundary tiles
 					int remainK = res.z;
 					for( int tk=0; tk<tileEnd.z;++tk )
 					{
@@ -461,7 +554,7 @@ namespace houdini
 								voxelOffset.x = ti*16;
 								numVoxels.x = std::min( 16,  remainI );
 
-								core::json::ObjectPtr tile = toObject(tiles->getArray(currentTileIndex));
+								json::ObjectPtr tile = toObject(tiles->getArray(currentTileIndex));
 								int tileCompression = 1;
 								if( tile->hasKey("compression") )
 								{
@@ -474,7 +567,7 @@ namespace houdini
 									case 0: // raw
 									case 1: // rawfull
 										{
-											core::json::ArrayPtr data = tile->getArray("data");
+											json::ArrayPtr data = tile->getArray("data");
 											int numElements = (int)data->size();
 
 											if( (numVoxels.x*numVoxels.y*numVoxels.z)!=numElements )
@@ -527,30 +620,44 @@ namespace houdini
 	}
 
 
+	int HouGeo::HouVolume::getVertex()const
+	{
+		return vertex;
+	}
+
+	real32 HouGeo::HouVolume::getVoxel( int i, int j, int k )const
+	{
+		return field->sample(i, j, k);
+	}
 	
 	math::Vec3i HouGeo::HouVolume::getResolution()const
 	{
 		return field->getResolution();
 	}
 
+	math::M44f HouGeo::HouVolume::getTransform()const
+	{
+		return field->m_localToWorld;
+	}
+
 	// returns raw pointer to the data
-	HouGeoAdapter::RawPointerPtr HouGeo::HouVolume::getRawPointer()
+	HouGeoAdapter::RawPointer::Ptr HouGeo::HouVolume::getRawPointer()
 	{
 		return HouGeoAdapter::RawPointer::create(field->getRawPointer());
 	}
 
 
 	// HouGeo::HouPoly ==================================================
-	void HouGeo::loadPolyPrimitive( core::json::ObjectPtr poly )
+	void HouGeo::loadPolyPrimitive( json::ObjectPtr poly )
 	{
-		HouPolyPtr pol = std::make_shared<HouPoly>();
+		HouPoly::Ptr pol = std::make_shared<HouPoly>();
 
 		if( !m_topology )
 			throw std::runtime_error( "HouGeo::loadPolyPrimitive expects topology to be loaded already!" );
 
 		if( poly->hasKey( "vertex" ) )
 		{
-			core::json::ArrayPtr vertex = poly->getArray("vertex");
+			json::ArrayPtr vertex = poly->getArray("vertex");
 			// these are indices into, well, indices...
 			int numVertices = (int) vertex->size();
 			pol->m_numPolys = 1;
@@ -562,14 +669,14 @@ namespace houdini
 		m_primitives.push_back( pol );
 	}
 
-	void HouGeo::loadPolyPrimitiveRun( core::json::ObjectPtr def, core::json::ArrayPtr run )
+	void HouGeo::loadPolyPrimitiveRun( json::ObjectPtr def, json::ArrayPtr run )
 	{
-		HouPolyPtr pol = std::make_shared<HouPoly>();
+		HouPoly::Ptr pol = std::make_shared<HouPoly>();
 		pol->m_numPolys = (int) run->size();
 		int vertex = 0;
 		for( int i=0;i<pol->m_numPolys;++i )
 		{
-			core::json::ArrayPtr c = run->getArray(i)->getArray(0);
+			json::ArrayPtr c = run->getArray(i)->getArray(0);
 			int numVertices = (int)c->size();
 			pol->m_perPolyVertexCount.push_back(numVertices);
 			for( int j=0;j<numVertices; ++j, ++vertex )
@@ -594,12 +701,13 @@ namespace houdini
 	}
 
 
+
 	// MISC =======================================================
 
 	// turns json array into jsonObject (every first entry is key, every second is value)
-	core::json::ObjectPtr HouGeo::toObject( core::json::ArrayPtr a )
+	json::ObjectPtr HouGeo::toObject( json::ArrayPtr a )
 	{
-		core::json::ObjectPtr o = core::json::Object::create();
+		json::ObjectPtr o = json::Object::create();
 
 		int numElements = (int)a->size();
 		for( int i=0;i<numElements;i+=2 )
@@ -607,7 +715,7 @@ namespace houdini
 			if( a->getValue(i).isString() )
 			{
 				std::string key = a->get<std::string>(i);
-				core::json::Value value = a->getValue(i+1);
+				json::Value value = a->getValue(i+1);
 				o->append( key, value );
 			}
 		}
@@ -618,7 +726,6 @@ namespace houdini
 
 
 
-*/
 
 
 

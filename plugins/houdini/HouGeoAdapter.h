@@ -67,7 +67,10 @@ namespace houdini
 			typedef std::shared_ptr<Topology> Ptr;
 
 			virtual ~Topology();
-			virtual RawPointer::Ptr                                       getRawPointer(); // indexBuffer
+
+			virtual void                          getIndices( std::vector<int> &indices )const=0;
+			virtual void                          addIndices( std::vector<int> &indices )=0;
+			virtual sint64                        getNumIndices()const=0;
 		};
 
 		struct Primitive
@@ -86,7 +89,10 @@ namespace houdini
 		{
 			typedef std::shared_ptr<VolumePrimitive> Ptr;
 
+			virtual math::M44f                                       getTransform()const=0;
+			virtual int                                              getVertex()const=0;
 			virtual math::Vec3i                                      getResolution()const;
+			virtual real32                                           getVoxel( int i, int j, int k )const=0;
 			virtual RawPointer::Ptr                                       getRawPointer(); // returns raw pointer to the data
 		};
 

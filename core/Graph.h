@@ -19,7 +19,7 @@ namespace core
 		GraphNodeSocket::Ptr m_dest;
 	};
 
-	struct Graph : public Data
+	class Graph : public Data
 	{
 		Q_OBJECT
 	public:

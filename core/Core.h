@@ -33,8 +33,8 @@ namespace core
 
 	// useful for filename handling
 	void                          setVariable( const QString &key, const QVariant &value );
-	QVariant                      getVariable( const QString &name );
-	QString                       expand( const QString path );
+	QVariant                      getVariable( const QString &key );
+	QString                       expand( const QString &path );
 
 
 

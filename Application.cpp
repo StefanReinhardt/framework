@@ -14,6 +14,8 @@ Application::Application( int argc, char **argv ) : QApplication(argc, argv)
 {
 	//  initialize core =======================
 	core::init();
+
+	core::setVariable( "$HERE", applicationDirPath() );
 /*
 	// main window ================
 	m_mainWindow = new QMainWindow();

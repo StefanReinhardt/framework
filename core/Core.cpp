@@ -8,6 +8,7 @@
 #include <QFile>
 #include <QStringList>
 #include <QDebug>
+#include <QVariantMap>
 
 #include "GraphNode.h"
 #include "GraphNodeSocket.h"
@@ -20,6 +21,7 @@ extern core::Plugin::Ptr getPlugin_sim( core::Core::Ptr core );
 namespace core
 {
 	Core::Ptr g_core = Core::Ptr();
+	QVariantMap g_variables;
 
 	void init()
 	{
@@ -54,16 +56,24 @@ namespace core
 
 	void setVariable( const QString &key, const QVariant &value )
 	{
-sdsdg
+		g_variables.insert( key, value );
 	}
 
-	QVariant getVariable( const QString &name )
+	QVariant getVariable( const QString &key )
 	{
-	}
+		auto it = g_variables.find( key );
 
+		if( it != g_variables.end() )
+			return *it;
+		return QVariant();
+	}
 
 	QString expand( const QString &path )
 	{
+		QString expanded = path;
+		for( auto it=g_variables.begin(), end=g_variables.end(); it!=end;++it)
+			expanded.replace( it.key(), it.value().toString() );
+		return expanded;
 	}
 
 
