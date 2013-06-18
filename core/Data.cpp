@@ -3,6 +3,10 @@
 
 namespace core
 {
+	Data::Data() : QObject()
+	{
+	}
+
 	Data::~Data()
 	{
 	}

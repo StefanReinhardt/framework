@@ -32,6 +32,7 @@ namespace core
 		GraphNode::Ptr                             createNode( const QString &type, const QString &name = "" );
 		bool                                       hasNode(const QString &name)const;
 		GraphNode::Ptr                             getNode(const QString &name);
+		void                                       addConnection(const QString &variableName, core::GraphNode::Ptr destNode, const QString &destSocketName );
 		void                                       addConnection(core::GraphNode::Ptr srcNode, const QString &srcSocketName, core::GraphNode::Ptr destNode, const QString &destSocketName );
 		void                                       addConnection(core::GraphNodeSocket::Ptr src, core::GraphNodeSocket::Ptr dest);
 		void                                       render( GraphNode::Ptr node, int startFrame, int endFrame );

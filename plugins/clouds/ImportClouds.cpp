@@ -14,20 +14,21 @@
 ImportClouds::ImportClouds() : core::GraphNode()
 {
 	addInputSocket( "file" );
+	addInputSocket( "frame" );
 	addOutputSocket( "output" );
 
-	getSocket("file")->setString("$HERE/cloud_initial.bgeo");
+	getSocket("frame")->setInt(8);
+	getSocket("file")->setString("$HERE/cloud_initial.$F4.bgeo");
 }
 
 void ImportClouds::update(core::GraphNodeSocket *output)
 {
+	qDebug() << "ImportClouds: update ";
+
 	QString filename = core::expand(getSocket("file")->asString());
 	SimObject::Ptr so = std::make_shared<SimObject>();
+	int frame = getSocket( "frame" )->asInt();
 
-	// tmp
-	qDebug() << "ImportClouds: update " << filename;
-	//std::ofstream out( (filename + ".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
-	//houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
 
 	// load houdini file ================
 	std::ifstream in( filename.toUtf8(), std::ios_base::in | std::ios_base::binary );

@@ -41,6 +41,11 @@ namespace core
 		const QString &name = socket->getName();
 		qDebug() << metaObject()->className() << " adding socket " << name;
 
+		if( socket->getDirection() == GraphNodeSocket::INPUT )
+		{
+			connect( socket.get(), &GraphNodeSocket::dirty, this, &GraphNode::makeDirty );
+		}
+		else
 		if( socket->getDirection() == GraphNodeSocket::OUTPUT )
 			socket->m_update = std::bind(&GraphNode::update, this, std::placeholders::_1 );
 
@@ -57,6 +62,18 @@ namespace core
 
 	void GraphNode::update( GraphNodeSocket *socket )
 	{
+	}
+
+	// makes all output slots dirty
+	void GraphNode::makeDirty()
+	{
+		qDebug() << "GraphNode::makeDirty";
+		for( auto it = m_sockets.begin(), end = m_sockets.end(); it != end; ++it )
+		{
+			GraphNodeSocket::Ptr socket = it->second;
+			if( socket->getDirection() == GraphNodeSocket::OUTPUT )
+				socket->makeDirty();
+		}
 	}
 
 	void GraphNode::store( QJsonObject &o, QJsonDocument &doc )

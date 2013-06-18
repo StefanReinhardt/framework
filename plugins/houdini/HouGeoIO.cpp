@@ -11,39 +11,26 @@ namespace houdini
 	HouGeo::Ptr HouGeoIO::import( std::istream *in )
 	{
 		json::JSONReader reader;
-		json::JSONLogger logger;
 		json::Parser p;
 
-
-		qDebug() << "loading1";
-		core::Timer timer;
-		timer.start();
+		//core::Timer timer;
+		//timer.start();
 		if(!p.parse( in, &reader ))
-		//if(!p.parse( in, &logger ))
 			return HouGeo::Ptr();
-		timer.stop();
-		float time_parse = timer.elapsedSeconds();
-		qDebug() << "parsing time: " << time_parse;
+		//timer.stop();
+		//float time_parse = timer.elapsedSeconds();
 
-		//return HouGeo::Ptr();
-		timer.reset();
-		///*
+		//timer.reset();
 		// now reader contains the json data (structured after the scheme of the file)
 		// we will create an empty HouGeo and have it load its data from the json data
 		HouGeo::Ptr houGeo = HouGeo::create();
-		timer.start();
+		//timer.start();
 		houGeo->load( HouGeo::toObject(reader.getRoot().asArray()) );
-		timer.stop();
-		float time_load = timer.elapsedSeconds();
-
-		qDebug() << "loading3";
-
-		qDebug() << "loading time: " << time_load;
-		qDebug() << "total time: " << (time_load + time_parse);
-
+		//timer.stop();
+		//float time_load = timer.elapsedSeconds();
+		//qDebug() << "loading time: " << time_load;
+		//qDebug() << "total time: " << (time_load + time_parse);
 		return houGeo;
-		//*/
-		//return HouGeo::Ptr();
 	}
 
 	void HouGeoIO::makeLog( const std::string &path, std::ostream *out )

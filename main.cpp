@@ -45,6 +45,8 @@ int main(int argc, char ** argv)
 		core::Graph::Ptr graph = std::make_shared<core::Graph>();
 		core::GraphNode::Ptr cloudImport = graph->createNode("ImportClouds");
 		core::GraphNode::Ptr cloudExport = graph->createNode("ExportClouds", "export");
+
+		graph->addConnection( "$F", cloudImport, "frame" );
 		graph->addConnection( cloudImport, "output", cloudExport, "input" );
 
 		core::save( "c:\\projects\\clouds\\bin\\test.json", graph );
@@ -56,7 +58,7 @@ int main(int argc, char ** argv)
 		core::Graph::Ptr graph = core::load( "c:\\projects\\clouds\\bin\\test.json" );
 		core::GraphNode::Ptr cloudExport = graph->getNode( "export" );
 		graph->print();
-		graph->render( cloudExport, 0, 0 );
+		graph->render( cloudExport, 1, 10 );
 	}
 
 	return 0;

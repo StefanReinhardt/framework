@@ -17,6 +17,7 @@ namespace core
 		Q_OBJECT
 	public:
 		typedef std::shared_ptr<Data> Ptr;
+		Data();
 		virtual ~Data();
 
 		virtual void                       store( QJsonObject &o, QJsonDocument &doc );

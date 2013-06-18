@@ -44,6 +44,7 @@ namespace core
 		template<typename T> std::shared_ptr<T>          getData();
 
 		const QVariant&                                  getValue();
+		void                                             setValue( const QVariant &value );
 		template<typename T> void                        setValue( const T &value);
 		QString                                          asString();
 		int                                              asInt();
@@ -56,7 +57,12 @@ namespace core
 		virtual void                                     store( QJsonObject &o, QJsonDocument &doc )override;
 		virtual void                                     load( QJsonObject &o )override;
 
-	//private:
+	signals:
+		void                                             dirty();
+	public slots:
+		void                                             makeDirty();
+
+	private:
 		friend class GraphNode; // required for GraphNode deserialization
 		friend class Graph; // required for setting update callback when making connections
 
@@ -83,9 +89,10 @@ namespace core
 	}
 
 	template<typename T>
-	void GraphNodeSocket::setValue( const T &value)
+	void GraphNodeSocket::setValue( const T &value )
 	{
-		m_value.setValue<T>( value );
-		m_type = VALUE;
+		QVariant variant;
+		variant.setValue<T>( value );
+		setValue(variant);
 	}
 }

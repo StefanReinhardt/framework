@@ -34,15 +34,22 @@ namespace core
 		return m_value;
 	}
 
+	void GraphNodeSocket::setValue( const QVariant &value )
+	{
+		makeDirty();
+		m_value = value;
+		m_type = VALUE;
+	}
+
 	QString GraphNodeSocket::asString()
 	{
-		return m_value.toString();
+		return getValue().toString();
 	}
 
 
 	int GraphNodeSocket::asInt()
 	{
-		return m_value.toInt();
+		return getValue().toInt();
 	}
 
 	void GraphNodeSocket::setString( const QString &value )
@@ -59,9 +66,7 @@ namespace core
 
 	void GraphNodeSocket::setData( Data::Ptr data )
 	{
-		//if( m_state == CLEAN )
-		// m_state = DIRTY;
-		//todo: emit isDirty;
+		makeDirty();
 		m_data = data;
 	}
 
@@ -80,12 +85,24 @@ namespace core
 		m_state = UPDATING;
 		if( m_update )
 			m_update( this );
+		qDebug() << "graphnodesocket makeClean " << m_name;
 		m_state = CLEAN;
+	}
+
+	void GraphNodeSocket::makeDirty()
+	{
+		if( m_state == CLEAN )
+		{
+			qDebug() << "graphnodesocket dirty " << m_name;
+			m_state = DIRTY;
+			emit dirty();
+		}
 	}
 
 	// updates this socket from remote socket
 	void GraphNodeSocket::updateFrom( GraphNodeSocket *src )
 	{
+		qDebug() << "updating graphnodesocket " << m_name << " from " << src->getName();
 		// TODO:switch(socketType)
 		// case Data:
 		switch( m_type )

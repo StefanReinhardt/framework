@@ -35,6 +35,8 @@ namespace core
 
 
 
+	public slots:
+		void                                             makeDirty(); // makes all output slots dirty
 
 	private:
 		friend class Graph;

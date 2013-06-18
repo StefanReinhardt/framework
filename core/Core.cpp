@@ -21,12 +21,12 @@ extern core::Plugin::Ptr getPlugin_sim( core::Core::Ptr core );
 namespace core
 {
 	Core::Ptr g_core = Core::Ptr();
-	QVariantMap g_variables;
 
 	void init()
 	{
 		g_core = std::make_shared<Core>();		
 		g_core->loadPlugins();
+		g_core->setFrame(1);
 	}
 
 	void shutdown()
@@ -54,9 +54,28 @@ namespace core
 		return g_core;
 	}
 
+
+
+
+	std::map<QString, GraphNodeSocket::Ptr> g_variables;
+	std::vector<std::pair<QString, GraphNodeSocket::Ptr>> g_variablesSorted; // used for string expansion - longer variable names come first
+
+
+
 	void setVariable( const QString &key, const QVariant &value )
 	{
-		g_variables.insert( key, value );
+		qDebug() << "setting variable " << key << " to " << value;
+		GraphNodeSocket::Ptr var;
+		auto it = g_variables.find( key );
+		if( it == g_variables.end() )
+		{
+			var = std::make_shared<GraphNodeSocket>( key, GraphNodeSocket::OUTPUT );
+			g_variables.insert( std::make_pair(key, var) );
+			g_variablesSorted.push_back( std::make_pair(key, var) );
+			std::sort( g_variablesSorted.begin(), g_variablesSorted.end(), []( const std::pair<QString, GraphNodeSocket::Ptr> &a, const std::pair<QString, GraphNodeSocket::Ptr> &b ){return a.first.size() > b.first.size();} );
+		}else
+			var = it->second;
+		var->setValue( value );
 	}
 
 	QVariant getVariable( const QString &key )
@@ -64,28 +83,64 @@ namespace core
 		auto it = g_variables.find( key );
 
 		if( it != g_variables.end() )
-			return *it;
+			return it->second->getValue();
 		return QVariant();
+	}
+
+	bool hasVariable( const QString &key )
+	{
+		auto it = g_variables.find( key );
+
+		if( it != g_variables.end() )
+			return true;
+		return false;
+	}
+
+	// used for serialization
+	bool isVariableSocket( GraphNodeSocket::Ptr socket )
+	{
+		for( auto it=g_variablesSorted.begin(), end=g_variablesSorted.end(); it!=end;++it)
+			if( socket == it->second )
+				return true;
+		return false;
+	}
+
+
+	GraphNodeSocket::Ptr getVariableSocket( const QString &key )
+	{
+		auto it = g_variables.find( key );
+
+		if( it != g_variables.end() )
+			return it->second;
+		return GraphNodeSocket::Ptr();
 	}
 
 	QString expand( const QString &path )
 	{
 		QString expanded = path;
-		for( auto it=g_variables.begin(), end=g_variables.end(); it!=end;++it)
-			expanded.replace( it.key(), it.value().toString() );
+		for( auto it=g_variablesSorted.begin(), end=g_variablesSorted.end(); it!=end;++it)
+			expanded.replace( it->first, it->second->getValue().toString() );
 		return expanded;
 	}
 
 
 	// Core =====================================================
 
-	void Core::resetFrame()
+	int Core::getCurrentFrame()const
 	{
+		return getVariable( "$F" ).toInt();
+	}
+
+	void Core::setFrame( int frame )
+	{
+		setVariable( "$F", QVariant(frame) );
+		setVariable( "$F4", QVariant(QString("%1").arg((int)frame, 4, 10, QChar('0'))) );
 	}
 
 
 	void Core::stepFrame()
 	{
+		setFrame( getCurrentFrame()+1 );
 	}
 
 

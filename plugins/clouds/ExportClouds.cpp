@@ -16,11 +16,12 @@ ExportClouds::ExportClouds() : core::GraphNode()
 	addInputSocket( "input" );
 	addInputSocket( "file" );
 
-	getSocket("file")->setString("$HERE/output.bgeo");
+	getSocket("file")->setString("$HERE/cloud_output.$F4.bgeo");
 }
 
 void ExportClouds::update(core::GraphNodeSocket *output)
 {
+	qDebug() << "ExportClouds: update ";
 	SimObject::Ptr so = getSocket("input")->getData<SimObject>();
 	QString filename = core::expand(getSocket("file")->asString());
 
@@ -42,8 +43,6 @@ void ExportClouds::update(core::GraphNodeSocket *output)
 
 	if( so )
 	{
-		qDebug() << "ExportClouds:: got so! " << filename;
-
 		ScalarField::Ptr test = so->getSubData<ScalarField>( "test" );
 
 		if( test )
@@ -53,8 +52,6 @@ void ExportClouds::update(core::GraphNodeSocket *output)
 				houdini::HouGeo::Ptr houGeo = std::make_shared<houdini::HouGeo>();
 				houGeo->addPrimitive( test );
 				houdini::HouGeoIO::xport( &out, houGeo );
-
-				qDebug() << "test " << test->getResolution().x << test->getResolution().y << test->getResolution().z;
 			}
 
 			{

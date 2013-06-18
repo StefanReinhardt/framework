@@ -31,9 +31,13 @@ namespace core
 	}
 
 
-	// useful for filename handling
+	// global variables =====================
+	// used for current frame, etc.
 	void                          setVariable( const QString &key, const QVariant &value );
+	bool                          hasVariable( const QString &key );
+	bool                          isVariableSocket( GraphNodeSocket::Ptr socket ); // used for serialization
 	QVariant                      getVariable( const QString &key );
+	GraphNodeSocket::Ptr          getVariableSocket( const QString &key );
 	QString                       expand( const QString &path );
 
 
@@ -45,16 +49,17 @@ namespace core
 		typedef std::shared_ptr<Core> Ptr;
 		Core();
 
+		// plugin management ---
 		void                                                   loadPlugins();
 		Data::Ptr                                              createData( const QString &type );
 		void                                                   addDataFactory( DataFactory::Ptr df );
 
-		// timeline
-		void                                                   resetFrame();
+		// timeline ---
+		int                                                    getCurrentFrame()const;
+		void                                                   setFrame( int frame );
 		void                                                   stepFrame();
 
-
-		// used during load/save
+		// load/save ---
 		Graph::Ptr                                             load(const QString &filename );
 		void                                                   save(const QString &filename, Graph::Ptr graph );
 		int                                                    serialize( Data::Ptr data );

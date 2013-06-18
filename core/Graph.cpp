@@ -59,6 +59,18 @@ namespace core
 		m_nodes[node->getName()] = node;
 	}
 
+	void Graph::addConnection(const QString &variableName, core::GraphNode::Ptr destNode, const QString &destSocketName )
+	{
+		GraphNodeSocket::Ptr srcSocket = getVariableSocket(variableName);
+		GraphNodeSocket::Ptr destSocket = destNode->getSocket(destSocketName);
+
+		if( srcSocket && destSocket )
+		{
+			addConnection( srcSocket, destSocket );
+		}else
+			qCritical() << "Graph::addConnection: one of destined sockets doesnt exist.";
+	}
+
 	void Graph::addConnection( core::GraphNode::Ptr srcNode, const QString &srcSocketName, core::GraphNode::Ptr destNode, const QString &destSocketName )
 	{
 		GraphNodeSocket::Ptr srcSocket = srcNode->getSocket(srcSocketName);
@@ -76,6 +88,12 @@ namespace core
 		qDebug() << "adding connection";
 
 		// connect signal/slots for dirty propagation
+		//bool result = connect( src.get(), SIGNAL(dirty()), dest.get(), SLOT(makeDirty()) );
+		bool result = connect( src.get(), &core::GraphNodeSocket::dirty, dest.get(), &core::GraphNodeSocket::makeDirty );
+		if( result == true )
+			qCritical() << "connection successfull";
+		else
+			qCritical() << "connection failed";
 
 		// set updateCallback on destNode such that it pulls information from source socket
 		dest->m_update = std::bind(&Graph::updateSocket, this, std::placeholders::_1, src.get() );
@@ -87,13 +105,12 @@ namespace core
 	// fetches content from another socket
 	void Graph::updateSocket(GraphNodeSocket *dest, GraphNodeSocket *src )
 	{
-		qDebug() << "updating socket connection";
 		dest->updateFrom(src);
 	}
 
 	void Graph::render( core::GraphNode::Ptr node, int startFrame, int endFrame )
 	{
-		instance()->resetFrame();
+		instance()->setFrame(startFrame);
 		// iterate all frames and evaluate node
 		for( int i=startFrame;i<=endFrame; ++i )
 		{
@@ -119,10 +136,21 @@ namespace core
 		QJsonArray jsonConnections = o["connections"].toArray();
 		for( auto jsonConnection : jsonConnections )
 		{
-			int src_id = (int)jsonConnection.toObject()["src"].toDouble();
-			int dest_id = (int)jsonConnection.toObject()["dest"].toDouble();
-			GraphNodeSocket::Ptr srcSocket = std::dynamic_pointer_cast<GraphNodeSocket>( core::instance()->deserialize(src_id) );
-			GraphNodeSocket::Ptr destSocket = std::dynamic_pointer_cast<GraphNodeSocket>( core::instance()->deserialize(dest_id) );
+			QString type = jsonConnection.toObject()["type"].toString();
+			GraphNodeSocket::Ptr srcSocket, destSocket;
+			if( type == QString("out->in") )
+			{
+				int src_id = (int)jsonConnection.toObject()["src"].toDouble();
+				int dest_id = (int)jsonConnection.toObject()["dest"].toDouble();
+				srcSocket = std::dynamic_pointer_cast<GraphNodeSocket>( core::instance()->deserialize(src_id) );
+				destSocket = std::dynamic_pointer_cast<GraphNodeSocket>( core::instance()->deserialize(dest_id) );
+			}else
+			if( type == QString("variable->in") )
+			{
+				int dest_id = (int)jsonConnection.toObject()["dest"].toDouble();
+				srcSocket = getVariableSocket( jsonConnection.toObject()["src"].toString() );
+				destSocket = std::dynamic_pointer_cast<GraphNodeSocket>( core::instance()->deserialize(dest_id) );
+			}
 			addConnection( srcSocket, destSocket );
 		}
 	}
@@ -146,8 +174,18 @@ namespace core
 		{
 			GraphNodeSocketConnection &c = *it;
 			QJsonObject jsonConnection = doc.object();
-			jsonConnection.insert( "src", QJsonValue( instance()->serialize(c.m_source) ) );
-			jsonConnection.insert( "dest", QJsonValue( instance()->serialize(c.m_dest) ) );
+
+			if( isVariableSocket( c.m_source ) )
+			{
+				jsonConnection.insert( "type", QJsonValue( QString("variable->in") ));
+				jsonConnection.insert( "src", QJsonValue( c.m_source->getName() ) );
+				jsonConnection.insert( "dest", QJsonValue( instance()->serialize(c.m_dest) ) );
+			}else
+			{
+				jsonConnection.insert( "type", QJsonValue( QString("out->in") ));
+				jsonConnection.insert( "src", QJsonValue( instance()->serialize(c.m_source) ) );
+				jsonConnection.insert( "dest", QJsonValue( instance()->serialize(c.m_dest) ) );
+			}
 			jsonConnections.append( QJsonValue(jsonConnection) );
 		}
 		o.insert("connections", jsonConnections);
