@@ -575,14 +575,21 @@ namespace houdini
 
 											float *volData = vol->field->getRawPointer();
 
-											int v = 0;
-											for( int k=0;k<numVoxels.z;++k )
-												for( int j=0;j<numVoxels.y;++j )
-													for( int i=0;i<numVoxels.x;++i,++v )
-													{
-														// TODO: get uniform array and make this more efficient
-														volData[(tk*16+k)*res.x*res.y + (tj*16+j)*res.x + (ti*16+i)] = data->get<float>(v);
-													}
+											if( data->isUniform() && (data->m_uniformType == 2) )
+											{
+												int v = 0;
+												for( int k=0;k<numVoxels.z;++k )
+													for( int j=0;j<numVoxels.y;++j, v+=numVoxels.x )
+														// copy a complete scanline directly
+														memcpy( &volData[(tk*16+k)*res.x*res.y + (tj*16+j)*res.x + (ti*16)], &data->m_uniformdata[v*sizeof(float)], numVoxels.x*sizeof(float) );
+											}else
+											{
+												int v = 0;
+												for( int k=0;k<numVoxels.z;++k )
+													for( int j=0;j<numVoxels.y;++j )
+														for( int i=0;i<numVoxels.x;++i,++v )
+															volData[(tk*16+k)*res.x*res.y + (tj*16+j)*res.x + (ti*16+i)] = data->get<float>(v);
+											}
 										}break;
 									case 2: // constant
 										{

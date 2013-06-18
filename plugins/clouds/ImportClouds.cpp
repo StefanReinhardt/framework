@@ -26,13 +26,12 @@ void ImportClouds::update(core::GraphNodeSocket *output)
 
 	// tmp
 	qDebug() << "ImportClouds: update " << filename;
-	std::ofstream out( (filename + ".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
-	houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
+	//std::ofstream out( (filename + ".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
+	//houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
 
 	// load houdini file ================
 	std::ifstream in( filename.toUtf8(), std::ios_base::in | std::ios_base::binary );
 	houdini::HouGeo::Ptr hgeo = houdini::HouGeoIO::import( &in );
-
 	if( hgeo )
 	{
 		houdini::HouGeo::HouVolume::Ptr hgeo_vol = std::dynamic_pointer_cast<houdini::HouGeo::HouVolume>(hgeo->getPrimitive(0));

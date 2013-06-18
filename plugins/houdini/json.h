@@ -776,37 +776,38 @@ namespace houdini
 		struct Array
 		{
 			Array();
+			~Array();
 
 			template<typename T>
 			const T                  get( const int index );
 			ObjectPtr                getObject( int index );
 			ArrayPtr                  getArray( int index );
 
-			Value              &getValue( const int index );
+			Value               getValue( const int index );
 
 			sint64                              size()const;
 			bool                           isUniform()const;
 
 
 
-			//void *uniformdata;
-			//sint64 numElements;
-			//int variant_which;
 
 			void                     append( Value &value );
 
-			static ArrayPtr                 createUniform();
 		//private:
 			std::vector<Value>                     m_values;
 			bool                                m_isUniform;
+			unsigned char*                    m_uniformdata;
+			sint64                     m_numUniformElements;
+			int                               m_uniformType; // integer which equals Variant::which()
 		};
 
 
 		template<typename T>
 		const T Array::get( const int index )
 		{
-			return m_values[index].as<T>();
+			return getValue(index).as<T>();
 		}
+
 
 		// Object -------------
 		struct Object
@@ -903,10 +904,42 @@ namespace houdini
 		template<typename T, typename S>
 		void JSONReader::jsonUA( sint64 numElements, Parser *parser )
 		{
+			typedef ttl::meta::find_equivalent_type<const T&, Value::Variant::list> found;
+
+			/*
 			jsonBeginArray();
 			for( sint64 i=0;i<numElements;++i )
 				jsonValue<T>((T)(parser->read<S>()));
 			jsonEndArray();
+			*/
+
+
+
+
+			///*
+			Value v = Value::createArray();
+			ArrayPtr ua = v.asArray();
+			ua->m_isUniform = true;
+			ua->m_uniformdata = (unsigned char *)malloc( numElements*sizeof(T) );
+			ua->m_numUniformElements = numElements;
+			ua->m_uniformType = found::index;
+
+			S *data_src = (S *)malloc( numElements*sizeof(S) );
+			parser->read<S>( data_src, numElements );
+
+			// convert types
+			T *data_dest = (T *)ua->m_uniformdata;
+			for( sint64 i=0;i<numElements;++i, ++data_dest )
+				*data_dest = (T)data_src[i];
+
+			if( m_root.isArray() )
+				m_root.asArray()->append(v);
+			else
+			if( m_root.isObject() )
+				m_root.asObject()->append(nextKey, v);
+
+			free(data_src);
+			//*/
 		}
 
 

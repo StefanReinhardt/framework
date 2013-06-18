@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.8)
 project(cloudshop)
 
 
-# if its david binaries will go to seperate bin directory one level above
+# if its david then binaries will go to seperate bin directory one level above
 if( $ENV{USERNAME} STREQUAL "koernedd" )
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../bin")
 endif( $ENV{USERNAME} STREQUAL "koernedd" )
@@ -13,6 +13,10 @@ set( APP_NAME cloudshop )
 MESSAGE( STATUS "APP_NAME  :         " ${APP_NAME} )
 
 
+# on windows
+if( CMAKE_SYSTEM_NAME MATCHES Windows )
+    add_definitions(-DNOMINMAX) # windows defines min and max in winbase.h which clashes with stl
+endif( CMAKE_SYSTEM_NAME MATCHES Windows )
 
 
 # QT 5.0 -------------------------------------------

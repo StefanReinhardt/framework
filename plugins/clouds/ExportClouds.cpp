@@ -40,7 +40,6 @@ void ExportClouds::update(core::GraphNodeSocket *output)
 	}
 	*/
 
-
 	if( so )
 	{
 		qDebug() << "ExportClouds:: got so! " << filename;
@@ -59,13 +58,12 @@ void ExportClouds::update(core::GraphNodeSocket *output)
 			}
 
 			{
-				std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
-				houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
+				//std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
+				//houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
 			}
 		}
 	}else
 		qDebug() << "ExportClouds:: NO so! " << filename;
-
 
 
 }

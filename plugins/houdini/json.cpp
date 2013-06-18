@@ -905,6 +905,8 @@ namespace houdini
 				case 3: memcpy( dst, &ttl::var::get<real64>(m_value), sizeof(real64));break;
 				//ubyte
 				case 4: memcpy( dst, &ttl::var::get<ubyte>(m_value), sizeof(ubyte));break;
+				//sint64
+				case 5: memcpy( dst, &ttl::var::get<sint64>(m_value), sizeof(sint64));break;
 			}
 		}
 
@@ -960,8 +962,14 @@ namespace houdini
 		}
 
 		// Array ----
-		Array::Array() : m_isUniform(false)
+		Array::Array() : m_isUniform(false), m_uniformdata(0), m_numUniformElements(0)
 		{
+		}
+
+		Array::~Array()
+		{
+			if( m_isUniform && m_uniformdata )
+				free(m_uniformdata);
 		}
 
 		bool Array::isUniform()const
@@ -976,11 +984,31 @@ namespace houdini
 
 		sint64 Array::size()const
 		{
+			if( m_isUniform )
+				return m_numUniformElements;
 			return m_values.size();
 		}
 
-		Value &Array::getValue( const int index )
+		Value Array::getValue( const int index )
 		{
+			if( m_isUniform )
+			{
+				switch( m_uniformType )
+				{
+					//bool
+				case 0: return Value::create<bool>( *((bool *)(&m_uniformdata[sizeof(bool)*index])) );break;
+					//sint32
+				case 1: return Value::create<sint32>( *((sint32 *)(&m_uniformdata[sizeof(sint32)*index])) );break;
+					//real32
+				case 2: return Value::create<real32>( *((real32 *)(&m_uniformdata[sizeof(real32)*index])) );break;
+					//real64
+				case 3: return Value::create<real64>( *((real64 *)(&m_uniformdata[sizeof(real64)*index])) );break;
+					//ubyte
+				case 4: return Value::create<ubyte>( *((ubyte *)(&m_uniformdata[sizeof(ubyte)*index])) );break;
+					//sint64
+				case 5: return Value::create<sint64>( *((sint64 *)(&m_uniformdata[sizeof(sint64)*index])) );break;
+				}
+			}
 			return m_values[index];
 		}
 
@@ -1163,6 +1191,7 @@ namespace houdini
 					jsonBool( (bits & (1 << i)) != 0 );
 			}
 			jsonEndArray();
+
 		}
 
 		void JSONReader::uaReal32( sint64 numElements, Parser *parser )

@@ -37,10 +37,8 @@ int main(int argc, char ** argv)
 
 
 	bool commandline = true;
-
 	if( !commandline )
 		return app.exec();
-
 	// standalone
 	// generate and serialize graph
 	{
