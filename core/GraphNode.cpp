@@ -101,7 +101,7 @@ namespace core
 		// sockets ----
 		QJsonArray sockets = o["sockets"].toArray();
 		for( auto it = sockets.begin(), end = sockets.end(); it != end; ++it )
-			addSocket( std::dynamic_pointer_cast<GraphNodeSocket>( core::instance()->deserialize(int((*it).toDouble())) ) );
+			addSocket( std::dynamic_pointer_cast<GraphNodeSocket>( core::instance()->deserialize(*it) ) );
 	}
 
 	// prints node to console (used for debugging)

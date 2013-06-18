@@ -6,18 +6,8 @@
 
 namespace core
 {
-	struct GraphNodeSocketConnection
-	{
-		GraphNodeSocketConnection()
-		{
-		}
-		GraphNodeSocketConnection( GraphNodeSocket::Ptr src, GraphNodeSocket::Ptr dest ) : m_source(src), m_dest(dest)
-		{
-		}
 
-		GraphNodeSocket::Ptr m_source;
-		GraphNodeSocket::Ptr m_dest;
-	};
+	typedef std::pair<GraphNodeSocket::Ptr, GraphNodeSocket::Ptr> GraphNodeSocketConnection;
 
 	class Graph : public Data
 	{

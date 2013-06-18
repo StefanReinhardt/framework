@@ -134,7 +134,7 @@ namespace core
 		m_direction = Direction(int(o["socketdirection"].toDouble()));
 
 		if( m_type == VALUE )
-			instance()->deserialize( o["socketvalue"].toObject(), m_value );
+			instance()->deserialize( o["socketvalue"], m_value );
 
 	}
 }

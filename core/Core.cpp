@@ -158,7 +158,7 @@ namespace core
 		// load data =================
 		m_deserializeJsonData = root.value("data").toObject();
 
-		Graph::Ptr graph = std::dynamic_pointer_cast<Graph>(deserialize( (int)root["graph"].toDouble() ));
+		Graph::Ptr graph = std::dynamic_pointer_cast<Graph>(deserialize( root["graph"] ));
 
 		// clean up
 		m_serializeMap.clear();
@@ -184,7 +184,7 @@ namespace core
 		QJsonObject root = m_serializeDoc.object();
 
 		//
-		int graphid = serialize( graph );
+		QJsonValue graphObj = serialize( graph );
 
 
 		// put all serialised objects into a map id->jsonobject
@@ -200,7 +200,7 @@ namespace core
 		root.insert("data", data);
 
 		// we store the id of the graph object
-		root.insert("graph", QJsonValue(graphid));
+		root.insert("graph", graphObj);
 
 
 		m_serializeDoc.setObject(root);
@@ -253,7 +253,7 @@ namespace core
 	}
 
 	// used during load/save -------------------
-	int Core::serialize( Data::Ptr data )
+	QJsonValue Core::serialize( Data::Ptr data )
 	{
 		auto it = m_serializeMap.find( data );
 		if( it != m_serializeMap.end() )
@@ -274,12 +274,13 @@ namespace core
 		// the correct obj instance
 		data->store( m_serializeMap[data].second, m_serializeDoc );
 
-		return id;
+		return QJsonValue(id);
 	}
 
 
-	Data::Ptr Core::deserialize( int id )
+	Data::Ptr Core::deserialize( QJsonValue obj )
 	{
+		int id = (int)obj.toDouble();
 		auto it = m_deserializeMap.find( id );
 		if( it != m_deserializeMap.end() )
 			return it->second;
@@ -295,7 +296,7 @@ namespace core
 		return data;
 	}
 
-	QJsonObject Core::serialize( const QVariant &variant )
+	QJsonValue Core::serialize( const QVariant &variant )
 	{
 		QString vtype = variant.typeName();
 		QJsonObject obj = m_serializeDoc.object();
@@ -309,11 +310,12 @@ namespace core
 		else
 			qCritical() <<"Core::serialize unable to serialize variant of type " << vtype;
 
-		return obj;
+		return QJsonValue(obj);
 	}
 
-	void Core::deserialize( QJsonObject obj, QVariant &variant )
+	void Core::deserialize(QJsonValue value, QVariant &variant )
 	{
+		QJsonObject obj = value.toObject();
 		QString vtype = obj["varianttype"].toString();
 
 		if( vtype == "QString" )

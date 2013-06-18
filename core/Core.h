@@ -62,10 +62,10 @@ namespace core
 		// load/save ---
 		Graph::Ptr                                             load(const QString &filename );
 		void                                                   save(const QString &filename, Graph::Ptr graph );
-		int                                                    serialize( Data::Ptr data );
-		Data::Ptr                                              deserialize( int id );
-		QJsonObject                                            serialize( const QVariant &variant );
-		void                                                   deserialize( QJsonObject obj, QVariant &variant );
+		QJsonValue                                             serialize( Data::Ptr data );
+		Data::Ptr                                              deserialize( QJsonValue obj );
+		QJsonValue                                             serialize( const QVariant &variant );
+		void                                                   deserialize(QJsonValue value, QVariant &variant );
 	private:
 		std::vector<Plugin::Ptr>                               m_plugins;
 		std::map<QString, DataFactory::Ptr>                    m_factories;

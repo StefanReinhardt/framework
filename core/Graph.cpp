@@ -127,8 +127,7 @@ namespace core
 		QJsonArray jsonNodes = o["nodes"].toArray();
 		for( auto jsonNode : jsonNodes )
 		{
-			int id = (int)jsonNode.toDouble();
-			GraphNode::Ptr node = std::dynamic_pointer_cast<GraphNode>( core::instance()->deserialize(id) );
+			GraphNode::Ptr node = std::dynamic_pointer_cast<GraphNode>( core::instance()->deserialize(jsonNode) );
 			addNode( node );
 		}
 
@@ -140,16 +139,13 @@ namespace core
 			GraphNodeSocket::Ptr srcSocket, destSocket;
 			if( type == QString("out->in") )
 			{
-				int src_id = (int)jsonConnection.toObject()["src"].toDouble();
-				int dest_id = (int)jsonConnection.toObject()["dest"].toDouble();
-				srcSocket = std::dynamic_pointer_cast<GraphNodeSocket>( core::instance()->deserialize(src_id) );
-				destSocket = std::dynamic_pointer_cast<GraphNodeSocket>( core::instance()->deserialize(dest_id) );
+				srcSocket = std::dynamic_pointer_cast<GraphNodeSocket>( core::instance()->deserialize(jsonConnection.toObject()["src"]) );
+				destSocket = std::dynamic_pointer_cast<GraphNodeSocket>( core::instance()->deserialize(jsonConnection.toObject()["dest"]) );
 			}else
 			if( type == QString("variable->in") )
 			{
-				int dest_id = (int)jsonConnection.toObject()["dest"].toDouble();
 				srcSocket = getVariableSocket( jsonConnection.toObject()["src"].toString() );
-				destSocket = std::dynamic_pointer_cast<GraphNodeSocket>( core::instance()->deserialize(dest_id) );
+				destSocket = std::dynamic_pointer_cast<GraphNodeSocket>( core::instance()->deserialize(jsonConnection.toObject()["dest"]) );
 			}
 			addConnection( srcSocket, destSocket );
 		}
@@ -163,8 +159,8 @@ namespace core
 		QJsonArray jsonNodes = doc.array();
 		for( auto node : m_nodes )
 		{
-			int id = instance()->serialize( node.second );
-			jsonNodes.append(QJsonValue(id));
+			QJsonValue obj = instance()->serialize( node.second );
+			jsonNodes.append(obj);
 		}
 		o.insert("nodes", jsonNodes);
 
@@ -175,16 +171,16 @@ namespace core
 			GraphNodeSocketConnection &c = *it;
 			QJsonObject jsonConnection = doc.object();
 
-			if( isVariableSocket( c.m_source ) )
+			if( isVariableSocket( c.first ) )
 			{
 				jsonConnection.insert( "type", QJsonValue( QString("variable->in") ));
-				jsonConnection.insert( "src", QJsonValue( c.m_source->getName() ) );
-				jsonConnection.insert( "dest", QJsonValue( instance()->serialize(c.m_dest) ) );
+				jsonConnection.insert( "src", QJsonValue( c.first->getName() ) );
+				jsonConnection.insert( "dest", QJsonValue( instance()->serialize(c.second) ) );
 			}else
 			{
 				jsonConnection.insert( "type", QJsonValue( QString("out->in") ));
-				jsonConnection.insert( "src", QJsonValue( instance()->serialize(c.m_source) ) );
-				jsonConnection.insert( "dest", QJsonValue( instance()->serialize(c.m_dest) ) );
+				jsonConnection.insert( "src", QJsonValue( instance()->serialize(c.first) ) );
+				jsonConnection.insert( "dest", QJsonValue( instance()->serialize(c.second) ) );
 			}
 			jsonConnections.append( QJsonValue(jsonConnection) );
 		}
