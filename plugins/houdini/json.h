@@ -31,6 +31,8 @@
 
 #include "ttl/var/variant.hpp"
 
+#include <QDebug>
+
 
 
 namespace houdini
@@ -500,30 +502,27 @@ namespace houdini
 
 			virtual void uaReal32( sint64 numElements, Parser *parser )
 			{
-				ua<real32>( numElements, parser );
+				ua<real32>( numElements, parser, "<real32>" );
 			}
 
 			virtual void uaReal64( sint64 numElements, Parser *parser )
 			{
-				ua<real64>( numElements, parser );
+				ua<real64>( numElements, parser, "<real64>" );
 			}
 
 			virtual void uaInt16( sint64 numElements, Parser *parser )
 			{
-				out << "check3 ";
-				ua<sword>( numElements, parser );
+				ua<sword>( numElements, parser, "<int16>" );
 			}
 
 			virtual void uaInt32( sint64 numElements, Parser *parser )
 			{
-				out << "check2 ";
-				ua<sint32>( numElements, parser );
+				ua<sint32>( numElements, parser, "<int32>" );
 			}
 
 			virtual void uaInt64( sint64 numElements, Parser *parser )
 			{
-				out << "check ";
-				ua<sint64>( numElements, parser );
+				ua<sint64>( numElements, parser, "<sint64>" );
 			}
 
 			virtual void uaUInt8( sint64 numElements, Parser *parser )
@@ -532,7 +531,7 @@ namespace houdini
 				std::vector<ubyte> data(numElements);
 				if( numElements != 0 )
 					parser->read<ubyte>( &data[0], numElements );
-				out << "jsonArray [";
+				out << "jsonArray<uint8> [";
 				for( std::vector<ubyte>::iterator it = data.begin(); it != data.end();++it )
 					out << (int)(*it) << " ";
 				out << "]\n";
@@ -545,20 +544,20 @@ namespace houdini
 				data.reserve(numElements);
 				for(sint64 i=0;i<numElements;++i)
 					data.push_back( parser->readBinaryString() );
-				out << "jsonArray [";
+				out << "jsonArray<string> [";
 				for( std::vector<std::string>::iterator it = data.begin(); it != data.end();++it )
 					out << *it << " ";
 				out << "]\n";
 			}
 
 			template<typename T>
-			void ua( sint64 numElements, Parser *parser )
+			void ua( sint64 numElements, Parser *parser, std::string type = "" )
 			{
 				indent();
 				std::vector<T> data(numElements);
 				if( numElements != 0 )
 					parser->read<T>( (T*)&data[0], numElements );
-				out << "jsonArray [";
+				out << "jsonArray"<<type<<" [";
 				for( std::vector<T>::iterator it = data.begin(); it != data.end();++it )
 					out << *it << " ";
 				out << "]\n";
@@ -759,8 +758,8 @@ namespace houdini
 			VariantConverter<T> conv(dest);
 			ttl::var::apply_visitor(conv, m_value);
 			return dest;
-			//return ttl::var::get<T>(m_value);
 		}
+
 
 		template<typename T>
 		Value Value::create( const T &value )
@@ -807,7 +806,6 @@ namespace houdini
 		{
 			return getValue(index).as<T>();
 		}
-
 
 		// Object -------------
 		struct Object
@@ -906,17 +904,7 @@ namespace houdini
 		{
 			typedef ttl::meta::find_equivalent_type<const T&, Value::Variant::list> found;
 
-			/*
-			jsonBeginArray();
-			for( sint64 i=0;i<numElements;++i )
-				jsonValue<T>((T)(parser->read<S>()));
-			jsonEndArray();
-			*/
 
-
-
-
-			///*
 			Value v = Value::createArray();
 			ArrayPtr ua = v.asArray();
 			ua->m_isUniform = true;
@@ -939,7 +927,6 @@ namespace houdini
 				m_root.asObject()->append(nextKey, v);
 
 			free(data_src);
-			//*/
 		}
 
 

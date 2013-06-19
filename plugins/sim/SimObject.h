@@ -12,9 +12,10 @@ public:
 
 
 	void                                                    addSubData(const QString &name , core::Data::Ptr data);
-	template<typename T> std::shared_ptr<T>                getSubData( const QString &name );
+	template<typename T> std::shared_ptr<T>                 getSubData( const QString &name );
 
 
+	void                                                    print()const; // used for debugging
 
 private:
 	std::vector<std::pair<QString, Data::Ptr>>              m_subData;

@@ -65,15 +65,36 @@ namespace houdini
 	void HouGeo::getGlobalAttributeNames( std::vector<std::string> &names )const
 	{
 		for( auto it = m_globalAttributes.cbegin(); it != m_globalAttributes.cend(); ++it )
-		{
 			names.push_back( it->second->getName() );
-		}
 	}
 
 	HouGeoAdapter::Attribute::Ptr HouGeo::getGlobalAttribute( const std::string &name )
 	{
 		auto it = m_globalAttributes.find(name);
 		if(it != m_globalAttributes.end())
+			return it->second;
+		return HouGeoAdapter::Attribute::Ptr();
+	}
+
+
+	bool HouGeo::hasPrimitiveAttribute( const std::string &name )const
+	{
+		auto it = m_primitiveAttributes.find( name );
+		if( it != m_primitiveAttributes.end() )
+			return true;
+		return false;
+	}
+
+	void HouGeo::getPrimitiveAttributeNames( std::vector<std::string> &names )const
+	{
+		for( auto it = m_primitiveAttributes.cbegin(); it != m_primitiveAttributes.cend(); ++it )
+			names.push_back( it->second->getName() );
+	}
+
+	HouGeoAdapter::Attribute::Ptr HouGeo::getPrimitiveAttribute( const std::string &name )
+	{
+		auto it = m_primitiveAttributes.find(name);
+		if(it != m_primitiveAttributes.end())
 			return it->second;
 		return HouGeoAdapter::Attribute::Ptr();
 	}
@@ -116,6 +137,7 @@ namespace houdini
 		}
 
 		math::V3f center = field->localToWorld( math::V3f(0.5f) );
+		qDebug() << "center " << center.x << " " << center.y << " " << center.z;
 		int index = pAttr->addV4f( math::V4f(center.x, center.y, center.z, 1.0f) );
 
 
@@ -127,7 +149,10 @@ namespace houdini
 
 		std::vector<int> indexList;
 		indexList.push_back( index );
+		qDebug() << "index " << index;
 		hvol->vertex = m_topology->getNumIndices();
+		qDebug() << "hvol->vertex " << hvol->vertex;
+		qDebug() << "m_topology->size " << m_topology->indexBuffer.size();
 		m_topology->addIndices(indexList);
 
 
@@ -138,6 +163,12 @@ namespace houdini
 	void HouGeo::setPointAttribute( const std::string &name, HouAttribute::Ptr attr )
 	{
 		m_pointAttributes[name] = attr;
+	}
+
+	void HouGeo::setPrimitiveAttribute( const std::string &name, HouAttribute::Ptr attr )
+	{
+		attr->name = name;
+		m_primitiveAttributes[name] = attr;
 	}
 
 	// Attribute ==============================
@@ -196,11 +227,25 @@ namespace houdini
 		int elementSize = storageSize( storage )*tupleSize;
 		data.resize( data.size() + elementSize );
 
-		//math::V4f* test = &data[ 0 ];
-
 		*((math::V4f *)(&data[ numElements * elementSize ])) = value;
 
 		return numElements++;
+	}
+
+	int HouGeo::HouAttribute::addString(const std::string &value)
+	{
+		// TODO: check storage
+		// TODO: check type
+		strings.push_back(value);
+		type = ATTR_TYPE_STRING;
+		//attr->storage = attrStorage;
+		tupleSize = 1;
+		return numElements++;
+	}
+
+	std::string HouGeo::HouAttribute::getString( int index )const
+	{
+		return strings[index];
 	}
 
 
@@ -216,7 +261,7 @@ namespace houdini
 
 	void HouGeo::HouTopology::addIndices( std::vector<int> &indices )
 	{
-		indexBuffer.insert( indexBuffer.begin(), indices.begin(), indices.end() );
+		indexBuffer.insert( indexBuffer.end(), indices.begin(), indices.end() );
 	}
 
 	sint64 HouGeo::HouTopology::getNumIndices()const
@@ -232,10 +277,13 @@ namespace houdini
 	{
 		sint64 numVertices = 0;
 		sint64 numPoints = 0;
+		sint64 numPrimitives = 0;
 		if( o->hasKey("pointcount") )
 			numPoints = o->get<int>("pointcount", 0);
 		if( o->hasKey("vertexcount") )
 			numVertices = o->get<int>("vertexcount", 0);
+		if( o->hasKey("primitivecount") )
+			numPrimitives = o->get<int>("primitivecount", 0);
 		if( o->hasKey("attributes") )
 		{
 			json::ObjectPtr attributes = toObject(o->getArray("attributes"));
@@ -259,6 +307,17 @@ namespace houdini
 					json::ArrayPtr vertexAttribute = vertexAttributes->getArray(i);
 					HouAttribute::Ptr attr = loadAttribute( vertexAttribute, numVertices );
 					m_vertexAttributes.insert( std::make_pair(attr->getName(), attr) );
+				}
+			}
+			if( attributes->hasKey("primitiveattributes") )
+			{
+				json::ArrayPtr primitiveAttributes = attributes->getArray("primitiveattributes");
+				sint64 numPrimitiveAttributes = primitiveAttributes->size();
+				for(int i=0;i<numPrimitiveAttributes;++i)
+				{
+					json::ArrayPtr primitiveAttribute = primitiveAttributes->getArray(i);
+					HouAttribute::Ptr attr = loadAttribute( primitiveAttribute, numPrimitives );
+					m_primitiveAttributes.insert( std::make_pair(attr->getName(), attr) );
 				}
 			}
 			if( attributes->hasKey("globalattributes") )
@@ -300,80 +359,174 @@ namespace houdini
 
 		std::string attrName = attrDef->get<std::string>("name");
 		Attribute::Type attrType = Attribute::type(attrDef->get<std::string>("type"));
-		Attribute::Storage attrStorage = Attribute::storage(attrData->get<std::string>("storage"));
-		int attrTupleSize = attrData->get<int>("size");
-		int attrComponentSize = Attribute::storageSize( attrStorage );
 
-		//int dstTupleSize = (attrTupleSize == 4)?3:attrTupleSize;
-		int dstTupleSize = attrTupleSize;
-		int dstComponentSize = attrComponentSize;
-		attr->data.resize( elementCount*dstTupleSize*dstComponentSize );
-	
-		if( attrData->hasKey("values") )
+		if( attrType == Attribute::ATTR_TYPE_NUMERIC )
 		{
-			json::ObjectPtr values = toObject( attrData->getArray("values") );
-			if( values->hasKey("rawpagedata") )
+			Attribute::Storage attrStorage = Attribute::storage(attrData->get<std::string>("storage"));
+			int attrTupleSize = attrData->get<int>("size");
+			int attrComponentSize = Attribute::storageSize( attrStorage );
+
+			int dstTupleSize = attrTupleSize;
+			int dstComponentSize = attrComponentSize;
+			attr->data.resize( elementCount*dstTupleSize*dstComponentSize );
+
+			if( attrData->hasKey("values") )
 			{
-				int elementsPerPage = values->get<int>("pagesize");
-				std::vector<ubyte> attrPacking;
-				if( values->hasKey("packing") )
+				json::ObjectPtr values = toObject( attrData->getArray("values") );
+				if( values->hasKey("rawpagedata") )
 				{
-					json::ArrayPtr packingArray = values->getArray("packing");
-					int psize = (int)packingArray->size();
-					for( int i=0;i<psize;++i )
-						attrPacking.push_back( packingArray->get<ubyte>(i) );
-				}else
-					attrPacking.push_back( attrTupleSize );
+					int elementsPerPage = values->get<int>("pagesize");
 
-				json::ArrayPtr rawPageData = values->getArray("rawpagedata");
-
-				// we need to repack - which when done in a generic way looks like a pain in the butt ======
-
-				//TODO: when reading attributes: use numElements, not pointcount!
-				attr->numElements = (int)rawPageData->size()/attrTupleSize;
-				int elementsRemaining = attr->numElements;
-
-				// process each page
-				int pageIndex = 0;
-				while( elementsRemaining>0 )
-				{
-					int lastElement = pageIndex*elementsPerPage;
-					int numElements = std::min( elementsRemaining, elementsPerPage );
-
-					ubyte packIndex = 0;
-					for( std::vector<ubyte>::iterator it = attrPacking.begin(); it != attrPacking.end();++it )
+					// one pack is a sequence of components
+					// packing is used to describe in which sequence components are written to the file
+					// packing allows to store vectors as list of structs or struct of lists.
+					std::vector<ubyte> attrPacking;
+					if( values->hasKey("packing") )
 					{
-						ubyte pack = *it;
-						int maxPack = std::min( (int)pack, std::max(0, dstTupleSize-packIndex) );
-
-						if( maxPack == 0 )
-							break;
-						
-						// now iterate over all elements and get values
-						for( int i=0;i<numElements;++i )
+						json::ArrayPtr packingArray = values->getArray("packing");
+						int psize = (int)packingArray->size();
+						for( int i=0;i<psize;++i )
 						{
-							int elementIndex = lastElement*attrTupleSize + i*pack;
-							int destIndex = (lastElement+i)*dstTupleSize;
-
-							// TODO: uniform arrays!
-							for( int p=0;p<maxPack;++p )
-								rawPageData->getValue(elementIndex+p).cpyTo( (char *)&(attr->data[(destIndex + packIndex + p)*dstComponentSize]) );
-
+							attrPacking.push_back( packingArray->get<ubyte>(i) );
 						}
+					}else
+						attrPacking.push_back( attrTupleSize );
 
-						packIndex += pack;
+					// constantpageflags is an array which
+					// contains an array for each pack
+					// each of those per pack arrays contains flags for each page
+					// which tell us wether the pack is constant for this page
+					std::vector<std::vector<bool>> constantPageFlagsPerPack;
+
+					// to make things even more fun, some packs can be constant
+					// and this may be different per page - oh boy
+					if( values->hasKey("constantpageflags") )
+					{
+						json::ArrayPtr constantPageFlags = values->getArray("constantpageflags");
+
+						// for each pack
+						int i=0;
+						for( auto it = attrPacking.begin(); it != attrPacking.end();++it,++i )
+						{
+							constantPageFlagsPerPack.push_back(std::vector<bool>());
+
+							// get array which tells us for each page if the pack is constant
+							json::ArrayPtr packConstantFlags = constantPageFlags->getArray(i);
+
+							for( int j=0;j<packConstantFlags->size();++j )
+								constantPageFlagsPerPack.back().push_back( packConstantFlags->get<bool>(j) );
+						}
+					}else
+					{
+						for( int j=0;j<attrTupleSize;++j )
+							constantPageFlagsPerPack.push_back(std::vector<bool>());
 					}
 
+					json::ArrayPtr rawPageData = values->getArray("rawpagedata");
 
-					elementsRemaining -= numElements;
-					lastElement += numElements;
-					++pageIndex;
+					// we need to repack - which when done in a generic way looks like a pain in the butt ======
+
+					attr->numElements = elementCount;
+					int elementsRemaining = attr->numElements;
+					qDebug() << "numElements " << attr->numElements;
+					qDebug() << "rawPageData->size() " << (int)rawPageData->size();
+					qDebug() << "attrTupleSize " << attrTupleSize;
+
+					// process each page
+					int pageIndex = 0;
+					int pageStartIndex = 0;
+					while( elementsRemaining>0 )
+					{
+						int pageStartElement = pageIndex*elementsPerPage;
+						int numElements = std::min( elementsRemaining, elementsPerPage );
+
+						// process each pack
+						int packIndex = 0;
+						ubyte startComponentIndex = 0;
+						for( std::vector<ubyte>::iterator it = attrPacking.begin(); it != attrPacking.end();++it, ++packIndex )
+						{
+							ubyte pack = *it;
+							int maxPack = std::min( (int)pack, std::max(0, dstTupleSize-startComponentIndex) );
+
+							if( maxPack == 0 )
+								break;
+
+							// is pack for current page constant?
+							bool isConstant = constantPageFlagsPerPack[packIndex].empty() ? false : constantPageFlagsPerPack[packIndex][pageIndex];
+							//qDebug() << "constant? " << isConstant;
+
+
+							// if pack is constant only the first element is given, this is the reference
+							// find element index where the new page starts
+							int elementIndex = pageStartIndex;
+
+							// now iterate over all elements of current page and get values from current pack
+							for( int i=0;i<numElements;++i )
+							{
+								// we update elementIndex only if pack is varying within current page
+								// otherwise we will just keep pointing to the reference element
+								if( !isConstant )
+									// get page element index into rawpagedata for current pack
+									// we can do pageStartElement*attrTupleSize because packing doesnt matter for past pages
+									elementIndex = pageStartIndex + i*pack;
+									//qDebug() << "elementIndex " << elementIndex;
+									//qDebug() << "pageStartElement " << pageStartElement;
+									//qDebug() << "attrTupleSize " << attrTupleSize;
+									//qDebug() << "i " << i;
+									//qDebug() << "pack " << pack;
+
+								// get global element index for writing into our dense array
+								int destElementIndex = (pageStartElement+i)*dstTupleSize;
+
+								// for each component of current pack
+								for( int component=0;component<maxPack;++component )
+									// get component value from current rawpagedata
+									// and copy that component to the location of that component in dense array
+									// TODO: uniform arrays!
+									rawPageData->getValue(elementIndex+component).cpyTo( (char *)&(attr->data[(destElementIndex + startComponentIndex + component)*dstComponentSize]) );
+							}
+
+
+							startComponentIndex += pack;
+							if( !isConstant )
+								pageStartIndex += numElements*pack;
+							else
+								pageStartIndex += pack;
+						}
+
+
+						elementsRemaining -= numElements;
+						pageStartElement += numElements;
+
+						// proceed next page
+						++pageIndex;
+					}
+
+					attr->name = attrName;
+					attr->type = attrType;
+					attr->storage = attrStorage;
+					attr->tupleSize = dstTupleSize;
 				}
+			}
+		}else
+		if( attrType == Attribute::ATTR_TYPE_STRING )
+		{
+			if( attrData->hasKey("strings") )
+			{
+				json::ArrayPtr stringsArray = attrData->getArray("strings");
+				int numElements = stringsArray->size();
+				for( int i=0;i<numElements;++i )
+				{
+					std::string string = stringsArray->get<std::string>( i );
+					attr->strings.push_back(string);
+					//qDebug() << QString::fromStdString(string);
+				}
+				attr->numElements = numElements;
 
 				attr->name = attrName;
 				attr->type = attrType;
-				attr->storage = attrStorage;
-				attr->tupleSize = dstTupleSize;
+				//attr->storage = attrStorage;
+				attr->tupleSize = 1;
 			}
 		}
 
@@ -463,6 +616,7 @@ namespace houdini
 				// in case of 4 component vector, w component will be ignored...
 				case Attribute::ATTR_STORAGE_FPREAL32:
 					{
+						qDebug() << "p check!";
 						p = *(math::V3f *)&m_pointAttributes.find("P")->second->data[ v*pAttr->tupleSize*sizeof(float) ];
 					}break;
 				case Attribute::ATTR_STORAGE_FPREAL64:
@@ -471,6 +625,7 @@ namespace houdini
 					}break;
 				}
 			}
+			qDebug() << "p " << p.x << " " << p.y << " " << p.z;
 
 			math::Matrix44d houLocalToWorldTranslation = math::Matrix44d::TranslationMatrix(p);
 

@@ -1003,10 +1003,11 @@ namespace houdini
 				case 2: return Value::create<real32>( *((real32 *)(&m_uniformdata[sizeof(real32)*index])) );break;
 					//real64
 				case 3: return Value::create<real64>( *((real64 *)(&m_uniformdata[sizeof(real64)*index])) );break;
+				case 4: return Value::create<std::string>("error in Array::getValue - uniform string arrays not supported");break;
 					//ubyte
-				case 4: return Value::create<ubyte>( *((ubyte *)(&m_uniformdata[sizeof(ubyte)*index])) );break;
+				case 5: return Value::create<ubyte>( *((ubyte *)(&m_uniformdata[sizeof(ubyte)*index])) );break;
 					//sint64
-				case 5: return Value::create<sint64>( *((sint64 *)(&m_uniformdata[sizeof(sint64)*index])) );break;
+				case 6: return Value::create<sint64>( *((sint64 *)(&m_uniformdata[sizeof(sint64)*index])) );break;
 				}
 			}
 			return m_values[index];

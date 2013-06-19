@@ -43,24 +43,52 @@ void ExportClouds::update(core::GraphNodeSocket *output)
 
 	if( so )
 	{
-		ScalarField::Ptr test = so->getSubData<ScalarField>( "test" );
+		std::ofstream out( filename.toUtf8() , std::ios_base::out | std::ios_base::binary );
+		houdini::HouGeo::Ptr houGeo = std::make_shared<houdini::HouGeo>();
 
-		if( test )
+		houdini::HouGeo::HouAttribute::Ptr nameAttr = std::make_shared<houdini::HouGeo::HouAttribute>();
+
+		ScalarField::Ptr density = so->getSubData<ScalarField>( "density" );
+		if( density )
 		{
-			{
-				std::ofstream out( filename.toUtf8() , std::ios_base::out | std::ios_base::binary );
-				houdini::HouGeo::Ptr houGeo = std::make_shared<houdini::HouGeo>();
-				houGeo->addPrimitive( test );
-				houdini::HouGeoIO::xport( &out, houGeo );
-			}
+			// add primitive
+			houGeo->addPrimitive( density );
 
-			{
-				//std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
-				//houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
-			}
+			// add primitive name
+			nameAttr->addString( "density" );
 		}
+
+
+		ScalarField::Ptr volume2 = so->getSubData<ScalarField>( "volume2" );
+		if( volume2 )
+		{
+			// add primitive
+			houGeo->addPrimitive( volume2 );
+
+			// add primitive name
+			nameAttr->addString( "volume2" );
+		}
+
+
+		houGeo->setPrimitiveAttribute( "name", nameAttr );
+		houdini::HouGeoIO::xport( &out, houGeo );
 	}else
 		qDebug() << "ExportClouds:: NO so! " << filename;
 
+	if(so)
+	{
+		std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
+		houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
+	}
 
+	{
+		filename = "c:/projects/clouds/bin/null.bgeo";
+		std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
+		houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
+	}
+	{
+		filename = "c:/projects/clouds/bin/test.bgeo";
+		std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
+		houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
+	}
 }

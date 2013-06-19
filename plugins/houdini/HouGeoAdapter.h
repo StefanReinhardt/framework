@@ -57,6 +57,7 @@ namespace houdini
 			virtual void                     getPacking( std::vector<int> &packing )const;
 			virtual int                                             getNumElements()const;
 			virtual RawPointer::Ptr                                       getRawPointer();
+			virtual std::string                             getString( int index )const=0;
 			static Type                               type( const std::string &typeName );
 			static Storage                      storage( const std::string &storageName );
 			static int                                     storageSize( Storage storage );
@@ -113,6 +114,8 @@ namespace houdini
 		virtual Attribute::Ptr               getPointAttribute( const std::string &name );
 		virtual void      getGlobalAttributeNames( std::vector<std::string> &names )const;
 		virtual Attribute::Ptr              getGlobalAttribute( const std::string &name );
+		virtual void getPrimitiveAttributeNames( std::vector<std::string> &names )const=0;
+		virtual Attribute::Ptr         getPrimitiveAttribute( const std::string &name )=0;
 		virtual Primitive::Ptr                                  getPrimitive( int index );
 		virtual Topology::Ptr                                               getTopology();
 	};

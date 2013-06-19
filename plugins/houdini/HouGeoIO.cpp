@@ -66,12 +66,13 @@ namespace houdini
 		g_writer->jsonString( "primitivecount" );
 		g_writer->jsonInt( geo->primitivecount() );
 
-		// -- topology
+		// -- topology (required)
 		g_writer->jsonString( "topology" );
 		g_writer->jsonBeginArray();
 			if( geo->getTopology() )
 				exportTopology( geo->getTopology() );
 		g_writer->jsonEndArray();
+
 
 		// -- attributes
 		g_writer->jsonString( "attributes" );
@@ -87,6 +88,16 @@ namespace houdini
 			g_writer->jsonEndArray(); // pointattributes
 
 
+			// -- primitive attributes
+			g_writer->jsonString( "primitiveattributes" );
+			g_writer->jsonBeginArray();
+				std::vector<std::string> primitiveAttrNames;
+				geo->getPrimitiveAttributeNames(primitiveAttrNames);
+				for( std::vector<std::string>::iterator it = primitiveAttrNames.begin(); it != primitiveAttrNames.end(); ++it )
+					exportAttribute( geo->getPrimitiveAttribute(*it) );
+			g_writer->jsonEndArray(); // primitiveattributes
+
+/*
 			// -- global attributes
 			g_writer->jsonString( "globalattributes" );
 			g_writer->jsonBeginArray();
@@ -95,7 +106,7 @@ namespace houdini
 				for( std::vector<std::string>::iterator it = globalAttrNames.begin(); it != globalAttrNames.end(); ++it )
 					exportAttribute( geo->getGlobalAttribute(*it) );
 			g_writer->jsonEndArray(); // globalattributes
-
+*/
 		g_writer->jsonEndArray(); // attributes
 
 
@@ -171,52 +182,90 @@ namespace houdini
 
 		g_writer->jsonEndArray(); // definition
 
-		// attribute values ------------
-		g_writer->jsonBeginArray(); // value data
-
-		g_writer->jsonString( "size" );
-		g_writer->jsonInt( size );
-
-		g_writer->jsonString( "storage" );
-		g_writer->jsonString( storage );
-
-
-		g_writer->jsonString( "values" );
+		// attribute content ------------
 		g_writer->jsonBeginArray();
 
+		if( attr->getType() == HouGeoAdapter::Attribute::ATTR_TYPE_NUMERIC )
+		{
 			g_writer->jsonString( "size" );
-			g_writer->jsonInt( attr->getTupleSize() );
+			g_writer->jsonInt( size );
 
 			g_writer->jsonString( "storage" );
 			g_writer->jsonString( storage );
 
-			g_writer->jsonString( "pagesize" );
-			g_writer->jsonInt( 1024 );
+
+			g_writer->jsonString( "values" );
+			g_writer->jsonBeginArray();
+
+				g_writer->jsonString( "size" );
+				g_writer->jsonInt( attr->getTupleSize() );
+
+				g_writer->jsonString( "storage" );
+				g_writer->jsonString( storage );
+
+				g_writer->jsonString( "pagesize" );
+				g_writer->jsonInt( 1024 );
 
 
-			//g_writer->jsonString( "packing" );
-			//std::vector<int> packing;
-			//attr->getPacking( packing );
-			//g_writer->jsonUniformArray( packing );
+				//g_writer->jsonString( "packing" );
+				//std::vector<int> packing;
+				//attr->getPacking( packing );
+				//g_writer->jsonUniformArray( packing );
 
-			//std::cout << "CHECK " << name << std::endl;
-			//std::cout << "CHECK " << attr->getNumElements() << std::endl;
-			//std::cout << "CHECK " << attr->getTupleSize() << std::endl;
-			//attr->getRawPointer();
+				//std::cout << "CHECK " << name << std::endl;
+				//std::cout << "CHECK " << attr->getNumElements() << std::endl;
+				//std::cout << "CHECK " << attr->getTupleSize() << std::endl;
+				//attr->getRawPointer();
 
-			g_writer->jsonString( "rawpagedata" );
-			if( attr->getStorage() == HouGeoAdapter::Attribute::ATTR_STORAGE_FPREAL32 )
-				g_writer->jsonUniformArray<real32>(  (const real32*) attr->getRawPointer()->ptr, attr->getNumElements()*attr->getTupleSize() );
-			else if( attr->getStorage() == HouGeoAdapter::Attribute::ATTR_STORAGE_FPREAL64 )
-				g_writer->jsonUniformArray<real64>( (const real64*) attr->getRawPointer()->ptr, attr->getNumElements()*attr->getTupleSize() );
-			else if( attr->getStorage() == HouGeoAdapter::Attribute::ATTR_STORAGE_INT32 )
-				g_writer->jsonUniformArray<sint32>( (const sint32*) attr->getRawPointer()->ptr, attr->getNumElements()*attr->getTupleSize() );
+				g_writer->jsonString( "rawpagedata" );
+				if( attr->getStorage() == HouGeoAdapter::Attribute::ATTR_STORAGE_FPREAL32 )
+					g_writer->jsonUniformArray<real32>(  (const real32*) attr->getRawPointer()->ptr, attr->getNumElements()*attr->getTupleSize() );
+				else if( attr->getStorage() == HouGeoAdapter::Attribute::ATTR_STORAGE_FPREAL64 )
+					g_writer->jsonUniformArray<real64>( (const real64*) attr->getRawPointer()->ptr, attr->getNumElements()*attr->getTupleSize() );
+				else if( attr->getStorage() == HouGeoAdapter::Attribute::ATTR_STORAGE_INT32 )
+					g_writer->jsonUniformArray<sint32>( (const sint32*) attr->getRawPointer()->ptr, attr->getNumElements()*attr->getTupleSize() );
 
-		g_writer->jsonEndArray(); // ?
+			g_writer->jsonEndArray(); // values
+		}else
+		if(attr->getType() == HouGeoAdapter::Attribute::ATTR_TYPE_STRING )
+		{
+			g_writer->jsonString( "size" );
+			g_writer->jsonInt( size );
+
+			g_writer->jsonString( "storage" );
+			g_writer->jsonString( "int32" );
+
+			g_writer->jsonString( "strings" );
+			g_writer->jsonBeginArray();
+				for( int i=0;i<attr->getNumElements();++i )
+					g_writer->jsonString( attr->getString(i) );
+			g_writer->jsonEndArray();
+
+			g_writer->jsonString( "indices" );
+			g_writer->jsonBeginArray();
+				g_writer->jsonString( "size" );
+				g_writer->jsonInt32( 1 );
+
+				g_writer->jsonString( "storage" );
+				g_writer->jsonString( "int32" );
+
+				g_writer->jsonString( "pagesize" );
+				g_writer->jsonInt32( 1024 );
+
+				g_writer->jsonString( "rawpagedata" );
+				std::vector<int> indices;
+				for( int i=0;i<attr->getNumElements();++i )
+					indices.push_back(i);
+				g_writer->jsonUniformArray(indices);
+
+			g_writer->jsonEndArray();
+
+
+		}
 
 
 
-		g_writer->jsonEndArray(); // /value data
+		g_writer->jsonEndArray(); // attribute content
 
 
 
@@ -229,24 +278,16 @@ namespace houdini
 	// TODO: datatype is int ~~~~
 	bool HouGeoIO::exportTopology( HouGeoAdapter::Topology::Ptr topo )
 	{
-		//std::vector<int> indices;
-		std::vector<sint16> indices;
-		//topo->getIndices(indices);
-		indices.push_back(0);
+		std::vector<int> indices;
+		topo->getIndices(indices);
+		std::vector<sint16> indicesInt16;
+		for( int i=0;i<indices.size();++i )
+			indicesInt16.push_back(sint16(indices[i]));
 
 		g_writer->jsonString( "pointref" );
 		g_writer->jsonBeginArray();
 			g_writer->jsonString( "indices" );
-			g_writer->jsonUniformArray<sint16>(&indices[0], indices.size());
-			//g_writer->jsonBeginArray();
-			/*
-			for( auto it = indices.begin(), end = indices.end(); it != end; ++it )
-			{
-				qDebug() << *it;
-				g_writer->jsonInt64( *it );
-			}
-			g_writer->jsonEndArray();
-			*/
+			g_writer->jsonUniformArray<sint16>(indicesInt16);
 		g_writer->jsonEndArray();
 
 		return true;

@@ -39,6 +39,5 @@ namespace core
 
 		std::vector<GraphNodeSocketConnection>     m_connections;
 		std::map<QString, GraphNode::Ptr>          m_nodes;
-		//std::vector<GraphNode::Ptr>                m_nodes;
 	};
 }

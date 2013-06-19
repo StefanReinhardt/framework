@@ -31,15 +31,18 @@ namespace houdini
 			virtual Storage                                             getStorage()const;
 			virtual void                     getPacking( std::vector<int> &packing )const;
 			virtual int                                             getNumElements()const;
+			virtual std::string                               getString( int index )const;
 			virtual RawPointer::Ptr                                       getRawPointer();
 
-			int addV4f(math::V4f value);
+			int                           addV4f(math::V4f value);
+			int                           addString(const std::string &value);
 
 			std::string                                                              name;
 			int                                                                 tupleSize;
 			Storage                                                               storage;
 			Type                                                                     type;
 			std::vector<char>                                                        data;
+			std::vector<std::string>                                              strings; // used in case of type==string
 			int                                                               numElements;
 		};
 
@@ -87,6 +90,7 @@ namespace houdini
 		static HouGeo::Ptr                                                           create();
 
 		void                                           setPointAttribute( const std::string &name, HouAttribute::Ptr attr );
+		void                                           setPrimitiveAttribute( const std::string &name, HouAttribute::Ptr attr );
 		void                                           addPrimitive( ScalarField::Ptr field );
 
 
@@ -98,6 +102,9 @@ namespace houdini
 		virtual Attribute::Ptr                   getPointAttribute( const std::string &name );
 		virtual void          getVertexAttributeNames( std::vector<std::string> &names )const;
 		virtual Attribute::Ptr                  getVertexAttribute( const std::string &name );
+		virtual bool                    hasPrimitiveAttribute( const std::string &name )const;
+		virtual void       getPrimitiveAttributeNames( std::vector<std::string> &names )const;
+		virtual Attribute::Ptr               getPrimitiveAttribute( const std::string &name );
 		virtual void          getGlobalAttributeNames( std::vector<std::string> &names )const;
 		virtual Attribute::Ptr                  getGlobalAttribute( const std::string &name );
 		virtual Primitive::Ptr                                      getPrimitive( int index );
@@ -120,6 +127,7 @@ namespace houdini
 		std::vector<Primitive::Ptr>                                              m_primitives;
 		std::map<std::string, HouAttribute::Ptr>                            m_pointAttributes;
 		std::map<std::string, HouAttribute::Ptr>                           m_vertexAttributes;
+		std::map<std::string, HouAttribute::Ptr>                        m_primitiveAttributes;
 		std::map<std::string, HouAttribute::Ptr>                           m_globalAttributes;
 		HouTopology::Ptr                                                           m_topology;
 	};

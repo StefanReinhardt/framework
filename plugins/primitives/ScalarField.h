@@ -12,6 +12,7 @@
 
 class ScalarField : public core::Data, public Field<float>
 {
+	Q_OBJECT
 public:
 	typedef std::shared_ptr<ScalarField> Ptr;
 
