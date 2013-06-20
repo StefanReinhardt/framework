@@ -41,3 +41,6 @@ namespace core
 		std::map<QString, GraphNode::Ptr>          m_nodes;
 	};
 }
+
+
+

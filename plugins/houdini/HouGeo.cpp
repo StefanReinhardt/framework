@@ -137,7 +137,6 @@ namespace houdini
 		}
 
 		math::V3f center = field->localToWorld( math::V3f(0.5f) );
-		qDebug() << "center " << center.x << " " << center.y << " " << center.z;
 		int index = pAttr->addV4f( math::V4f(center.x, center.y, center.z, 1.0f) );
 
 
@@ -149,10 +148,8 @@ namespace houdini
 
 		std::vector<int> indexList;
 		indexList.push_back( index );
-		qDebug() << "index " << index;
+
 		hvol->vertex = m_topology->getNumIndices();
-		qDebug() << "hvol->vertex " << hvol->vertex;
-		qDebug() << "m_topology->size " << m_topology->indexBuffer.size();
 		m_topology->addIndices(indexList);
 
 
@@ -428,9 +425,9 @@ namespace houdini
 
 					attr->numElements = elementCount;
 					int elementsRemaining = attr->numElements;
-					qDebug() << "numElements " << attr->numElements;
-					qDebug() << "rawPageData->size() " << (int)rawPageData->size();
-					qDebug() << "attrTupleSize " << attrTupleSize;
+					//qDebug() << "numElements " << attr->numElements;
+					//qDebug() << "rawPageData->size() " << (int)rawPageData->size();
+					//qDebug() << "attrTupleSize " << attrTupleSize;
 
 					// process each page
 					int pageIndex = 0;
@@ -616,7 +613,6 @@ namespace houdini
 				// in case of 4 component vector, w component will be ignored...
 				case Attribute::ATTR_STORAGE_FPREAL32:
 					{
-						qDebug() << "p check!";
 						p = *(math::V3f *)&m_pointAttributes.find("P")->second->data[ v*pAttr->tupleSize*sizeof(float) ];
 					}break;
 				case Attribute::ATTR_STORAGE_FPREAL64:
@@ -625,8 +621,6 @@ namespace houdini
 					}break;
 				}
 			}
-			qDebug() << "p " << p.x << " " << p.y << " " << p.z;
-
 			math::Matrix44d houLocalToWorldTranslation = math::Matrix44d::TranslationMatrix(p);
 
 			math::Matrix44d localToWorld = math::Matrix44d::ScaleMatrix(2.0)*math::Matrix44d::TranslationMatrix(-1.0,-1.0,-1.0)*houLocalToWorldRotationScale*houLocalToWorldTranslation;

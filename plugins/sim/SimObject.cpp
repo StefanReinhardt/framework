@@ -17,6 +17,25 @@ void SimObject::addSubData( const QString &name, core::Data::Ptr data )
 	m_subData.push_back( std::make_pair( name, data ) );
 }
 
+void SimObject::setSubData(const QString &name , core::Data::Ptr data)
+{
+	for( auto it = m_subData.begin(), end=m_subData.end();it != end; ++it )
+		if( it->first == name )
+		{
+			it->second = data;
+			return;
+		}
+	addSubData( name, data );
+}
+
+bool SimObject::hasSubData( const QString &name )
+{
+	for( auto it = m_subData.begin(), end=m_subData.end();it != end; ++it )
+		if( it->first == name )
+			return true;
+	return false;
+}
+
 // used for debugging
 void SimObject::print()const
 {

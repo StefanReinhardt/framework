@@ -3,6 +3,10 @@
 
 #include <core/Core.h>
 
+// these includes are here only for node creation
+#include <plugins/sim/Solver.h>
+//#include <plugins/clouds/Advect2d.h>
+
 
 void logger(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -53,14 +57,42 @@ int main(int argc, char ** argv)
 		core::save( "c:\\projects\\clouds\\bin\\test.json", graph );
 	}
 	*/
+	{
+		core::Graph::Ptr graph = std::make_shared<core::Graph>();
 
+		// create nodes
+		core::GraphNode::Ptr cloudImport = graph->createNode("ImportClouds");
+		Solver::Ptr solver = std::dynamic_pointer_cast<Solver>(graph->createNode("Solver"));
+		core::GraphNode::Ptr cloudExport = graph->createNode("ExportClouds", "export");
+
+		// setup solver
+		solver->createOperator( "Advect2d", "advect density" );
+
+
+		// set inputs
+		cloudImport->getSocket("file")->setString("$HERE/cloud_initial.bgeo");
+		cloudExport->getSocket("file")->setString("$HERE/cloud_output.$F4.bgeo");
+
+		// make connections
+		graph->addConnection( cloudImport, "output", solver, "input" );
+		graph->addConnection( "$F", solver, "frame" );
+		graph->addConnection( solver, "output", cloudExport, "input" );
+
+		// save graph
+		core::save( "c:\\projects\\clouds\\bin\\test.json", graph );
+	}
 	// debug
 	// deserialize and execute graph
 	{
+		// load graph
 		core::Graph::Ptr graph = core::load( "c:\\projects\\clouds\\bin\\test.json" );
-		core::GraphNode::Ptr cloudExport = graph->getNode( "export" );
 		graph->print();
-		graph->render( cloudExport, 1, 1 );
+
+		// find node which saves cloud data to disk
+		core::GraphNode::Ptr cloudExport = graph->getNode( "export" );
+
+		// evaluate this node for 10 frames
+		graph->render( cloudExport, 1, 10 );
 	}
 
 	return 0;

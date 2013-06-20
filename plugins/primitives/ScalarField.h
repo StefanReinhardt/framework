@@ -16,6 +16,9 @@ class ScalarField : public core::Data, public Field<float>
 public:
 	typedef std::shared_ptr<ScalarField> Ptr;
 
+	ScalarField();
+	ScalarField( Ptr other); // copy constructor
+
 
 
 

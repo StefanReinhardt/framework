@@ -1,0 +1,20 @@
+#include "ScalarField.h"
+
+
+
+
+
+
+
+ScalarField::ScalarField() : core::Data()
+{
+}
+
+// copy constructor
+ScalarField::ScalarField( Ptr other ) : core::Data()
+{
+	resize(other->getResolution());
+	setBound(other->bound());
+
+	memcpy( &m_data[0], &other->m_data[0], sizeof(float)*m_resolution.x*m_resolution.y*m_resolution.z );
+}

@@ -16,6 +16,7 @@ ExportClouds::ExportClouds() : core::GraphNode()
 	addInputSocket( "input" );
 	addInputSocket( "file" );
 
+	// TODO: default?
 	getSocket("file")->setString("$HERE/cloud_output.$F4.bgeo");
 }
 
@@ -75,6 +76,7 @@ void ExportClouds::update(core::GraphNodeSocket *output)
 	}else
 		qDebug() << "ExportClouds:: NO so! " << filename;
 
+	/*
 	if(so)
 	{
 		std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
@@ -91,4 +93,5 @@ void ExportClouds::update(core::GraphNodeSocket *output)
 		std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
 		houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
 	}
+	*/
 }
