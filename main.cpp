@@ -45,19 +45,21 @@ int main(int argc, char ** argv)
 		return app.exec();
 	// standalone
 	// generate and serialize graph
-	/*
-	{
+
+    { /*
 		core::Graph::Ptr graph = std::make_shared<core::Graph>();
-		core::GraphNode::Ptr cloudImport = graph->createNode("ImportClouds");
+        //core::GraphNode::Ptr cloudImport = graph->createNode("ImportClouds");
+        core::GraphNode::Ptr cloudCreate = graph->createNode("CreateCloud");
 		core::GraphNode::Ptr cloudExport = graph->createNode("ExportClouds", "export");
 
-		graph->addConnection( "$F", cloudImport, "frame" );
-		graph->addConnection( cloudImport, "output", cloudExport, "input" );
+        graph->addConnection( cloudCreate, "output", cloudExport, "input" );
 
-		core::save( "c:\\projects\\clouds\\bin\\test.json", graph );
+        core::save( "$HERE/test.json", graph );
+    */
 	}
-	*/
+
 	{
+
 		core::Graph::Ptr graph = std::make_shared<core::Graph>();
 
 		// create nodes
@@ -80,6 +82,7 @@ int main(int argc, char ** argv)
 
 		// save graph
         core::save( "$HERE/test.json", graph );
+
 	}
 	// debug
 	// deserialize and execute graph

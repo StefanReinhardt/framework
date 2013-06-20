@@ -2,7 +2,7 @@
 #include <core/GraphNode.h>
 
 
-struct ImportClouds : public core::GraphNode
+class ImportClouds : public core::GraphNode
 {
 	Q_OBJECT
 public:

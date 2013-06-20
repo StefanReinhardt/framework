@@ -75,7 +75,7 @@ typename Field<T>::Ptr Field<T>::create( math::V3i res, math::M44f l2w )
 }
 
 template<typename T>
-typename Field<T>::Ptr Field<T>::create( math::V3i res, math::Box3f bound, T initialValue = T() )
+typename Field<T>::Ptr Field<T>::create( math::V3i res, math::Box3f bound, T initialValue )
 {
 	Field<T>::Ptr field = Field<T>::Ptr(new Field<T>());
 	field->resize(res);

@@ -6,7 +6,7 @@
 
 
 
-ScalarField::ScalarField() : core::Data()
+ScalarField::ScalarField() : core::Data(), Field<float>()
 {
 }
 
