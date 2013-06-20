@@ -13,4 +13,5 @@ public:
 	virtual void apply( SimObject::Ptr so )override;
 
 private:
+	//QString m_name;
 };

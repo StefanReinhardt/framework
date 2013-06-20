@@ -85,7 +85,7 @@ int main(int argc, char ** argv)
 	// deserialize and execute graph
 	{
 		// load graph
-		core::Graph::Ptr graph = core::load( "c:\\projects\\clouds\\bin\\test.json" );
+		core::Graph::Ptr graph = core::load( "$HERE/test.json" );
 		graph->print();
 
 		// find node which saves cloud data to disk

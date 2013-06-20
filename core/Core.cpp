@@ -36,7 +36,7 @@ namespace core
 
 	Graph::Ptr  load( const QString &filename )
 	{
-		return g_core->load( filename );
+		return g_core->load( expand(filename) );
 	}
 
 	void save( const QString &filename, Graph::Ptr graph )
