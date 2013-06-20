@@ -34,10 +34,10 @@ void Advect2d::apply( SimObject::Ptr so )
 		for( int j=0;j<res.y;++j )
 			for( int i=0;i<res.x;++i )
 			{
-				if(i==0)
+                if(i==res.x-1)
 					density->lvalue(i, j, k) = 0.0f;
 				else
-					density->lvalue(i, j, k) = density_old->sample(i-1, j, k);
+                    density->lvalue(i, j, k) = density_old->sample(i+1, j, k);
 			}
 
 

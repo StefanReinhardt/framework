@@ -79,7 +79,7 @@ int main(int argc, char ** argv)
 		graph->addConnection( solver, "output", cloudExport, "input" );
 
 		// save graph
-		core::save( "c:\\projects\\clouds\\bin\\test.json", graph );
+        core::save( "$HERE/test.json", graph );
 	}
 	// debug
 	// deserialize and execute graph

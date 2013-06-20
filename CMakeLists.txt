@@ -3,9 +3,9 @@ project(cloudshop)
 
 
 # if its david then binaries will go to seperate bin directory one level above
-if( $ENV{USERNAME} STREQUAL "koernedd" )
+#if( $ENV{USERNAME} STREQUAL "koernedd" )
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../bin")
-endif( $ENV{USERNAME} STREQUAL "koernedd" )
+#endif( $ENV{USERNAME} STREQUAL "koernedd" )
 
 
 

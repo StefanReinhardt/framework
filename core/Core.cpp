@@ -41,7 +41,7 @@ namespace core
 
 	void save( const QString &filename, Graph::Ptr graph )
 	{
-		g_core->save( filename, graph );
+        g_core->save(  expand(filename), graph );
 	}
 
 	Data::Ptr create( const QString &type )
