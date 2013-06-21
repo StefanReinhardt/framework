@@ -11,6 +11,7 @@ public:
     typedef std::shared_ptr<CreateClouds> Ptr;
 	CreateClouds();
 	virtual void					update( core::GraphNodeSocket *output )override;
+
 };
 
 #endif // CREATECLOUDS_H

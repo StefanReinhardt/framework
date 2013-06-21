@@ -5,8 +5,11 @@
 
 Advect2d::Advect2d() : Operator()
 {
-	step=0;
+	dt= 1.0f;
+	qDebug() << "============================== no attribute to advect";
+
 }
+
 
 void Advect2d::apply( SimObject::Ptr so )
 {
@@ -14,6 +17,8 @@ void Advect2d::apply( SimObject::Ptr so )
 
 	// get density scalarfield ---
 	ScalarField::Ptr density = so->getSubData<ScalarField>( "density" );
+	ScalarField::Ptr vel_x = so->getSubData<ScalarField>( "vel_x" );
+	ScalarField::Ptr vel_y = so->getSubData<ScalarField>( "vel_y" );
 
 	// get temporary scalarfield for update ---
 	ScalarField::Ptr density_old;
@@ -35,19 +40,16 @@ void Advect2d::apply( SimObject::Ptr so )
 		for( int j=0;j<res.y;++j )
 			for( int i=0;i<res.x;++i )
 			{
-				///*
-                if(i==res.x-1)
-					density->lvalue(i, j, k) = 0.0f;
-				else
-                    density->lvalue(i, j, k) = density_old->sample(i+1, j, k);
-				//*/
-				//density->lvalue(i, j, k) = step/10.0f;
+				float x = i - dt * vel_x->sample(i,j,k);
+				float y = j - dt * vel_y->sample(i,j,k);
+				float z = k; //k -  &dt * vel_z->sample(i,j,k);
+
+				density->lvalue(i,j,k) = density_old->evaluate(math::V3f(x,y,z));
 			}
 
 
 	// since we swapped pointers we have to swap subdata as well
 	so->setSubData( "density", density );
 	so->setSubData( "density_old", density_old );
-	step++;
 }
 

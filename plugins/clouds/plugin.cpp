@@ -6,6 +6,7 @@
 #include "ExportClouds.h"
 #include "ImportClouds.h"
 #include "Advect2d.h"
+#include "Project2d.h"
 
 
 
@@ -17,6 +18,7 @@ struct CloudsPlugin : public core::Plugin
 		core->addDataFactory( core::DataFactoryT<ImportClouds>::create(ImportClouds::staticMetaObject.className(), "imports initial cloud state to simobject") );
 		core->addDataFactory( core::DataFactoryT<ExportClouds>::create(ExportClouds::staticMetaObject.className(), "exports cloud state from simobject") );
 		core->addDataFactory( core::DataFactoryT<Advect2d>::create(Advect2d::staticMetaObject.className(), "advects name identified field in 2d given a name identified velocity ") );
+		core->addDataFactory( core::DataFactoryT<Project2d>::create(Project2d::staticMetaObject.className(), "projects name identified 2d velocity field ") );
 	}
 };
 

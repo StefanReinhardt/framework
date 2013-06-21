@@ -72,7 +72,8 @@ int main(int argc, char ** argv)
 		core::GraphNode::Ptr cloudExport = graph->createNode("ExportClouds", "export");
 
 		// setup solver
-		//solver->createOperator( "Advect2d", "advect density" );
+		solver->createOperator( "Advect2d", "advect density" );
+		solver->createOperator( "Project2d", "projection step" );
 
 
 		// set inputs
