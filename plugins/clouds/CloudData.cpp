@@ -46,6 +46,14 @@ CloudData::CloudData() : SimObject()
 	vel_y->fill(1,math::Box3f(0.0f,0.3f,0,1.0f,0.7f,1.0f));
 	addSubData("vel_y", vel_y);
 
+
+	// TEMP --------
+	// velocity test
+	VectorField::Ptr velocity = std::make_shared<VectorField>(  );
+	velocity->resize( density->getResolution().x, density->getResolution().y, density->getResolution().z );
+	velocity->setBound( math::Box3f( math::V3f(-7.5), math::V3f(7.5) ) );
+	velocity->fill( math::V3f(1.0f, 1.0f, 1.0f) );
+	addSubData("velocity", velocity);
 }
 
 void CloudData::reset()

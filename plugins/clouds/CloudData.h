@@ -4,6 +4,7 @@
 #include <plugins/sim/SimObject.h>
 #include <vector>
 #include <plugins/primitives/ScalarField.h>
+#include <plugins/primitives/VectorField.h>
 
 
 class CloudData  : public SimObject

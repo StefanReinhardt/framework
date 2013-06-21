@@ -2,6 +2,7 @@
 
 #include <plugins/sim/SimObject.h>
 #include <plugins/primitives/ScalarField.h>
+#include <plugins/primitives/VectorField.h>
 #include <plugins/houdini/HouGeoIO.h>
 
 #include <core/Core.h>
@@ -53,9 +54,22 @@ void ExportClouds::update(core::GraphNodeSocket *output)
 
 		for (int i=0; i<subDataNames.size(); ++i)
 		{
-			houGeo->addPrimitive(so->getSubData<ScalarField>(subDataNames[i]));
-			nameAttr->addString(subDataNames[i].toStdString());
-
+			// ScalarField?
+			if( so->getSubData<ScalarField>(subDataNames[i]) )
+			{
+				houGeo->addPrimitive(so->getSubData<ScalarField>(subDataNames[i]));
+				nameAttr->addString(subDataNames[i].toStdString());
+			}else
+			// VectorField?
+			if( so->getSubData<VectorField>(subDataNames[i]) )
+			{
+				houGeo->addPrimitive(so->getSubData<VectorField>(subDataNames[i])->getScalarField(0));
+				nameAttr->addString((subDataNames[i]+".x").toStdString());
+				houGeo->addPrimitive(so->getSubData<VectorField>(subDataNames[i])->getScalarField(1));
+				nameAttr->addString((subDataNames[i]+".y").toStdString());
+				houGeo->addPrimitive(so->getSubData<VectorField>(subDataNames[i])->getScalarField(2));
+				nameAttr->addString((subDataNames[i]+".z").toStdString());
+			}
 		}
 
 		/*
