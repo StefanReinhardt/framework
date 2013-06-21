@@ -4,10 +4,10 @@
 
 struct ExportClouds : public core::GraphNode
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	typedef std::shared_ptr<ExportClouds> Ptr;
+    typedef std::shared_ptr<ExportClouds> Ptr;
 
-	ExportClouds();
-	virtual void                  update(core::GraphNodeSocket *output)override;
+    ExportClouds();
+    virtual void update(core::GraphNodeSocket *output)override;
 };

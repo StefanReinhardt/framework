@@ -47,6 +47,16 @@ void SimObject::print()const
 	}
 }
 
-
+std::vector<QString> SimObject::getSubDataNames()
+{
+	std::vector<QString> subDataNames;
+	qDebug() << "get SubData Names";
+	for( auto it = m_subData.begin(), end=m_subData.end();it != end; ++it )
+	{
+		subDataNames.push_back(it->first);
+		qDebug() << "\t " << it->first;
+	}
+	return subDataNames;
+}
 
 

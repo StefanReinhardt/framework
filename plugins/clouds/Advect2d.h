@@ -14,4 +14,5 @@ public:
 
 private:
 	//QString m_name;
+	int step;
 };

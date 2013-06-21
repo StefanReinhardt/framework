@@ -1,5 +1,7 @@
 #pragma once
 #include <core/Data.h>
+#include <QString>
+#include <vector>
 
 
 class SimObject : public core::Data
@@ -18,6 +20,8 @@ public:
 
 
 	void                                                    print()const; // used for debugging
+
+	std::vector<QString>									getSubDataNames();
 
 private:
 	std::vector<std::pair<QString, Data::Ptr>>              m_subData;

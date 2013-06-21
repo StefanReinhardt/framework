@@ -5,6 +5,7 @@
 
 Advect2d::Advect2d() : Operator()
 {
+	step=0;
 }
 
 void Advect2d::apply( SimObject::Ptr so )
@@ -34,15 +35,19 @@ void Advect2d::apply( SimObject::Ptr so )
 		for( int j=0;j<res.y;++j )
 			for( int i=0;i<res.x;++i )
 			{
+				///*
                 if(i==res.x-1)
 					density->lvalue(i, j, k) = 0.0f;
 				else
                     density->lvalue(i, j, k) = density_old->sample(i+1, j, k);
+				//*/
+				//density->lvalue(i, j, k) = step/10.0f;
 			}
 
 
 	// since we swapped pointers we have to swap subdata as well
 	so->setSubData( "density", density );
 	so->setSubData( "density_old", density_old );
+	step++;
 }
 

@@ -13,10 +13,14 @@ public:
 
     CloudData();
 
-    void reset();
-
+    void							reset();
+	
+	math::V3i						getResolution();
+	void							resize(math::V3i);
+	
 private:
-
+	math::V3i resolution;
+	
     float tlr;					// Temperature lapse rate in °C per 100meter
     float hum;					// humidity in percent 0-1
     float maxAlt;				// upper boarder of altitude in simulation in meter

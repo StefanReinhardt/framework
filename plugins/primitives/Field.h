@@ -18,6 +18,8 @@ struct Field
 	template<typename R> static Ptr                 create( typename Field<R>::Ptr t);
 	static Ptr                                    load( const std::string &filename );
 
+	Field();
+
 	T                                           evaluate( const math::V3f &vsP )const;
 	T                                              sample( int i, int j, int k )const;
 	T                                                  &lvalue( int i, int j, int k );
@@ -96,6 +98,13 @@ typename Field<T>::Ptr Field<T>::create( typename Field<R>::Ptr src)
 	for( ; dstIt != dstEnd; ++dstIt, ++srcIt )
 		*dstIt = (T)*srcIt;
 	return dst;
+}
+
+template<typename T>
+Field<T>::Field()
+{
+	resize( math::V3i(1) );
+	setLocalToWorld( math::M44f::Identity() );
 }
 
 template<typename T>

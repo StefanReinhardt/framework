@@ -46,16 +46,19 @@ int main(int argc, char ** argv)
 	// standalone
 	// generate and serialize graph
 
-    { /*
+    {
+/*
 		core::Graph::Ptr graph = std::make_shared<core::Graph>();
         //core::GraphNode::Ptr cloudImport = graph->createNode("ImportClouds");
-        core::GraphNode::Ptr cloudCreate = graph->createNode("CreateCloud");
+        core::GraphNode::Ptr cloudCreate = graph->createNode("CreateClouds");
 		core::GraphNode::Ptr cloudExport = graph->createNode("ExportClouds", "export");
 
         graph->addConnection( cloudCreate, "output", cloudExport, "input" );
 
+        //graph->addConnection( cloudImport, "output", cloudExport, "input" );
+
         core::save( "$HERE/test.json", graph );
-    */
+*/
 	}
 
 	{
@@ -63,25 +66,27 @@ int main(int argc, char ** argv)
 		core::Graph::Ptr graph = std::make_shared<core::Graph>();
 
 		// create nodes
-		core::GraphNode::Ptr cloudImport = graph->createNode("ImportClouds");
+		//core::GraphNode::Ptr cloudImport = graph->createNode("ImportClouds");
+		core::GraphNode::Ptr cloudCreate = graph->createNode("CreateClouds");
 		Solver::Ptr solver = std::dynamic_pointer_cast<Solver>(graph->createNode("Solver"));
 		core::GraphNode::Ptr cloudExport = graph->createNode("ExportClouds", "export");
 
 		// setup solver
-		solver->createOperator( "Advect2d", "advect density" );
+		//solver->createOperator( "Advect2d", "advect density" );
 
 
 		// set inputs
-		cloudImport->getSocket("file")->setString("$HERE/cloud_initial.bgeo");
+		//cloudImport->getSocket("file")->setString("$HERE/cloud_initial.bgeo");
 		cloudExport->getSocket("file")->setString("$HERE/cloud_output.$F4.bgeo");
 
 		// make connections
-		graph->addConnection( cloudImport, "output", solver, "input" );
+		graph->addConnection( cloudCreate, "output", solver, "input" );
+		//graph->addConnection( cloudImport, "output", solver, "input" );
 		graph->addConnection( "$F", solver, "frame" );
 		graph->addConnection( solver, "output", cloudExport, "input" );
 
 		// save graph
-        core::save( "$HERE/test.json", graph );
+		core::save( "$HERE/test.json", graph );
 
 	}
 	// debug

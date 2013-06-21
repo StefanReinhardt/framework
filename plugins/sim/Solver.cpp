@@ -23,13 +23,16 @@ Solver::Solver() : core::GraphNode()
 
 void Solver::update(core::GraphNodeSocket *output)
 {
-	qDebug() << "Solver: update ";
+    qDebug() << "Solver: update ";
 	SimObject::Ptr so = getSocket("input")->getData<SimObject>();
 	int frame = getSocket( "frame" )->asInt();
 
 	// apply operators
 	for( auto it = m_operators.begin(), end=m_operators.end();it != end;++it )
+    {
+        qDebug() << "Solver: running op ";
 		it->first->apply( so );
+    }
 
 	getSocket( "output" )->setData(so);
 }

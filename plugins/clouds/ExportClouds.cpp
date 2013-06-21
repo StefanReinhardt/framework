@@ -13,85 +13,95 @@
 
 ExportClouds::ExportClouds() : core::GraphNode()
 {
-	addInputSocket( "input" );
-	addInputSocket( "file" );
+    addInputSocket( "input" );
+    addInputSocket( "file" );
 
-	// TODO: default?
-	getSocket("file")->setString("$HERE/cloud_output.$F4.bgeo");
+    // TODO: default?
+    getSocket("file")->setString("$HERE/cloud_output.$F4.bgeo");
 }
 
 void ExportClouds::update(core::GraphNodeSocket *output)
 {
-	qDebug() << "ExportClouds: update ";
-	SimObject::Ptr so = getSocket("input")->getData<SimObject>();
-	QString filename = core::expand(getSocket("file")->asString());
+    qDebug() << "ExportClouds: update ";
+    SimObject::Ptr so = getSocket("input")->getData<SimObject>();
+    QString filename = core::expand(getSocket("file")->asString());
 
 
-	// test
-	/*
-	{
-		ScalarField::Ptr test = std::make_shared<ScalarField>();
-		std::ofstream out( filename.toUtf8() , std::ios_base::out | std::ios_base::binary );
-		houdini::HouGeo::Ptr houGeo = std::make_shared<houdini::HouGeo>();
-		houGeo->addPrimitive( test );
-		houdini::HouGeoIO::xport( &out, houGeo );
-	}
-	{
-		std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
-		houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
-	}
-	*/
+    // test
+    /*
+    {
+        ScalarField::Ptr test = std::make_shared<ScalarField>();
+        std::ofstream out( filename.toUtf8() , std::ios_base::out | std::ios_base::binary );
+        houdini::HouGeo::Ptr houGeo = std::make_shared<houdini::HouGeo>();
+        houGeo->addPrimitive( test );
+        houdini::HouGeoIO::xport( &out, houGeo );
+    }
+    {
+        std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
+        houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
+    }
+    */
 
-	if( so )
-	{
-		std::ofstream out( filename.toUtf8() , std::ios_base::out | std::ios_base::binary );
-		houdini::HouGeo::Ptr houGeo = std::make_shared<houdini::HouGeo>();
+    if( so )
+    {
+        std::ofstream out( filename.toUtf8() , std::ios_base::out | std::ios_base::binary );
+        houdini::HouGeo::Ptr houGeo = std::make_shared<houdini::HouGeo>();
 
-		houdini::HouGeo::HouAttribute::Ptr nameAttr = std::make_shared<houdini::HouGeo::HouAttribute>();
+        houdini::HouGeo::HouAttribute::Ptr nameAttr = std::make_shared<houdini::HouGeo::HouAttribute>();
 
-		ScalarField::Ptr density = so->getSubData<ScalarField>( "density" );
-		if( density )
+		std::vector<QString> subDataNames = so->getSubDataNames();
+
+		for (int i=0; i<subDataNames.size(); ++i)
 		{
-			// add primitive
-			houGeo->addPrimitive( density );
+			houGeo->addPrimitive(so->getSubData<ScalarField>(subDataNames[i]));
+			nameAttr->addString(subDataNames[i].toStdString());
 
-			// add primitive name
-			nameAttr->addString( "density" );
 		}
 
+		/*
+        ScalarField::Ptr density = so->getSubData<ScalarField>( "density" );
+        if( density )
+        {
+            // add primitive
+            houGeo->addPrimitive( density );
 
-		ScalarField::Ptr volume2 = so->getSubData<ScalarField>( "volume2" );
-		if( volume2 )
-		{
-			// add primitive
-			houGeo->addPrimitive( volume2 );
-
-			// add primitive name
-			nameAttr->addString( "volume2" );
-		}
+            // add primitive name
+            nameAttr->addString( "density" );
+        }
 
 
+        ScalarField::Ptr volume2 = so->getSubData<ScalarField>( "volume2" );
+        if( volume2 )
+        {
+            // add primitive
+            houGeo->addPrimitive( volume2 );
+
+            // add primitive name
+            nameAttr->addString( "volume2" );
+        }
+		*/
 		houGeo->setPrimitiveAttribute( "name", nameAttr );
-		houdini::HouGeoIO::xport( &out, houGeo );
-	}else
-		qDebug() << "ExportClouds:: NO so! " << filename;
 
-	/*
-	if(so)
-	{
-		std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
-		houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
-	}
+        houdini::HouGeoIO::xport( &out, houGeo );
+    }else
+        qDebug() << "ExportClouds:: NO so! " << filename;
 
-	{
-		filename = "c:/projects/clouds/bin/null.bgeo";
-		std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
-		houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
-	}
-	{
-		filename = "c:/projects/clouds/bin/test.bgeo";
-		std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
-		houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
-	}
-	*/
+    /*
+    if(so)
+    {
+        std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
+        houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
+    }
+
+    {
+        filename = "c:/projects/clouds/bin/null.bgeo";
+        std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
+        houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
+    }
+    {
+        filename = "c:/projects/clouds/bin/test.bgeo";
+        std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
+        houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
+    }
+    */
 }
