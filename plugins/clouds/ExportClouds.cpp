@@ -69,6 +69,14 @@ void ExportClouds::update(core::GraphNodeSocket *output)
 				nameAttr->addString((subDataNames[i]+".y").toStdString());
 				houGeo->addPrimitive(so->getSubData<VectorField>(subDataNames[i])->getScalarField(2));
 				nameAttr->addString((subDataNames[i]+".z").toStdString());
+
+				for( int j=0;j<3;++j )
+				{
+					ScalarField::Ptr f = so->getSubData<VectorField>(subDataNames[i])->getScalarField(j);
+					math::Box3f b = f->bound();
+					qDebug() << f->getVoxelSize().x << " " << f->getVoxelSize().y << " " << f->getVoxelSize().z;
+				}
+
 			}
 		}
 

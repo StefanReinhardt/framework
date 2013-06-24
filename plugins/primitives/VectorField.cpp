@@ -74,16 +74,37 @@ void VectorField::resize( math::V3i resolution )
 
 }
 
-void VectorField::setLocalToWorld( const math::M44f &localToWorld )
-{
-	for( int i=0;i<3;++i )
-		m_fields[i]->setLocalToWorld(localToWorld);
-}
 
 void VectorField::setBound( const math::Box3f &bound )
 {
-	for( int i=0;i<3;++i )
-		m_fields[i]->setBound(bound);
+
+	switch(m_sampling)
+	{
+	case CENTER:
+		{
+			for( int i=0;i<3;++i )
+				m_fields[i]->setBound(bound);
+		}break;
+	case FACE:
+		{
+			// for staggered grids fields have a different resolution in one component
+			// we take this into account when computing bounding boxes in order to keep uniform voxels uniform
+
+			for( int i=0;i<3;++i )
+			{
+				// get minimum bound by substracing half a voxel on each side
+				math::V3f vs_h = m_fields[i]->getVoxelSize()*0.5f;
+
+				math::Box3f b( bound.minPoint + vs_h, bound.maxPoint - vs_h );
+
+				// only current component remains original size since there is a voxel more
+				b.minPoint[i] = bound.minPoint[i];
+				b.maxPoint[i] = bound.maxPoint[i];
+
+				m_fields[i]->setBound( b );
+			}
+		}break;
+	};
 }
 
 

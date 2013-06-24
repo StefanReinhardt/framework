@@ -31,8 +31,7 @@ public:
 	void                                   resize( int x, int y, int z );
 	void                                   resize( math::V3i resolution );
 
-	void                                   setLocalToWorld( const math::M44f &localToWorld );
-	void                                   setBound( const math::Box3f &bound );
+	void                                   setBound( const math::Box3f &bound ); // TODO: update bound seperately (keep voxels uniform size)
 
 	void                                   fill( math::V3f value ); // fills all voxels with the same value
 
