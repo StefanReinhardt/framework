@@ -48,10 +48,10 @@ CloudData::CloudData() : SimObject()
 
 
 	// TEMP --------
-	// velocity test
-	VectorField::Ptr velocity = std::make_shared<VectorField>(  );
-	velocity->resize( density->getResolution().x, density->getResolution().y, density->getResolution().z );
-	velocity->setBound( math::Box3f( math::V3f(-7.5), math::V3f(7.5) ) );
+	// staggered grid for velocity test
+	VectorField::Ptr velocity = std::make_shared<VectorField>( VectorField::FACE );
+	velocity->resize( 50, 50, 50 );
+	velocity->setBound( math::Box3f( math::V3f(-0.5), math::V3f(0.5) ) );
 	velocity->fill( math::V3f(1.0f, 1.0f, 1.0f) );
 	addSubData("velocity", velocity);
 }

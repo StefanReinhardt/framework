@@ -57,6 +57,8 @@ struct Field
 	math::M44f                                                          m_worldToVoxel; // transforms from worldspace to voxelspace
 	math::M44f                                                          m_voxelToWorld;
 
+	math::V3f                                                           m_sampleLocation; // sample location within one voxel (allows staggered grids etc.)
+
 	math::V3i                                                             m_resolution;
 
 	math::Box3f                                                                m_bound;
@@ -101,7 +103,7 @@ typename Field<T>::Ptr Field<T>::create( typename Field<R>::Ptr src)
 }
 
 template<typename T>
-Field<T>::Field()
+Field<T>::Field() : m_sampleLocation(0.5f)
 {
 	resize( math::V3i(1) );
 	setLocalToWorld( math::M44f::Identity() );
@@ -189,10 +191,8 @@ T Field<T>::evaluate( const math::V3f &vsP )const
 
 	Vector vs = vsP;
 
-	// voxels defined at cell centers
-	vs.x -= (real_t)(0.5);
-	vs.y -= (real_t)(0.5);
-	vs.z -= (real_t)(0.5);
+	// take sample location within voxel into account
+	vs -= m_sampleLocation;
 
 	real_t tx = vs.x - floor(vs.x);
 	real_t ty = vs.y - floor(vs.y);
