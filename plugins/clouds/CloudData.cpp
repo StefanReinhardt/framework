@@ -25,8 +25,11 @@ CloudData::CloudData() : SimObject()
 	wind = 		0.1f;
 	heatSrc = 	20.0f;
 
-	resolution = math::Vec3i(40,40,5);
+	resolution = math::Vec3i(100,100,1);
 
+	math::Vec3i resVelX = math::Vec3i(resolution.x+1,resolution.y,resolution.z);
+	math::Vec3i resVelY = math::Vec3i(resolution.x,resolution.y+1,resolution.z);
+	//math::Vec3i resVelZ = math::Vec3i(resolution.x,resolution.y,resolution.z+1);
 
 	density = std::make_shared<ScalarField>();
 	density->resize(resolution);
@@ -36,27 +39,20 @@ CloudData::CloudData() : SimObject()
 	addSubData("density", density);
 
 	vel_x = std::make_shared<ScalarField>();
-	vel_x->resize(resolution);
+	vel_x->resize(resVelX);
 	vel_x->localToWorld(math::V3f(2,2,1));
 	vel_x->fill(0.0f);
 	vel_x->fill(1,math::Box3f(0.4f,0.55f,0,0.8f,0.8f,1.0f));
 	addSubData("vel_x", vel_x );
 
 	vel_y = std::make_shared<ScalarField>();
-	vel_y->resize(resolution);
+	vel_y->resize(resVelY);
 	vel_y->localToWorld(math::V3f(2,2,1));
 	vel_y->fill(0.0f);
 	vel_y->fill(1,math::Box3f(0.4f,0.4f,0,0.6f,0.6f,1.0f));
 	addSubData("vel_y", vel_y);
 
 
-	// TEMP --------
-	// velocity test
-	VectorField::Ptr velocity = std::make_shared<VectorField>(  );
-	velocity->resize( density->getResolution().x, density->getResolution().y, density->getResolution().z );
-	velocity->setBound( math::Box3f( math::V3f(-7.5), math::V3f(7.5) ) );
-	velocity->fill( math::V3f(1.0f, 1.0f, 1.0f) );
-	addSubData("velocity", velocity);
 }
 
 void CloudData::reset()
@@ -77,4 +73,160 @@ math::V3i CloudData::getResolution()
 void CloudData::resize(math::V3i size)
 {
 	resolution = size;
+}
+
+void CloudData::setTimestep(float timestep)
+{
+	dt=timestep;
+}
+
+
+// ========Settings for b
+// 0=NeumannBounds || 1=vel_x || 2=vel_y || 3=vel_z || 4=potentialTemperature || 5=waterVapor || 6=cloudWater
+
+void CloudData::setBounds(int b, ScalarField::Ptr f)
+{
+	math::V3i res = f->getResolution();
+	int k=0;
+	switch ( b )
+	{
+
+		// ___________________________________
+		// Neumann Boundaries
+		case 0:
+			qDebug()  << "setBounds with b=0 (Neumann) res = "<< res.x;
+
+			//for( int k=0;k<res.z;++k )
+				for( int j=0;j<res.y;++j )
+				{
+					f->lvalue(0,j,k)= f->lvalue(1,j,k);
+					f->lvalue(res.x-1,j,k)= f->lvalue(res.x-2,j,k);
+				}
+
+			//for( int k=0;k<res.z;++k )
+				for( int i=0;i<res.x;++i )
+				{
+					f->lvalue(i,0,k)= f->lvalue(i,1,k);
+					f->lvalue(i,res.y-1,k) = f->lvalue(i,res.y-2,k);
+				}
+			/*
+			for( int j=0;j<res.y;++j )
+				for( int i=0;i<res.x;++i )
+				{
+					f->lvalue(i,j,0) = f->lvalue(i,j,1);
+					f->lvalue(i,j,res.z-1) = f->lvalue(i,j,res.z-2);
+				}
+			*/
+			break;
+
+		// ___________________________________
+		// x Velocity
+		case 1:
+			qDebug()  << "setBounds with b=1 (vel_x)";
+
+			// sides 	= user defined wind
+			//for( int k=0;k<res.z;++k )
+				for( int j=0;j<res.y;++j )
+				{
+					f->lvalue(0,j,k) = wind;
+					//f->lvalue(1,j,k) = wind;
+					f->lvalue(res.x-1,j,k) = wind;
+					//f->lvalue(res.x-2,j,k) = wind;
+				}
+
+			// bottom 	= noslip
+			// top 		= free slip
+			//for( int k=0;k<res.z;++k )
+				for( int i=0;i<res.x;++i )
+				{
+					//f->lvalue(i,0,k)=0;
+					f->lvalue(i,0,k)=-f->lvalue(i,1,k);
+					f->lvalue(i,res.y-1,k)=f->lvalue(i,res.y-2,k);
+				}
+
+			// backFront = free slip
+			/*
+			for( int j=0;j<res.y;++j )
+				for( int i=0;i<res.x;++i )
+				{
+					f->lvalue(i,j,0) = f->lvalue(i,j,1);
+					f->lvalue(i,j,res.z-1) = f->lvalue(i,j,res.z-2);
+				}
+			*/
+			break;
+
+		// ___________________________________
+		// y Velocity
+		case 2:
+			qDebug()  << "setBounds with b=2 (vel_y)";
+
+
+			// sides = zero
+			//for( int k=0;k<res.z;++k )
+				for( int j=0;j<res.y;++j )
+				{
+					f->lvalue(0,j,k)= 0;
+					f->lvalue(res.x-1,j,k)= 0;
+				}
+
+			// bottom 	= noslip
+			// top 		= free slip
+			//for( int k=0;k<res.z;++k )
+				for( int i=0;i<res.x;++i )
+				{
+					f->lvalue(i,0,k) = 0;
+					f->lvalue(i,1,k) = 0;
+					f->lvalue(i,res.y-1,k) = 0;
+					f->lvalue(i,res.y-2,k) = 0;
+				}
+			/*
+			// frontBack = zero
+			for( int j=0;j<res.y;++j )
+				for( int i=0;i<res.x;++i )
+				{
+					f->lvalue(i,j,0)= 0;
+					f->lvalue(i,j,res.z-1)= 0;
+				}
+			*/
+			break;
+
+		// ___________________________________
+		// z Velocity
+		case 3:
+			qDebug()  << "setBounds with b=3 (vel_z)";
+
+			/*
+
+			// sides = wind
+			for( int k=0;k<res.z;++k )
+				for( int j=0;j<res.y;++j )
+				{
+				}
+
+			// bottom 	= noslip
+			// top 		= free slip
+			for( int k=0;k<res.z;++k )
+				for( int i=0;i<res.x;++i )
+				{
+				}
+
+			// frontBack = free slip
+			for( int j=0;j<res.y;++j )
+				for( int i=0;i<res.x;++i )
+				{
+				}
+			*/
+
+			break;
+
+		default:
+			//for( int k=0;k<res.z;++k )
+				for( int j=0;j<res.y;++j )
+				{
+					qCritical() << "wuahhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh 333333";
+					f->lvalue(0,j,k)=3333.33f;
+				}
+			qDebug()  << "setBounds with unknown parameter b="<<b;
+
+	}
 }

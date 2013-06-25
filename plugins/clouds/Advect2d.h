@@ -1,6 +1,7 @@
 #pragma once
 
 #include <plugins/sim/Operator.h>
+#include <plugins/primitives/ScalarField.h>
 
 class Advect2d : public Operator
 {
@@ -11,7 +12,17 @@ public:
 
 	virtual void apply( SimObject::Ptr so )override;
 
+	void	setType(int, QString);
+
+
+	// overloads from Data
+	virtual void                       store( QJsonObject &o, QJsonDocument &doc );
+	virtual void                       load( QJsonObject &o );
+
 private:
+	int b;
+	QString advectionField;
+
 	//QString m_name;
 	float dt;			// Timestep
 };

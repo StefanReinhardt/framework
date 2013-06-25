@@ -10,7 +10,8 @@
 class CloudData  : public SimObject
 {
 public:
-//typedef std::shared_ptr<Operator> Ptr;
+
+	typedef std::shared_ptr<CloudData> Ptr;
 
     CloudData();
 
@@ -20,6 +21,10 @@ public:
 	void							resize(math::V3i);
 
 	float							getTimestep();
+	void							setTimestep(float);
+
+	void							setBounds(int, ScalarField::Ptr);
+
 private:
 	math::V3i						resolution;
 

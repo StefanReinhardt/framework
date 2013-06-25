@@ -91,7 +91,7 @@ namespace core
 		//bool result = connect( src.get(), SIGNAL(dirty()), dest.get(), SLOT(makeDirty()) );
 		bool result = connect( src.get(), &core::GraphNodeSocket::dirty, dest.get(), &core::GraphNodeSocket::makeDirty );
 		if( result == true )
-			qCritical() << "connection successfull";
+			qDebug() << "connection successfull";
 		else
 			qCritical() << "connection failed";
 
