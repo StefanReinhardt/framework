@@ -5,7 +5,7 @@
 
 // these includes are here only for node creation
 #include <plugins/sim/Solver.h>
-//#include <plugins/clouds/Advect2d.h>
+#include <plugins/clouds/Advect2d.h>
 
 
 void logger(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -14,7 +14,7 @@ void logger(QtMsgType type, const QMessageLogContext &context, const QString &ms
 	switch (type) {
 	case QtDebugMsg:
 		//fprintf(stderr, "Debug: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
-		fprintf(stderr, "Debug: %s\n", localMsg.constData());
+		//fprintf(stderr, "Debug: %s\n", localMsg.constData());
 		break;
 	case QtWarningMsg:
 		//fprintf(stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
@@ -72,7 +72,16 @@ int main(int argc, char ** argv)
 		core::GraphNode::Ptr cloudExport = graph->createNode("ExportClouds", "export");
 
 		// setup solver
-		//solver->createOperator( "Advect2d", "advect density" );
+
+		// Project
+		solver->createOperator( "Project2d", "projection step" );
+
+		// Advect Density
+		Advect2d::Ptr advectDensity = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect density" ));
+		advectDensity->setType(1, "density");
+
+
+
 
 
 		// set inputs
@@ -102,6 +111,6 @@ int main(int argc, char ** argv)
 		// evaluate this node for 10 frames
 		graph->render( cloudExport, 1, 10 );
 	}
-
+	qDebug() << "EXIT";
 	return 0;
 }
