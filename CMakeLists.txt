@@ -4,10 +4,9 @@ project(cloudshop)
 
 # if its david then binaries will go to seperate bin directory one level above
 #if( $ENV{USERNAME} STREQUAL "koernedd" )
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../bin")
+get_filename_component(bin_directory ${CMAKE_CURRENT_SOURCE_DIR}/../bin ABSOLUTE)
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${bin_directory} )
 #endif( $ENV{USERNAME} STREQUAL "koernedd" )
-
-
 
 set( APP_NAME cloudshop )
 MESSAGE( STATUS "APP_NAME  :         " ${APP_NAME} )
