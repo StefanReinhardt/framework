@@ -11,7 +11,14 @@ public:
 
 	virtual void apply( SimObject::Ptr so )override;
 
+	void setField(QString);
+
+	// overloads from Data
+	virtual void                       store( QJsonObject &o, QJsonDocument &doc );
+	virtual void                       load( QJsonObject &o );
+
 private:
 	//QString m_name;
 	float dt;			// Timestep
+	QString projectionField;
 };

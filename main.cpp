@@ -6,6 +6,7 @@
 // these includes are here only for node creation
 #include <plugins/sim/Solver.h>
 #include <plugins/clouds/Advect2d.h>
+#include <plugins/clouds/Project2d.h>
 
 
 void logger(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -74,7 +75,8 @@ int main(int argc, char ** argv)
 		// setup solver
 
 		// Project
-		solver->createOperator( "Project2d", "projection step" );
+		Project2d::Ptr project = std::dynamic_pointer_cast<Project2d>(solver->createOperator( "Project2d", "projection step" ) );
+		project->setField("velocity");
 
 		// Advect Density
 		Advect2d::Ptr advectDensity = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect density" ));

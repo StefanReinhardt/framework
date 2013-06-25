@@ -38,29 +38,30 @@ CloudData::CloudData() : SimObject()
 	density->fill(33.3f,math::Box3f(0.4f,0.4f,0,0.6f,0.6f,1.0f));
 	addSubData("density", density);
 
-	vel_x = std::make_shared<ScalarField>();
-	vel_x->resize(resVelX);
-	vel_x->localToWorld(math::V3f(2,2,1));
-	vel_x->fill(0.0f);
-	vel_x->fill(1,math::Box3f(0.4f,0.55f,0,0.8f,0.8f,1.0f));
-	addSubData("vel_x", vel_x );
-
-	vel_y = std::make_shared<ScalarField>();
-	vel_y->resize(resVelY);
-	vel_y->localToWorld(math::V3f(2,2,1));
-	vel_y->fill(0.0f);
-	vel_y->fill(1,math::Box3f(0.4f,0.4f,0,0.6f,0.6f,1.0f));
-	addSubData("vel_y", vel_y);
-
-
-
 	// TEMP --------
 	// staggered grid for velocity test
 	VectorField::Ptr velocity = std::make_shared<VectorField>( VectorField::FACE );
-	velocity->resize( 50, 50, 50 );
-	velocity->setBound( math::Box3f( math::V3f(-0.51f), math::V3f(0.51f) ) );
-	velocity->fill( math::V3f(1.0f, 1.0f, 1.0f) );
+	velocity->resize( resolution);
+	//velocity->setBound( math::Box3f( math::V3f(-0.51f), math::V3f(0.51f) ) );
+	//velocity->fill( math::V3f(1.0f, 1.0f, 1.0f) );
 	addSubData("velocity", velocity);
+
+	//vel_x = std::make_shared<ScalarField>();
+	//vel_x->resize(resVelX);
+	//vel_x->localToWorld(math::V3f(2,2,1));
+	velocity->getScalarField(0)->fill(0.0f);
+	velocity->getScalarField(0)->fill(1,math::Box3f(0.4f,0.55f,0,0.8f,0.8f,1.0f));
+	//addSubData("vel_x", vel_x );
+
+	//vel_y = std::make_shared<ScalarField>();
+	//vel_y->resize(resVelY);
+	//vel_y->localToWorld(math::V3f(2,2,1));
+	velocity->getScalarField(1)->fill(0.0f);
+	velocity->getScalarField(1)->fill(1,math::Box3f(0.4f,0.4f,0,0.6f,0.6f,1.0f));
+	//addSubData("vel_y", vel_y);
+
+
+
 }
 
 void CloudData::reset()

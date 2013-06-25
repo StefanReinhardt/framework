@@ -25,9 +25,10 @@ void Advect2d::apply( SimObject::Ptr so)
 	ScalarField::Ptr field = so->getSubData<ScalarField>(advectionField);
 
 	// get velocity scalarfield ---
-	ScalarField::Ptr vel_x = so->getSubData<ScalarField>( "vel_x" );
-	ScalarField::Ptr vel_y = so->getSubData<ScalarField>( "vel_y" );
-	ScalarField::Ptr vel_z = so->getSubData<ScalarField>( "vel_z" );
+	VectorField::Ptr vel = so->getSubData<VectorField>("velocity");
+
+	ScalarField::Ptr vel_x = vel->getScalarField(0);
+	ScalarField::Ptr vel_y = vel->getScalarField(1);
 
 	// get temporary scalarfield for update ---
 	ScalarField::Ptr field_old;
