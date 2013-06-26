@@ -23,7 +23,13 @@ VectorField::VectorField( Sampling sampling ) : core::Data(), m_sampling(samplin
 	}
 }
 
+VectorField::VectorField( VectorField::Ptr other ) : core::Data()
+{
+	m_sampling = other->m_sampling;
 
+	for( int i=0;i<3;++i )
+		m_fields[i] = std::make_shared<ScalarField>(other->getScalarField(i));
+}
 
 
 

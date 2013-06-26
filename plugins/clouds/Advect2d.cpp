@@ -1,20 +1,18 @@
 #include "Advect2d.h"
-
-
-
 #include <plugins/clouds/CloudData.h>
+#include <core/Data.h>
 
 Advect2d::Advect2d() : Operator()
 {
-	dt= 1.0f;
-	qDebug() << "============================== no attribute to advect";
-
+	m_dt= 1.0f;
+	m_periodic=false;
 }
 
-void Advect2d::setType(int b, QString name)
+void Advect2d::setType(QString field, QString vecField, bool periodic)
 {
-	this->b = b;
-	this->advectionField = name;
+	this->m_periodic = periodic;
+	this->advectionField = field;
+	this->vecField = vecField;
 }
 
 void Advect2d::apply( SimObject::Ptr so)
@@ -22,60 +20,99 @@ void Advect2d::apply( SimObject::Ptr so)
 	qDebug() << "Advect2d::apply";
 
 	// get field to advect
-	ScalarField::Ptr field = so->getSubData<ScalarField>(advectionField);
+	Data::Ptr f = so->getSubData<Data>(advectionField);
+	VectorField::Ptr f_v = so->getSubData<VectorField>(vecField);
 
-	// get velocity scalarfield ---
-	VectorField::Ptr vel = so->getSubData<VectorField>("velocity");
-
-	ScalarField::Ptr vel_x = vel->getScalarField(0);
-	ScalarField::Ptr vel_y = vel->getScalarField(1);
-
-	// get temporary scalarfield for update ---
-	ScalarField::Ptr field_old;
-	if( so->hasSubData("field_old") )
-		field_old = so->getSubData<ScalarField>( "field_old" );
-	else
+	if(std::dynamic_pointer_cast<VectorField>(f))
 	{
-		// initialize field_old field from field
-		field_old = std::make_shared<ScalarField>( field );
-		so->addSubData( "field_old", field_old );
+		VectorField::Ptr field = std::dynamic_pointer_cast<VectorField>(f);
+
+		// create field_OLD
+		VectorField::Ptr field_old;
+		if(so->hasSubData(advectionField+"_old") )
+			field_old = so->getSubData<VectorField>( advectionField+"_old" );
+		else
+		{
+			field_old =std::make_shared<VectorField>(field);
+			so->addSubData( advectionField+"_old", field_old );
+		}
+
+		// swap fields
+		std::swap( field, field_old );
+
+		for(int i=0; i<3; ++i)
+		{
+			advect(field->getScalarField(i), field_old->getScalarField(i), f_v);
+		}
+
+		// since we swapped pointers we have to swap subdata as well
+		so->setSubData( advectionField, field );
+		so->setSubData( advectionField+"_old", field_old );
+
+
 	}
 
-	// make current field -> field_old
-	std::swap( field, field_old );
+	else if(std::dynamic_pointer_cast<ScalarField>(f))
+	{
+		ScalarField::Ptr field = std::dynamic_pointer_cast<ScalarField>(f);
 
+		// create field_OLD
+		ScalarField::Ptr field_old;
+		if( so->hasSubData(advectionField+"_old") )
+			field_old = so->getSubData<ScalarField>( advectionField+"_old" );
+		else
+		{
+			field_old = std::make_shared<ScalarField>( field );
+			so->addSubData( advectionField+"_old", field_old );
+		}
+
+		// swap field
+		std::swap( field, field_old );
+
+		// ADVECT
+		advect(field, field_old, f_v);
+
+		// since we swapped pointers we have to swap subdata as well
+		so->setSubData( advectionField, field );
+		so->setSubData( advectionField+"_old", field_old );
+
+	}
+
+}
+
+
+void Advect2d::advect(ScalarField::Ptr field, ScalarField::Ptr field_old, VectorField::Ptr vecField)
+{
 	// perform backtracking
-	math::V3i res = field->getResolution();
+
+	math::V3i res= field->getResolution();
+
 	for( int k=0;k<res.z;++k )
 		for( int j=0;j<res.y;++j )
 			for( int i=0;i<res.x;++i )
 			{
-				float x = i - dt * vel_x->sample(i,j,k);
-				float y = j - dt * vel_y->sample(i,j,k);
-				float z = k; //k -  &dt * vel_z->sample(i,j,k);
+				float x = i+field->m_sampleLocation.x;
+				float y = j+field->m_sampleLocation.y;
+				float z = k;//+sampleLoc.z;
 
+				// Backtrace Particles
+				// if backtrace starts on value then sample instead of evaluate
+				if(field->m_sampleLocation.x == 0)
+					x= x - m_dt * vecField->getScalarField(0)->sample(i,j,k);
+				else
+					x = x - m_dt * vecField->getScalarField(0)->evaluate(math::V3f(x,y,z));
+
+				if(field->m_sampleLocation.y == 0)
+					y = y - m_dt * vecField->getScalarField(1)->sample(i,j,k);
+				else
+					y = y - m_dt * vecField->getScalarField(1)->evaluate(math::V3f(x,y,z));
+
+				//if(field->m_sampleLocation.z == 0)
+				z = k; //k -  &dt * vel_z->sample(i,j,k);
+
+				//Evaluate Field at backtraced position
 				field->lvalue(i,j,k) = field_old->evaluate(math::V3f(x,y,z));
 			}
-
-
-	// since we swapped pointers we have to swap subdata as well
-	so->setSubData( advectionField, field );
-	so->setSubData( "field_old", field_old );
-
-
-	// Boundary settings
-	if(std::dynamic_pointer_cast<CloudData>(so))
-	{
-		CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
-		qDebug() << "sucessfully casted SO to cloudData";
-
-		//cd->setBounds(0, field);
-
-		//cd->setBounds(2, vel_y);
-		//cd->setBounds(3, vel_z);
-
-	}
-
 
 }
 
@@ -86,7 +123,9 @@ void Advect2d::store( QJsonObject &o, QJsonDocument &doc )
 	Operator::store( o, doc );
 
 	o.insert( "advectionField", advectionField );
+	o.insert( "vecField", vecField);
 }
+
 
 
 void Advect2d::load( QJsonObject &o )
@@ -94,5 +133,6 @@ void Advect2d::load( QJsonObject &o )
 	Operator::load( o );
 
 	advectionField = o["advectionField"].toString();
+	vecField = o["vecField"].toString();
 }
 

@@ -5,7 +5,8 @@
 #include <plugins/clouds/CloudData.h>
 
 Project2d::Project2d() : Operator()
-{	
+{
+
 }
 void Project2d::setField(QString name)
 {
@@ -22,16 +23,14 @@ void Project2d::apply( SimObject::Ptr so )
 
 	math::V3i res = math::V3i(vel->getScalarField(0)->getResolution());
 	res = math::V3i(res.x-1, res.y, res.z);
-	qCritical() << "resolution is " << res.x << " "<< res.y << " "<< res.z;
 
 	ScalarField::Ptr div = std::make_shared<ScalarField>();
 	ScalarField::Ptr q = std::make_shared<ScalarField>();
 	div->resize(res);
 	q->resize(res);
 
-	qDebug() << "res = " << res.x << res.y << res.z;
-	float h = 1.0f;
 
+	float h = 1.0f;
 
 	//calculate divergence field
 	//for( int k=1;k<res.z-1;++k )

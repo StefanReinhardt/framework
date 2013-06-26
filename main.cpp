@@ -80,10 +80,11 @@ int main(int argc, char ** argv)
 
 		// Advect Density
 		Advect2d::Ptr advectDensity = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect density" ));
-		advectDensity->setType(1, "density");
+		advectDensity->setType("density", "velocity", false);
 
-
-
+		// Advect Density
+		Advect2d::Ptr advectVelocity = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect velocity" ));
+		advectVelocity->setType("velocity", "velocity", false);
 
 
 		// set inputs

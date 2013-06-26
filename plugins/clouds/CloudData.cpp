@@ -27,10 +27,6 @@ CloudData::CloudData() : SimObject()
 
 	resolution = math::Vec3i(100,100,1);
 
-	math::Vec3i resVelX = math::Vec3i(resolution.x+1,resolution.y,resolution.z);
-	math::Vec3i resVelY = math::Vec3i(resolution.x,resolution.y+1,resolution.z);
-	//math::Vec3i resVelZ = math::Vec3i(resolution.x,resolution.y,resolution.z+1);
-
 	density = std::make_shared<ScalarField>();
 	density->resize(resolution);
 	density->localToWorld(math::V3f(2,2,1));
@@ -41,10 +37,11 @@ CloudData::CloudData() : SimObject()
 	// TEMP --------
 	// staggered grid for velocity test
 	VectorField::Ptr velocity = std::make_shared<VectorField>( VectorField::FACE );
-	velocity->resize( resolution);
+	velocity->resize(resolution);
 	//velocity->setBound( math::Box3f( math::V3f(-0.51f), math::V3f(0.51f) ) );
 	//velocity->fill( math::V3f(1.0f, 1.0f, 1.0f) );
 	addSubData("velocity", velocity);
+
 
 	//vel_x = std::make_shared<ScalarField>();
 	//vel_x->resize(resVelX);
@@ -59,7 +56,6 @@ CloudData::CloudData() : SimObject()
 	velocity->getScalarField(1)->fill(0.0f);
 	velocity->getScalarField(1)->fill(1,math::Box3f(0.4f,0.4f,0,0.6f,0.6f,1.0f));
 	//addSubData("vel_y", vel_y);
-
 
 
 }
@@ -229,13 +225,6 @@ void CloudData::setBounds(int b, ScalarField::Ptr f)
 			break;
 
 		default:
-			//for( int k=0;k<res.z;++k )
-				for( int j=0;j<res.y;++j )
-				{
-					qCritical() << "wuahhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh 333333";
-					f->lvalue(0,j,k)=3333.33f;
-				}
-			qDebug()  << "setBounds with unknown parameter b="<<b;
-
+			qCritical() << "wrong Boundary settings. b="<<b;
 	}
 }
