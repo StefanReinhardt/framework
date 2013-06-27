@@ -4,7 +4,7 @@
 
 Advect2d::Advect2d() : Operator()
 {
-	m_dt= 1.0f;
+	m_dt= 5.0f;
 	m_periodic=false;
 }
 
@@ -110,8 +110,35 @@ void Advect2d::advect(ScalarField::Ptr field, ScalarField::Ptr field_old, Vector
 				//if(field->m_sampleLocation.z == 0)
 				z = k; //k -  &dt * vel_z->sample(i,j,k);
 
+				// Boundary conditions
+				if(m_periodic)
+				{
+					// then repeat
+					float i;
+
+					x = (((int)(x))%(int)(res.x-2)) == 0 ?  res.x-2 + modf(x, &i)  :  (((int)(x))%(int)(res.x-2)) +modf(x, &i);
+					y = (((int)(y))%(int)(res.y-2)) == 0 ?  res.y-2 + modf(y, &i)  :  (((int)(y))%(int)(res.y-2)) +modf(y, &i);
+					//z = (((int)(z))%(int)(res.z-2)) == 0 ?  res.z-2 + modf(z, &i)  :  (((int)(z))%(int)(res.z-2)) +modf(z, &i);
+
+
+
+				}
+
+				else
+				{
+					qCritical() << "x vorher "<< x;
+					// clamp to Boundary cell
+					x = std::max(0.0f,std::min(x,(float)(res.x-1.0f)));
+					y = std::max(0.0f,std::min(y,(float)(res.y-1.0f)));
+					z = std::max(0.0f,std::min(z,(float)(res.z-1.0f)));
+					qCritical() << "x nachher "<< x;
+
+				}
+
+
 				//Evaluate Field at backtraced position
 				field->lvalue(i,j,k) = field_old->evaluate(math::V3f(x,y,z));
+
 			}
 
 }
@@ -124,6 +151,7 @@ void Advect2d::store( QJsonObject &o, QJsonDocument &doc )
 
 	o.insert( "advectionField", advectionField );
 	o.insert( "vecField", vecField);
+	o.insert( "m_periodic", m_periodic);
 }
 
 
@@ -134,5 +162,6 @@ void Advect2d::load( QJsonObject &o )
 
 	advectionField = o["advectionField"].toString();
 	vecField = o["vecField"].toString();
+	m_periodic = o["m_periodic"].toBool();
 }
 
