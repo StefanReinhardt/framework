@@ -31,7 +31,7 @@ CloudData::CloudData() : SimObject()
 	density->resize(resolution);
 	density->localToWorld(math::V3f(2,2,1));
 	density->fill(0.0f);
-	density->fill(33.3f,math::Box3f(0.4f,0.4f,0,0.6f,0.6f,1.0f));
+	density->fill(33.3f,math::Box3f(0.4f,0.4f,0,0.95f,0.6f,1.0f));
 	addSubData("density", density);
 
 	// TEMP --------
@@ -47,14 +47,14 @@ CloudData::CloudData() : SimObject()
 	//vel_x->resize(resVelX);
 	//vel_x->localToWorld(math::V3f(2,2,1));
 	velocity->getScalarField(0)->fill(0.0f);
-	velocity->getScalarField(0)->fill(1,math::Box3f(0.4f,0.55f,0,0.8f,0.8f,1.0f));
+	velocity->getScalarField(0)->fill(-1,math::Box3f(0.0f,0.55f,0,1.0f,0.8f,1.0f));
 	//addSubData("vel_x", vel_x );
 
 	//vel_y = std::make_shared<ScalarField>();
 	//vel_y->resize(resVelY);
 	//vel_y->localToWorld(math::V3f(2,2,1));
 	velocity->getScalarField(1)->fill(0.0f);
-	velocity->getScalarField(1)->fill(1,math::Box3f(0.4f,0.4f,0,0.6f,0.6f,1.0f));
+	velocity->getScalarField(1)->fill(0,math::Box3f(0.4f,0.4f,0,0.6f,0.6f,1.0f));
 	//addSubData("vel_y", vel_y);
 
 

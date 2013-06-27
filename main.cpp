@@ -75,16 +75,16 @@ int main(int argc, char ** argv)
 		// setup solver
 
 		// Project
-		Project2d::Ptr project = std::dynamic_pointer_cast<Project2d>(solver->createOperator( "Project2d", "projection step" ) );
-		project->setField("velocity");
+		//Project2d::Ptr project = std::dynamic_pointer_cast<Project2d>(solver->createOperator( "Project2d", "projection step" ) );
+		//project->setField("velocity");
 
 		// Advect Density
 		Advect2d::Ptr advectDensity = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect density" ));
-		advectDensity->setType("density", "velocity", false);
+		advectDensity->setType("density", "velocity", true);
 
-		// Advect Density
+		// Advect Velocity
 		Advect2d::Ptr advectVelocity = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect velocity" ));
-		advectVelocity->setType("velocity", "velocity", false);
+		advectVelocity->setType("velocity", "velocity", true);
 
 
 		// set inputs
