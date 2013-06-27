@@ -25,7 +25,7 @@ public:
 
 	void							setBounds(int, ScalarField::Ptr);
 
-private:
+
 	math::V3i						resolution;
 
 	float							dt;
@@ -53,10 +53,14 @@ private:
 	std::vector<float>				tLut;		// absolute Temperature at altitude in K
 	std::vector<float>				pLut;		// absolute Pressure at altitude in kPa
 
+	ScalarField::Ptr				pt;
+	ScalarField::Ptr				qv;
+	ScalarField::Ptr				qc;
+
+	VectorField::Ptr				velocity;
+
 	ScalarField::Ptr				density;
-	ScalarField::Ptr				vel_x;
-	ScalarField::Ptr				vel_y;
-	ScalarField::Ptr				vel_z;
+
 
 
 };

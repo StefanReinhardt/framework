@@ -21,8 +21,7 @@ void Project2d::apply( SimObject::Ptr so )
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
 	VectorField::Ptr vel = so->getSubData<VectorField>(projectionField);
 
-	math::V3i res = math::V3i(vel->getScalarField(0)->getResolution());
-	res = math::V3i(res.x-1, res.y, res.z);
+	math::V3i res = cd->getResolution();
 
 	ScalarField::Ptr div = std::make_shared<ScalarField>();
 	ScalarField::Ptr q = std::make_shared<ScalarField>();

@@ -126,12 +126,12 @@ void Advect2d::advect(ScalarField::Ptr field, ScalarField::Ptr field_old, Vector
 
 				else
 				{
-					qCritical() << "x vorher "<< x;
+					//qCritical() << "x vorher "<< x;
 					// clamp to Boundary cell
 					x = std::max(0.0f,std::min(x,(float)(res.x-1.0f)));
 					y = std::max(0.0f,std::min(y,(float)(res.y-1.0f)));
 					z = std::max(0.0f,std::min(z,(float)(res.z-1.0f)));
-					qCritical() << "x nachher "<< x;
+					//qCritical() << "x nachher "<< x;
 
 				}
 
