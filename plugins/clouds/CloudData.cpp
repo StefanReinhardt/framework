@@ -14,7 +14,6 @@ CloudData::CloudData() : SimObject()
 	gravity = 	9.81f;		// gravitational acceleration (m/s²)
 	lh = 		2501;		// Latent heat of vaporization of water (J/kg)
 	cp = 		1005;		// specific heat capacity J/(kg K)
-	tlr =       0.6f;		// Temperature lapse rate in °C per 100meter
 
 	maxAlt = 	4000;		// altitude in meter on top of sim grid
 	tlr = 		0.009f; 	// Kelvin per 1 meter (between 0.55 and 0.99)
@@ -46,7 +45,7 @@ CloudData::CloudData() : SimObject()
 	//vel_x = std::make_shared<ScalarField>();
 	//vel_x->resize(resVelX);
 	//vel_x->localToWorld(math::V3f(2,2,1));
-	velocity->getScalarField(0)->fill(0.0f);
+	velocity->getScalarField(0)->fill(-1.0f);
 	velocity->getScalarField(0)->fill(-1,math::Box3f(0.0f,0.55f,0,1.0f,0.8f,1.0f));
 	//addSubData("vel_x", vel_x );
 
@@ -57,7 +56,6 @@ CloudData::CloudData() : SimObject()
 	velocity->getScalarField(1)->fill(0,math::Box3f(0.4f,0.4f,0,0.6f,0.6f,1.0f));
 	//addSubData("vel_y", vel_y);
 
-	qCritical() << "no reset Cloud Data";
 	reset();
 }
 
@@ -103,6 +101,10 @@ void CloudData::reset()
 		}
 	}
 
+	// Init ground pot temp
+	//************************************************************
+	pt0 = tLut.at(0) * pow( p0/pLut.at(0) , 0.286);
+
 	// Initialize Saturation vapor mixing ratio and water vapor mixing ratio
 	//************************************************************
 	//T in celsius
@@ -112,7 +114,6 @@ void CloudData::reset()
 			qs		=		(float) (  (380/(pLut.at(j)*1000)  ) * exp( (17.67*(tLut.at(j)-273.15)) / (tLut.at(j)-273.15+243.5))) ;
 				qv->lvalue(i,j,k) = 		qs * hum;
 				//qv_old->lvalue(i,j,k) =		qs * hum;
-				qCritical() << qv->lvalue(i,j,k);
 		}
 	}
 }
@@ -273,6 +274,100 @@ void CloudData::setBounds(int b, ScalarField::Ptr f)
 				{
 				}
 			*/
+
+			break;
+
+		case 4:
+			qDebug()  << "setBounds with b=4 (pt)";
+
+
+			// sides = wind
+			for( int k=0;k<res.z;++k )
+				for( int j=0;j<res.y;++j )
+				{
+					f->lvalue(0,j,k) = tLut.at(j)*pow(100/pLut.at(j), 0.286);
+					f->lvalue(res.x-1,j,k) = tLut.at(j)*pow(100/pLut.at(j), 0.286);
+				}
+
+			// bottom 	= noslip
+			// top 		= free slip
+			for( int k=0;k<res.z;++k )
+				for( int i=0;i<res.x;++i )
+				{
+					f->lvalue(i,0,k) = tLut.at(0)*pow(100/pLut.at(0), 0.286);
+					f->lvalue(i,res.y-1,k) = tLut.at(res.y-1)*pow(100/pLut.at(res.y-1), 0.286);
+				}
+
+			// frontBack = free slip
+			for( int j=0;j<res.y;++j )
+				for( int i=0;i<res.x;++i )
+				{
+					//f->lvalue(i,j,0) = tLut.at(j)*pow(100/pLut.at(j), 0.286);
+					//f->lvalue(i,j,res.z-1) = tLut.at(j)*pow(100/pLut.at(j), 0.286);
+				}
+			break;
+
+
+		case 5:
+			qDebug()  << "setBounds with b=5 (qv)";
+
+
+			// sides = periodic
+			for( int k=0;k<res.z;++k )
+				for( int j=0;j<res.y;++j )
+				{
+					f->lvalue(0,j,k) = 13370.1337f;
+					f->lvalue(res.x-1,j,k) = 13370.1337f;
+				}
+
+			// bottom 	= noise
+			// top 		= 0
+			for( int k=0;k<res.z;++k )
+				for( int i=0;i<res.x;++i )
+				{
+					f->lvalue(i,0,k) = 33.3f;
+					f->lvalue(i,res.y-1,k) = 0;
+				}
+
+			// frontBack = periodic?
+			for( int j=0;j<res.y;++j )
+				for( int i=0;i<res.x;++i )
+				{
+					//f->lvalue(i,j,0) = tLut.at(j)*pow(100/pLut.at(j), 0.286);
+					//f->lvalue(i,j,res.z-1) = tLut.at(j)*pow(100/pLut.at(j), 0.286);
+				}
+
+			break;
+
+
+		case 6:
+			qDebug()  << "setBounds with b=5 (qc)";
+
+
+			// sides = 0
+			for( int k=0;k<res.z;++k )
+				for( int j=0;j<res.y;++j )
+				{
+					f->lvalue(0,j,k) =			0;
+					f->lvalue(res.x-1,j,k) =	0;
+				}
+
+			// bottom 	= 0
+			// top 		= 0
+			for( int k=0;k<res.z;++k )
+				for( int i=0;i<res.x;++i )
+				{
+					f->lvalue(i,0,k) =			0;
+					f->lvalue(i,res.y-1,k) =	0;
+				}
+
+			// frontBack = periodic?
+			for( int j=0;j<res.y;++j )
+				for( int i=0;i<res.x;++i )
+				{
+					//f->lvalue(i,j,0) =		0;
+					//f->lvalue(i,j,res.z-1) =	0;
+				}
 
 			break;
 

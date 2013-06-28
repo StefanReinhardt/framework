@@ -1,13 +1,13 @@
 #include "SimObject.h"
 
-
+#include <core/Core.h>
 
 
 
 
 SimObject::SimObject() : core::Data()
 {
-
+	setTime( 1.0/core::getVariable("$FPS").toDouble() );
 }
 
 
@@ -34,6 +34,18 @@ bool SimObject::hasSubData( const QString &name )
 		if( it->first == name )
 			return true;
 	return false;
+}
+
+// set timestamp for object in s
+void SimObject::setTime( double newTime )
+{
+	m_time = newTime;
+}
+
+// returns timestamp for object in s
+double SimObject::getTime()const
+{
+	return m_time;
 }
 
 // used for debugging

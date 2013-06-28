@@ -26,6 +26,10 @@ namespace core
 	{
 		g_core = std::make_shared<Core>();		
 		g_core->loadPlugins();
+
+		double fps=24.0f;
+		setVariable( "$FPS", QVariant(fps) );
+
 		g_core->setFrame(1);
 	}
 

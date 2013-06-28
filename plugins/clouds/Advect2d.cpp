@@ -56,6 +56,10 @@ void Advect2d::apply( SimObject::Ptr so)
 	{
 		ScalarField::Ptr field = std::dynamic_pointer_cast<ScalarField>(f);
 
+
+
+
+
 		// create field_OLD
 		ScalarField::Ptr field_old;
 		if( so->hasSubData(advectionField+"_old") )
@@ -66,15 +70,45 @@ void Advect2d::apply( SimObject::Ptr so)
 			so->addSubData( advectionField+"_old", field_old );
 		}
 
+		if (advectionField=="qc")
+		{
+			qCritical() << "************************** " << advectionField;
+			qCritical() << "field" << field->lvalue(50,50,0);
+			qCritical() << "field_old" << field_old->lvalue(50,50,0);
+		}
+
+
 		// swap field
 		std::swap( field, field_old );
+
+		if (advectionField=="qc")
+		{
+			qCritical() << "+++ after swap"  << advectionField;
+			qCritical() << "field" << field->lvalue(50,50,0);
+			qCritical() << "field_old" << field_old->lvalue(50,50,0);
+		}
 
 		// ADVECT
 		advect(field, field_old, f_v);
 
+		if (advectionField=="qc")
+		{
+			qCritical() << "+++ after advect";
+			qCritical() << "field" << field->lvalue(50,50,0);
+			qCritical() << "field_old" << field_old->lvalue(50,50,0);
+		}
 		// since we swapped pointers we have to swap subdata as well
 		so->setSubData( advectionField, field );
 		so->setSubData( advectionField+"_old", field_old );
+
+		if (advectionField=="qc")
+		{
+			qCritical() << "+++ after setSubdata";
+			qCritical() << "field" << field->lvalue(50,50,0);
+			qCritical() << "field_old" << field_old->lvalue(50,50,0);
+		}
+
+
 
 	}
 
@@ -83,7 +117,16 @@ void Advect2d::apply( SimObject::Ptr so)
 
 void Advect2d::advect(ScalarField::Ptr field, ScalarField::Ptr field_old, VectorField::Ptr vecField)
 {
+
 	// perform backtracking
+
+
+	if (advectionField=="qc")
+	{
+		qCritical() << "+++ after advect load";
+		qCritical() << "field" << field->lvalue(50,50,0);
+		qCritical() << "field_old" << field_old->lvalue(50,50,0);
+	}
 
 	math::V3i res= field->getResolution();
 
@@ -114,13 +157,15 @@ void Advect2d::advect(ScalarField::Ptr field, ScalarField::Ptr field_old, Vector
 				if(m_periodic)
 				{
 					// then repeat
-					float i;
 
-					x = (((int)(x))%(int)(res.x-2)) == 0 ?  res.x-2 + modf(x, &i)  :  (((int)(x))%(int)(res.x-2)) +modf(x, &i);
-					y = (((int)(y))%(int)(res.y-2)) == 0 ?  res.y-2 + modf(y, &i)  :  (((int)(y))%(int)(res.y-2)) +modf(y, &i);
+					float intpart;
+					//x = (((int)(x))%(int)(res.x-2)) == 0 ?  res.x-2 + modf(x, &i)  :  (((int)(x))%(int)(res.x-2)) +modf(x, &i);
+					//y = (((int)(y))%(int)(res.y-2)) == 0 ?  res.y-2 + modf(y, &i)  :  (((int)(y))%(int)(res.y-2)) +modf(y, &i);
 					//z = (((int)(z))%(int)(res.z-2)) == 0 ?  res.z-2 + modf(z, &i)  :  (((int)(z))%(int)(res.z-2)) +modf(z, &i);
 
-
+					x = (int)x % res.x + modf(x, &intpart);
+					y = (int)y % res.y + modf(y, &intpart);
+					z = (int)z % res.z + modf(z, &intpart);
 
 				}
 
@@ -139,7 +184,22 @@ void Advect2d::advect(ScalarField::Ptr field, ScalarField::Ptr field_old, Vector
 				//Evaluate Field at backtraced position
 				field->lvalue(i,j,k) = field_old->evaluate(math::V3f(x,y,z));
 
+				if(i==50 && j==50 && advectionField=="qc")
+				{
+					qCritical() << "i "<<i << "j "<<j << "k "<<k << "evaluate=" <<  field_old->evaluate(math::V3f(x,y,z));;
+					qCritical() << "x "<<x << "y "<<y << "z "<<z << "sample=" << field_old->lvalue(55,50,0);
+					qCritical() << "i "<<i << "j "<<j << "k "<<k << "value="<<field->lvalue(i,j,k);
+				}
+
+
 			}
+	if (advectionField=="qc")
+	{
+		qCritical() << "+++ after advect end";
+		qCritical() << "field" << field->lvalue(50,50,0);
+		qCritical() << "field_old" << field_old->lvalue(50,50,0);
+	}
+
 
 }
 

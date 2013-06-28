@@ -27,12 +27,22 @@ void Solver::update(core::GraphNodeSocket *output)
 	SimObject::Ptr so = getSocket("input")->getData<SimObject>();
 	int frame = getSocket( "frame" )->asInt();
 
-	// apply operators
-	for( auto it = m_operators.begin(), end=m_operators.end();it != end;++it )
-    {
-        qDebug() << "Solver: running op ";
-		it->first->apply( so );
-    }
+	double curTime = so->getTime();
+	double dstTime = double(frame)/core::getVariable("$FPS").toDouble();
+	double dt = 1.0/core::getVariable("$FPS").toDouble();
+
+	while( curTime < dstTime )
+	{
+		// apply operators
+		for( auto it = m_operators.begin(), end=m_operators.end();it != end;++it )
+		{
+			qDebug() << "Solver: running op ";
+			it->first->apply( so );
+		}
+		// proceed
+		curTime += dt;
+		so->setTime( curTime );
+	}
 
 	getSocket( "output" )->setData(so);
 }

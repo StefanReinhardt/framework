@@ -8,6 +8,7 @@
 #include "Advect2d.h"
 #include "Project2d.h"
 #include "WaterContinuity.h"
+#include "AddSource.h"
 
 
 
@@ -21,6 +22,7 @@ struct CloudsPlugin : public core::Plugin
 		core->addDataFactory( core::DataFactoryT<Advect2d>::create(Advect2d::staticMetaObject.className(), "advects name identified field in 2d given a name identified velocity ") );
 		core->addDataFactory( core::DataFactoryT<Project2d>::create(Project2d::staticMetaObject.className(), "projects name identified 2d velocity field ") );
 		core->addDataFactory( core::DataFactoryT<WaterContinuity>::create(WaterContinuity::staticMetaObject.className(), "balances water vapor and condensed cloud water") );
+		core->addDataFactory( core::DataFactoryT<AddSource>::create(AddSource::staticMetaObject.className(), "adds a source to a field") );
 	}
 };
 

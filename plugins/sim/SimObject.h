@@ -18,6 +18,8 @@ public:
 	template<typename T> std::shared_ptr<T>                 getSubData( const QString &name );
 	bool                                                    hasSubData( const QString &name );
 
+	void                                                    setTime( double newTime ); // set timestamp for object in s
+	double                                                  getTime()const; // returns timestamp for object in s
 
 	void                                                    print()const; // used for debugging
 
@@ -25,6 +27,7 @@ public:
 
 private:
 	std::vector<std::pair<QString, Data::Ptr>>              m_subData;
+	double                                                  m_time; // timestamp for current simobject state in s
 
 };
 

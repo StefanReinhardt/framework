@@ -7,6 +7,8 @@
 #include <plugins/sim/Solver.h>
 #include <plugins/clouds/Advect2d.h>
 #include <plugins/clouds/Project2d.h>
+#include <plugins/clouds/WaterContinuity.h>
+#include <plugins/clouds/AddSource.h>
 
 
 void logger(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -72,21 +74,49 @@ int main(int argc, char ** argv)
 		Solver::Ptr solver = std::dynamic_pointer_cast<Solver>(graph->createNode("Solver"));
 		core::GraphNode::Ptr cloudExport = graph->createNode("ExportClouds", "export");
 
-		// setup solver
+		//***********************************************************************************************
+		// setup Nodes
+		//***********************************************************************************************
+
 
 		// Project
 		//Project2d::Ptr project = std::dynamic_pointer_cast<Project2d>(solver->createOperator( "Project2d", "projection step" ) );
 		//project->setField("velocity");
 
 		// Advect Density
-		Advect2d::Ptr advectDensity = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect density" ));
-		advectDensity->setType("density", "velocity", true);
+		//Advect2d::Ptr advectDensity = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect density" ));
+		//advectDensity->setType("density", "velocity", true);
 
 		// Advect Velocity
 		Advect2d::Ptr advectVelocity = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect velocity" ));
 		advectVelocity->setType("velocity", "velocity", true);
 
 
+		// Advect qv
+		Advect2d::Ptr advectQv = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect qv" ));
+		advectQv->setType("qv", "velocity", true);
+
+		// Advect qc
+		Advect2d::Ptr advectQc = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect qc" ));
+		advectQc->setType("qc", "velocity", false);
+
+		// Advect pt
+		Advect2d::Ptr advectPt = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect qc" ));
+		advectPt->setType("pt", "velocity", false);
+
+		// Watercontinuity
+		//WaterContinuity::Ptr WaterCont = std::dynamic_pointer_cast<WaterContinuity>(solver->createOperator( "WaterContinuity", "water continuity" ));
+
+
+
+
+
+		//***********************************************************************************************
+		// setup Nodes end
+		//***********************************************************************************************
+
+
+		//
 		// set inputs
 		//cloudImport->getSocket("file")->setString("$HERE/cloud_initial.bgeo");
 		cloudExport->getSocket("file")->setString("$HERE/cloud_output.$F4.bgeo");

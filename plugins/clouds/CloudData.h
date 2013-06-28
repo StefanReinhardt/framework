@@ -35,6 +35,7 @@ public:
 	float							maxAlt;		// upper boarder of altitude in simulation in meter
 	float							t0;			// ground temp
 	float							p0;			// ground pressure
+	float							pt0;		// ground pot temp
 	float							vorticity;
 	float							buoyancy;
 	float							gravity;

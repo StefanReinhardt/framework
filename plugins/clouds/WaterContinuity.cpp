@@ -30,15 +30,13 @@ void WaterContinuity::apply(SimObject::Ptr so)
 			// 			L = Lapse rate in °K or °C per meter
 			//			Rd = ideal gas constant ~ 287 J/(kg K)
 
-			//****exner = (float) ( Math.pow( (absP[j]/p0),0.286f )  );
-			float exner = pow(cd->pLut.at(j)/cd->p0,0.286f);
+			exner = pow(cd->pLut.at(j)/cd->p0,0.286f);
 
 			//p = (float) Math.pow(10*(1-(alt*tlr/t0)),(9.81/(tlr*rd)));
 			//
 			//compute 	T = pt[i,j]/( (^p/p)^k  )
 			// 			with  ^p = 100kPa   k = ~0.286
 			//			T = pt[i,j]/( (100/p)^0.286)
-			//*******T =  pt[i][j]*exner;
 			T = cd->pt->lvalue(i,j,k)*exner;
 
 			// conversion from Kelvin to Celsius
@@ -46,34 +44,17 @@ void WaterContinuity::apply(SimObject::Ptr so)
 			//
 			//compute 	qs= (380.16/p)exp((17.67*T)/(T+243.5))
 			// with T in °C and P in Pa
-			//
-			// qs nicht als feld
-
-
 			qs = (float) ( (380.16f / (cd->pLut.at(j)*1000) ) * exp( (17.67f * T) / (T + 243.5f) ) );
 
 			d_qv  = math::min(qs - cd->qv->lvalue(i,j,k),cd->qc->lvalue(i,j,k));
 
-			//qv[i][j] = qv[i][j] + d_qv;
-			//qc[i][j] = qc[i][j] - d_qv;
-
 			cd->qv->lvalue(i,j,k) = cd->qv->lvalue(i,j,k) + d_qv;
 			cd->qc->lvalue(i,j,k) = cd->qc->lvalue(i,j,k) - d_qv;
 
-
-			//if(j>3 && qc[i][j]>qc_max){
-			//	qc_max=qc[i][j];
-			//	System.out.println(1/qc_max);
-			//}
-
-			//if(i==30 && j ==4)System.out.println("qs="+qs+" dqv="+d_qv+" qc="+qc[i][j]+" qv="+qv[i][j]);
-
-
-
 			// Update the potential temperature according to condesation
 			// Due to condensation latent energy is released in form of heat. -> change in pot temp
-			//update potential Temperature ( Thermodynamics Equation )
-			//delta p = L/(cp*PI)*(delta C)
+			// update potential Temperature ( Thermodynamics Equation )
+			// delta p = L/(cp*PI)*(delta C)
 			// L  = constant for latent heat released    	2501 J/kg
 			// cp = specific heat capacity of dry air 		1005 J/(kg K)
 			// C  = condensation rate = condensation per evaporation
@@ -85,6 +66,10 @@ void WaterContinuity::apply(SimObject::Ptr so)
 			cd->pt->lvalue(i,j,k) += (cd->lh / ( cd->cp * exner )) * (-d_qv);
 		}
 
+	//set Boundary values
+	//cd->setBounds(4,cd->pt);
+	//cd->setBounds(5,cd->qv);
+	//cd->setBounds(6,cd->qc);
 
 
 
