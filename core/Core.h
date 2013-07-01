@@ -13,6 +13,7 @@
 #include "Plugin.h"
 #include "DataFactory.h"
 #include "Graph.h"
+#include "Timer.h"
 
 
 namespace core

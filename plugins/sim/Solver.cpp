@@ -17,6 +17,7 @@ Solver::Solver() : core::GraphNode()
 	addOutputSocket( "output" );
 
 	getSocket("frame")->setInt(1);
+	m_frame = 1;
 }
 
 
@@ -26,22 +27,24 @@ void Solver::update(core::GraphNodeSocket *output)
     qDebug() << "Solver: update ";
 	SimObject::Ptr so = getSocket("input")->getData<SimObject>();
 	int frame = getSocket( "frame" )->asInt();
+	double fps = core::getVariable("$FPS").toDouble();
 
-	double curTime = so->getTime();
-	double dstTime = double(frame)/core::getVariable("$FPS").toDouble();
-	double dt = 1.0/core::getVariable("$FPS").toDouble();
+	// Reset if frame == 1
+	if (frame==1)
+		m_frame = 1;
 
-	while( curTime < dstTime )
+	while( m_frame < frame )
 	{
 		// apply operators
 		for( auto it = m_operators.begin(), end=m_operators.end();it != end;++it )
 		{
-			qDebug() << "Solver: running op ";
+			qDebug() << "Solver: running op " << (*it).second;
 			it->first->apply( so );
 		}
+
 		// proceed
-		curTime += dt;
-		so->setTime( curTime );
+		m_frame++;
+		so->setTime( m_frame/fps );
 	}
 
 	getSocket( "output" )->setData(so);

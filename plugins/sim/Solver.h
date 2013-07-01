@@ -28,4 +28,5 @@ public:
 
 private:
 	std::vector<std::pair<Operator::Ptr, QString>>    m_operators;
+	int                                               m_frame;
 };
