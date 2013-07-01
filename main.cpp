@@ -9,6 +9,8 @@
 #include <plugins/clouds/Project2d.h>
 #include <plugins/clouds/WaterContinuity.h>
 #include <plugins/clouds/AddSource.h>
+#include <plugins/clouds/Buoyancy.h>
+#include<plugins/clouds/VortexConfinement.h>
 
 
 void logger(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -79,18 +81,12 @@ int main(int argc, char ** argv)
 		//***********************************************************************************************
 
 
-		// Project
-		//Project2d::Ptr project = std::dynamic_pointer_cast<Project2d>(solver->createOperator( "Project2d", "projection step" ) );
-		//project->setField("velocity");
+
+		//********** ADVECT FIELDS
 
 		// Advect Density
-		//Advect2d::Ptr advectDensity = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect density" ));
-		//advectDensity->setType("density", "velocity", true);
-
-		// Advect Velocity
-		Advect2d::Ptr advectVelocity = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect velocity" ));
-		advectVelocity->setType("velocity", "velocity", true);
-
+		Advect2d::Ptr advectDensity = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect density" ));
+		advectDensity->setType("density", "velocity", true);
 
 		// Advect qv
 		Advect2d::Ptr advectQv = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect qv" ));
@@ -104,10 +100,29 @@ int main(int argc, char ** argv)
 		Advect2d::Ptr advectPt = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect qc" ));
 		advectPt->setType("pt", "velocity", false);
 
+		// Advect Velocity
+		Advect2d::Ptr advectVelocity = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect velocity" ));
+		advectVelocity->setType("velocity", "velocity", false);
+
+
+		//********** ADD FORCES
+
+		// Buoyancy
+		Buoyancy::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy>(solver->createOperator( "Buoyancy", "apply buoyant Force" ));
+
+		// Vortex confinement
+		VortexConfinement::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement>(solver->createOperator("VortexConfinement", "add curls back in"));
+		vortConf->setField("velocity");
+
+
+		//********** SOLVE FOR QC & QV & PT
 		// Watercontinuity
-		//WaterContinuity::Ptr WaterCont = std::dynamic_pointer_cast<WaterContinuity>(solver->createOperator( "WaterContinuity", "water continuity" ));
+		WaterContinuity::Ptr WaterCont = std::dynamic_pointer_cast<WaterContinuity>(solver->createOperator( "WaterContinuity", "water continuity" ));
 
-
+		//********** PROJECT
+		// Project
+		Project2d::Ptr project = std::dynamic_pointer_cast<Project2d>(solver->createOperator( "Project2d", "projection step" ) );
+		project->setField("velocity");
 
 
 
@@ -142,7 +157,11 @@ int main(int argc, char ** argv)
 		core::GraphNode::Ptr cloudExport = graph->getNode( "export" );
 
 		// evaluate this node for 10 frames
-		graph->render( cloudExport, 1, 10 );
+		core::Timer timer;
+		timer.start();
+		graph->render( cloudExport, 1, 200 );
+		timer.stop();
+		qCritical() << "time taken: " << timer.elapsedSeconds() << "s";
 	}
 	qDebug() << "EXIT";
 	return 0;

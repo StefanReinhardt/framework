@@ -8,7 +8,11 @@ WaterContinuity::WaterContinuity()
 
 void WaterContinuity::apply(SimObject::Ptr so)
 {
+
+
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
+
+
 
 	cd->getResolution();
 

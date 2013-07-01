@@ -9,7 +9,8 @@
 #include "Project2d.h"
 #include "WaterContinuity.h"
 #include "AddSource.h"
-
+#include "Buoyancy.h"
+#include "VortexConfinement.h"
 
 
 struct CloudsPlugin : public core::Plugin
@@ -23,6 +24,8 @@ struct CloudsPlugin : public core::Plugin
 		core->addDataFactory( core::DataFactoryT<Project2d>::create(Project2d::staticMetaObject.className(), "projects name identified 2d velocity field ") );
 		core->addDataFactory( core::DataFactoryT<WaterContinuity>::create(WaterContinuity::staticMetaObject.className(), "balances water vapor and condensed cloud water") );
 		core->addDataFactory( core::DataFactoryT<AddSource>::create(AddSource::staticMetaObject.className(), "adds a source to a field") );
+		core->addDataFactory( core::DataFactoryT<Buoyancy>::create(Buoyancy::staticMetaObject.className(), "adds vertical velocity depending on temperature and water") );
+		core->addDataFactory( core::DataFactoryT<VortexConfinement>::create(VortexConfinement::staticMetaObject.className(), "adds lost curl energy back in") );
 	}
 };
 

@@ -20,9 +20,9 @@ CloudData::CloudData() : SimObject()
 	t0 = 		295;		// temp on ground in Kelvin
 	hum = 		0.6f;		// humidty
 	buoyancy =  0.8f;
-	vorticity = 0.2f;
-	wind = 		0.1f;
-	heatSrc = 	20.0f;
+	vorticity = 1.2f;
+	wind = 		0.0f;
+	heatSrc = 	0.0f;
 
 	resolution = math::Vec3i(100,100,1);
 
@@ -45,18 +45,20 @@ CloudData::CloudData() : SimObject()
 	//vel_x = std::make_shared<ScalarField>();
 	//vel_x->resize(resVelX);
 	//vel_x->localToWorld(math::V3f(2,2,1));
-	velocity->getScalarField(0)->fill(-1.0f);
-	velocity->getScalarField(0)->fill(-1,math::Box3f(0.0f,0.55f,0,1.0f,0.8f,1.0f));
+	velocity->getScalarField(0)->fill(0.00f);
+	velocity->getScalarField(0)->fill(0,math::Box3f(0.30f,0.15f,0,0.80f,0.9f,1.0f));
 	//addSubData("vel_x", vel_x );
 
 	//vel_y = std::make_shared<ScalarField>();
 	//vel_y->resize(resVelY);
 	//vel_y->localToWorld(math::V3f(2,2,1));
 	velocity->getScalarField(1)->fill(0.0f);
-	velocity->getScalarField(1)->fill(0,math::Box3f(0.4f,0.4f,0,0.6f,0.6f,1.0f));
+	velocity->getScalarField(1)->fill(0,math::Box3f(0.4f,0.1f,0,0.6f,0.9f,1.0f));
 	//addSubData("vel_y", vel_y);
 
 	reset();
+
+	pt->fill(305.0,math::Box3f(0.4f,0.05f,0,0.60f,0.31f,1.0f));
 }
 
 void CloudData::reset()
@@ -187,9 +189,9 @@ void CloudData::setBounds(int b, ScalarField::Ptr f)
 				for( int j=0;j<res.y;++j )
 				{
 					f->lvalue(0,j,k) = wind;
-					//f->lvalue(1,j,k) = wind;
+					f->lvalue(1,j,k) = wind;
 					f->lvalue(res.x-1,j,k) = wind;
-					//f->lvalue(res.x-2,j,k) = wind;
+					f->lvalue(res.x-2,j,k) = wind;
 				}
 
 			// bottom 	= noslip
@@ -373,5 +375,13 @@ void CloudData::setBounds(int b, ScalarField::Ptr f)
 
 		default:
 			qCritical() << "wrong Boundary settings. b="<<b;
+			break;
 	}
+		// set corner values
+		f->lvalue(0,0,0)=( f->lvalue(1,0,0) + f->lvalue(0,1,0) )/2;
+		f->lvalue(res.x-1,0,0)=( f->lvalue(res.x-2,0,0) + f->lvalue(res.x-1,1,0) )/2;
+		f->lvalue(0,res.y-1,0)=( f->lvalue(1,res.y-1,0) + f->lvalue(0,res.y-2,0) )/2;
+		f->lvalue(res.x-1,res.y-1,0)=( f->lvalue(res.x-2,res.y-1,0) + f->lvalue(res.x-1,res.y-2,0) )/2;
+
+
 }
