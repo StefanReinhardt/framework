@@ -21,6 +21,8 @@ void VortexConfinement::apply(SimObject::Ptr so)
 		return;
 	}
 
+	qDebug() << "apply: vortex confinement";
+
 	vel_x = so->getSubData<VectorField>(vortField)->getScalarField(0);
 	vel_y = so->getSubData<VectorField>(vortField)->getScalarField(1);
 	vel_z = so->getSubData<VectorField>(vortField)->getScalarField(2);
@@ -31,7 +33,6 @@ void VortexConfinement::apply(SimObject::Ptr so)
 	math::V3i res = vel_x->getResolution();
 	res = math::V3i(res.x-1,res.y,res.z);
 
-	qCritical() << "apply: vortex confinement";
 
 	// TODO:
 	//Scalar Field to Vector if Vort in 3D

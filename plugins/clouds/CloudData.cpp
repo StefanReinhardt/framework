@@ -20,7 +20,7 @@ CloudData::CloudData() : SimObject()
 	t0 = 		295;		// temp on ground in Kelvin
 	hum = 		0.6f;		// humidty
 	buoyancy =  0.8f;
-	vorticity = 1.2f;
+	vorticity = 0.5f;
 	wind = 		0.0f;
 	heatSrc = 	0.0f;
 
@@ -58,7 +58,7 @@ CloudData::CloudData() : SimObject()
 
 	reset();
 
-	pt->fill(305.0,math::Box3f(0.4f,0.05f,0,0.60f,0.31f,1.0f));
+	//pt->fill(305.0,math::Box3f(0.4f,0.05f,0,0.60f,0.31f,1.0f));
 }
 
 void CloudData::reset()

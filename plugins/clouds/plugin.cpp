@@ -11,6 +11,7 @@
 #include "AddSource.h"
 #include "Buoyancy.h"
 #include "VortexConfinement.h"
+#include "AddHeatSource.h"
 
 
 struct CloudsPlugin : public core::Plugin
@@ -26,6 +27,7 @@ struct CloudsPlugin : public core::Plugin
 		core->addDataFactory( core::DataFactoryT<AddSource>::create(AddSource::staticMetaObject.className(), "adds a source to a field") );
 		core->addDataFactory( core::DataFactoryT<Buoyancy>::create(Buoyancy::staticMetaObject.className(), "adds vertical velocity depending on temperature and water") );
 		core->addDataFactory( core::DataFactoryT<VortexConfinement>::create(VortexConfinement::staticMetaObject.className(), "adds lost curl energy back in") );
+		core->addDataFactory( core::DataFactoryT<AddHeatSource>::create(AddHeatSource::staticMetaObject.className(), "adds temperature to pt") );
 	}
 };
 

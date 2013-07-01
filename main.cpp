@@ -10,8 +10,8 @@
 #include <plugins/clouds/WaterContinuity.h>
 #include <plugins/clouds/AddSource.h>
 #include <plugins/clouds/Buoyancy.h>
-#include<plugins/clouds/VortexConfinement.h>
-
+#include <plugins/clouds/VortexConfinement.h>
+#include <plugins/clouds/AddHeatSource.h>
 
 void logger(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -105,7 +105,17 @@ int main(int argc, char ** argv)
 		advectVelocity->setType("velocity", "velocity", false);
 
 
+
+
+
+		//********** SOLVE FOR QC & QV & PT
+		// Watercontinuity
+		WaterContinuity::Ptr WaterCont = std::dynamic_pointer_cast<WaterContinuity>(solver->createOperator( "WaterContinuity", "water continuity" ));
+
 		//********** ADD FORCES
+
+		// Add Heat Src
+		AddHeatSource::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource>(solver->createOperator( "AddHeatSource", "add heat field" ));
 
 		// Buoyancy
 		Buoyancy::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy>(solver->createOperator( "Buoyancy", "apply buoyant Force" ));
@@ -113,11 +123,6 @@ int main(int argc, char ** argv)
 		// Vortex confinement
 		VortexConfinement::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement>(solver->createOperator("VortexConfinement", "add curls back in"));
 		vortConf->setField("velocity");
-
-
-		//********** SOLVE FOR QC & QV & PT
-		// Watercontinuity
-		WaterContinuity::Ptr WaterCont = std::dynamic_pointer_cast<WaterContinuity>(solver->createOperator( "WaterContinuity", "water continuity" ));
 
 		//********** PROJECT
 		// Project
@@ -159,7 +164,7 @@ int main(int argc, char ** argv)
 		// evaluate this node for 10 frames
 		core::Timer timer;
 		timer.start();
-		graph->render( cloudExport, 1, 200 );
+		graph->render( cloudExport, 1, 600 );
 		timer.stop();
 		qCritical() << "time taken: " << timer.elapsedSeconds() << "s";
 	}
