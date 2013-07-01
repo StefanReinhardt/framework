@@ -55,10 +55,10 @@ void Project2d::apply( SimObject::Ptr so )
 	//solve for q
 
 	float temp = 0;
-	float w = 1.9f;
+	float w = 1.8f;
 	float error = std::numeric_limits<float>::max();
 
-	for(int l=0; error>0.04f; l++)
+	for(int l=0; error>0.01f; l++)
 	//for( int k=1;k<res.z-1;++k )
 	{
 		error=0;
