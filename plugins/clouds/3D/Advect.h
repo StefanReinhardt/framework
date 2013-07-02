@@ -12,12 +12,12 @@
 #include <plugins/primitives/ScalarField.h>
 #include <plugins/primitives/VectorField.h>
 
-class Advect2D : public Operator
+class Advect : public Operator
 {
 	Q_OBJECT
 public:
-	typedef std::shared_ptr<Advect2D> Ptr;
-	Advect2D();
+	typedef std::shared_ptr<Advect> Ptr;
+	Advect();
 
 	virtual void apply( SimObject::Ptr so )override;
 
@@ -29,11 +29,12 @@ public:
 	virtual void						load( QJsonObject &o );
 
 private:
-	QString advectionField;
-	QString vecField;
+	QString                             advectionField;
+	QString                             vecField;
 
 	void 								advect(ScalarField::Ptr field, ScalarField::Ptr field_old, VectorField::Ptr vecField);
+
 	//QString m_name;
-	bool m_periodic;
-	float m_dt;			// Timestep
+	bool                                m_periodic;
+	float                               m_dt;			// Timestep
 };

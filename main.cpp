@@ -5,6 +5,7 @@
 
 // these includes are here only for node creation
 #include <plugins/sim/Solver.h>
+
 #include <plugins/clouds/2D/Advect2D.h>
 #include <plugins/clouds/2D/Project2D.h>
 #include <plugins/clouds/2D/WaterContinuity2D.h>
@@ -12,6 +13,8 @@
 #include <plugins/clouds/2D/Buoyancy2D.h>
 #include <plugins/clouds/2D/VortexConfinement2D.h>
 #include <plugins/clouds/2D/AddHeatSource2D.h>
+
+#include <plugins/clouds/3D/Advect.h>
 
 void logger(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -85,9 +88,9 @@ int main(int argc, char ** argv)
 		//********** ADVECT FIELDS
 
 		// Advect Density
-		Advect2D::Ptr advectDensity = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect density" ));
+		Advect::Ptr advectDensity = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect density" ));
 		advectDensity->setType("density", "velocity", true);
-
+/*
 		// Advect qv
 		Advect2D::Ptr advectQv = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect qv" ));
 		advectQv->setType("qv", "velocity", true);
@@ -129,7 +132,7 @@ int main(int argc, char ** argv)
 		// Project
 		Project2D::Ptr project = std::dynamic_pointer_cast<Project2D>(solver->createOperator( "Project2D", "projection step" ) );
 		project->setField("velocity");
-
+*/
 
 
 		//***********************************************************************************************
@@ -165,7 +168,7 @@ int main(int argc, char ** argv)
 		// evaluate this node for 10 frames
 		core::Timer timer;
 		timer.start();
-		graph->render( cloudExport, 1, 600 );
+		graph->render( cloudExport, 1, 10 );
 		timer.stop();
 		qCritical() << "time taken: " << timer.elapsedSeconds() << "s";
 	}

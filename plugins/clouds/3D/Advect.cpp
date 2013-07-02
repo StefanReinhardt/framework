@@ -1,42 +1,41 @@
-#include "Advect2D.h"
+#include "Advect.h"
 #include <plugins/clouds/CloudData.h>
 #include <core/Data.h>
 
 #include <core/Core.h>
 
-Advect2D::Advect2D() : Operator()
+Advect::Advect() : Operator()
 {
 	m_dt= 1.0f;
 	m_periodic=false;
 }
 
-void Advect2D::setType(QString field, QString vecField, bool periodic)
+void Advect::setType(QString field, QString vecField, bool periodic)
 {
 	this->m_periodic = periodic;
 	this->advectionField = field;
 	this->vecField = vecField;
 }
 
-void Advect2D::apply( SimObject::Ptr so)
+void Advect::apply( SimObject::Ptr so)
 {
 	if(advectionField==0 || vecField==0)
 	{
-		qCritical() << "Advect2D: no fields set!";
+		qCritical() << "Advect: no fields set!";
 		return;
 	}
 
-	qDebug() << "Advect2D::apply";
-
-	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
+	qDebug() << "Advect:: apply";
 
 	// get field to advect
 	Data::Ptr f = so->getSubData<Data>(advectionField);
 	VectorField::Ptr f_v = so->getSubData<VectorField>(vecField);
 
+
+	// IF Vector field is advected
 	if(std::dynamic_pointer_cast<VectorField>(f))
 	{
 		VectorField::Ptr field = std::dynamic_pointer_cast<VectorField>(f);
-
 		// create field_OLD
 		VectorField::Ptr field_old;
 		if(so->hasSubData(advectionField+"_old") )
@@ -60,8 +59,6 @@ void Advect2D::apply( SimObject::Ptr so)
 		// since we swapped pointers we have to swap subdata as well
 		so->setSubData( advectionField, field );
 		so->setSubData( advectionField+"_old", field_old );
-
-
 	}
 
 	else if(std::dynamic_pointer_cast<ScalarField>(f))
@@ -97,7 +94,7 @@ void Advect2D::apply( SimObject::Ptr so)
 
 
 
-void Advect2D::advect(ScalarField::Ptr field, ScalarField::Ptr field_old, VectorField::Ptr vecField)
+void Advect::advect(ScalarField::Ptr field, ScalarField::Ptr field_old, VectorField::Ptr vecField)
 {
 
 	// perform backtracking
@@ -109,7 +106,7 @@ void Advect2D::advect(ScalarField::Ptr field, ScalarField::Ptr field_old, Vector
 			{
 				float x = i+field->m_sampleLocation.x;
 				float y = j+field->m_sampleLocation.y;
-				float z = k;//+sampleLoc.z;
+				float z = k+field->m_sampleLocation.z;
 
 				// Backtrace Particles
 				// if backtrace starts on value then sample instead of evaluate
@@ -123,8 +120,11 @@ void Advect2D::advect(ScalarField::Ptr field, ScalarField::Ptr field_old, Vector
 				else
 					y = y - m_dt * vecField->getScalarField(1)->evaluate(math::V3f(x,y,z));
 
-				//if(field->m_sampleLocation.z == 0)
-				z = k; //k -  &dt * vel_z->sample(i,j,k);
+
+				if(field->m_sampleLocation.z == 0)
+					z = z - m_dt * vecField->getScalarField(2)->sample(i,j,k);
+				else
+					z = z - m_dt * vecField->getScalarField(2)->evaluate(math::V3f(x,y,z));
 
 				// Boundary conditions
 				if(m_periodic)
@@ -161,7 +161,7 @@ void Advect2D::advect(ScalarField::Ptr field, ScalarField::Ptr field_old, Vector
 
 
 
-void Advect2D::store( QJsonObject &o, QJsonDocument &doc )
+void Advect::store( QJsonObject &o, QJsonDocument &doc )
 {
 	Operator::store( o, doc );
 
@@ -172,7 +172,7 @@ void Advect2D::store( QJsonObject &o, QJsonDocument &doc )
 
 
 
-void Advect2D::load( QJsonObject &o )
+void Advect::load( QJsonObject &o )
 {
 	Operator::load( o );
 
