@@ -1,22 +1,22 @@
-#include "Project2d.h"
+#include "Project2D.h"
 
 #include <plugins/primitives/ScalarField.h>
 #include <plugins/primitives/VectorField.h>
 #include <plugins/clouds/CloudData.h>
 
-Project2d::Project2d() : Operator()
+Project2D::Project2D() : Operator()
 {
 
 }
-void Project2d::setField(QString name)
+void Project2D::setField(QString name)
 {
 	this->projectionField = name;
 }
 
 
-void Project2d::apply( SimObject::Ptr so )
+void Project2D::apply( SimObject::Ptr so )
 {
-	qDebug() << "Project2d::apply";
+	qDebug() << "Project2D::apply";
 
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
 	VectorField::Ptr vel = so->getSubData<VectorField>(projectionField);
@@ -100,7 +100,7 @@ void Project2d::apply( SimObject::Ptr so )
 
 
 
-void Project2d::store( QJsonObject &o, QJsonDocument &doc )
+void Project2D::store( QJsonObject &o, QJsonDocument &doc )
 {
 	Operator::store( o, doc );
 
@@ -108,7 +108,7 @@ void Project2d::store( QJsonObject &o, QJsonDocument &doc )
 }
 
 
-void Project2d::load( QJsonObject &o )
+void Project2D::load( QJsonObject &o )
 {
 	Operator::load( o );
 

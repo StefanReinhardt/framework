@@ -1,4 +1,4 @@
-#include "Buoyancy.h"
+#include "Buoyancy2D.h"
 //#include <core/Data.h>
 
 #include <plugins/primitives/ScalarField.h>

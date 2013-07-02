@@ -1,4 +1,4 @@
-#include "WaterContinuity.h"
+#include "WaterContinuity2D.h"
 #include <plugins/clouds/CloudData.h>
 #include <math.h>
 
@@ -16,6 +16,9 @@ void WaterContinuity::apply(SimObject::Ptr so)
 
 	cd->getResolution();
 
+	ScalarField::Ptr pt = cd->getSubData<ScalarField>("pt");
+	ScalarField::Ptr qv = cd->getSubData<ScalarField>("qv");
+	ScalarField::Ptr qc = cd->getSubData<ScalarField>("qc");
 	math::V3i res =cd->getResolution();
 
 	float d_qv, T, qs, exner;
@@ -41,7 +44,7 @@ void WaterContinuity::apply(SimObject::Ptr so)
 			//compute 	T = pt[i,j]/( (^p/p)^k  )
 			// 			with  ^p = 100kPa   k = ~0.286
 			//			T = pt[i,j]/( (100/p)^0.286)
-			T = cd->pt->lvalue(i,j,k)*exner;
+			T = pt->lvalue(i,j,k)*exner;
 
 			// conversion from Kelvin to Celsius
 			T -= 273.15f;
@@ -50,10 +53,10 @@ void WaterContinuity::apply(SimObject::Ptr so)
 			// with T in °C and P in Pa
 			qs = (float) ( (380.16f / (cd->pLut.at(j)*1000) ) * exp( (17.67f * T) / (T + 243.5f) ) );
 
-			d_qv  = math::min(qs - cd->qv->lvalue(i,j,k),cd->qc->lvalue(i,j,k));
+			d_qv  = math::min(qs - qv->lvalue(i,j,k),qc->lvalue(i,j,k));
 
-			cd->qv->lvalue(i,j,k) = cd->qv->lvalue(i,j,k) + d_qv;
-			cd->qc->lvalue(i,j,k) = cd->qc->lvalue(i,j,k) - d_qv;
+			qv->lvalue(i,j,k) = qv->lvalue(i,j,k) + d_qv;
+			qc->lvalue(i,j,k) = qc->lvalue(i,j,k) - d_qv;
 
 			// Update the potential temperature according to condesation
 			// Due to condensation latent energy is released in form of heat. -> change in pot temp
@@ -67,7 +70,7 @@ void WaterContinuity::apply(SimObject::Ptr so)
 			//_______________L_____/___cp___*________PI___________*____________C_________________________________
 			T += 273.15f;
 
-			cd->pt->lvalue(i,j,k) += (cd->lh / ( cd->cp * exner )) * (-d_qv);
+			pt->lvalue(i,j,k) += (cd->lh / ( cd->cp * exner )) * (-d_qv);
 		}
 
 	//set Boundary values

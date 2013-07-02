@@ -2,12 +2,12 @@
 
 #include <plugins/sim/Operator.h>
 
-class Project2d : public Operator
+class Project2D : public Operator
 {
 	Q_OBJECT
 public:
-	typedef std::shared_ptr<Project2d> Ptr;
-	Project2d();
+	typedef std::shared_ptr<Project2D> Ptr;
+	Project2D();
 
 	virtual void apply( SimObject::Ptr so )override;
 

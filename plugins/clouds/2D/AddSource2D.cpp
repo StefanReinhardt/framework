@@ -1,4 +1,4 @@
-#include "AddSource.h"
+#include "AddSource2D.h"
 #include <core/Data.h>
 #include <plugins/primitives/ScalarField.h>
 #include <plugins/primitives/VectorField.h>

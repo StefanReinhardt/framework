@@ -1,4 +1,4 @@
-#include "VortexConfinement.h"
+#include "VortexConfinement2D.h"
 #include <plugins/clouds/CloudData.h>
 
 

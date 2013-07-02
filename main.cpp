@@ -5,13 +5,13 @@
 
 // these includes are here only for node creation
 #include <plugins/sim/Solver.h>
-#include <plugins/clouds/Advect2d.h>
-#include <plugins/clouds/Project2d.h>
-#include <plugins/clouds/WaterContinuity.h>
-#include <plugins/clouds/AddSource.h>
-#include <plugins/clouds/Buoyancy.h>
-#include <plugins/clouds/VortexConfinement.h>
-#include <plugins/clouds/AddHeatSource.h>
+#include <plugins/clouds/2D/Advect2D.h>
+#include <plugins/clouds/2D/Project2D.h>
+#include <plugins/clouds/2D/WaterContinuity2D.h>
+#include <plugins/clouds/2D/AddSource2D.h>
+#include <plugins/clouds/2D/Buoyancy2D.h>
+#include <plugins/clouds/2D/VortexConfinement2D.h>
+#include <plugins/clouds/2D/AddHeatSource2D.h>
 
 void logger(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -85,23 +85,23 @@ int main(int argc, char ** argv)
 		//********** ADVECT FIELDS
 
 		// Advect Density
-		Advect2d::Ptr advectDensity = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect density" ));
+		Advect2D::Ptr advectDensity = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect density" ));
 		advectDensity->setType("density", "velocity", true);
 
 		// Advect qv
-		Advect2d::Ptr advectQv = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect qv" ));
+		Advect2D::Ptr advectQv = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect qv" ));
 		advectQv->setType("qv", "velocity", true);
 
 		// Advect qc
-		Advect2d::Ptr advectQc = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect qc" ));
+		Advect2D::Ptr advectQc = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect qc" ));
 		advectQc->setType("qc", "velocity", false);
 
 		// Advect pt
-		Advect2d::Ptr advectPt = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect qc" ));
+		Advect2D::Ptr advectPt = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect qc" ));
 		advectPt->setType("pt", "velocity", false);
 
 		// Advect Velocity
-		Advect2d::Ptr advectVelocity = std::dynamic_pointer_cast<Advect2d>(solver->createOperator( "Advect2d", "advect velocity" ));
+		Advect2D::Ptr advectVelocity = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect velocity" ));
 		advectVelocity->setType("velocity", "velocity", false);
 
 
@@ -114,11 +114,12 @@ int main(int argc, char ** argv)
 
 		//********** ADD FORCES
 
+		// Buoyancy
+		Buoyancy::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy>(solver->createOperator( "Buoyancy", "apply buoyant Force" ));
+
 		// Add Heat Src
 		AddHeatSource::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource>(solver->createOperator( "AddHeatSource", "add heat field" ));
 
-		// Buoyancy
-		Buoyancy::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy>(solver->createOperator( "Buoyancy", "apply buoyant Force" ));
 
 		// Vortex confinement
 		VortexConfinement::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement>(solver->createOperator("VortexConfinement", "add curls back in"));
@@ -126,7 +127,7 @@ int main(int argc, char ** argv)
 
 		//********** PROJECT
 		// Project
-		Project2d::Ptr project = std::dynamic_pointer_cast<Project2d>(solver->createOperator( "Project2d", "projection step" ) );
+		Project2D::Ptr project = std::dynamic_pointer_cast<Project2D>(solver->createOperator( "Project2D", "projection step" ) );
 		project->setField("velocity");
 
 

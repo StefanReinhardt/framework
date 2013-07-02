@@ -53,7 +53,7 @@ public:
 
 	std::vector<float>				tLut;		// absolute Temperature at altitude in K
 	std::vector<float>				pLut;		// absolute Pressure at altitude in kPa
-
+/*
 	ScalarField::Ptr				pt;
 	ScalarField::Ptr				qv;
 	ScalarField::Ptr				qc;
@@ -61,7 +61,7 @@ public:
 	VectorField::Ptr				velocity;
 
 	ScalarField::Ptr				density;
-
+*/
 
 
 };

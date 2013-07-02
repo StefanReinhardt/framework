@@ -5,13 +5,13 @@
 #include "CreateClouds.h"
 #include "ExportClouds.h"
 #include "ImportClouds.h"
-#include "Advect2d.h"
-#include "Project2d.h"
-#include "WaterContinuity.h"
-#include "AddSource.h"
-#include "Buoyancy.h"
-#include "VortexConfinement.h"
-#include "AddHeatSource.h"
+#include "2D/Advect2D.h"
+#include "2D/Project2D.h"
+#include "2D/WaterContinuity2D.h"
+#include "2D/AddSource2D.h"
+#include "2D/Buoyancy2D.h"
+#include "2D/VortexConfinement2D.h"
+#include "2D/AddHeatSource2D.h"
 
 
 struct CloudsPlugin : public core::Plugin
@@ -21,8 +21,8 @@ struct CloudsPlugin : public core::Plugin
         core->addDataFactory( core::DataFactoryT<CreateClouds>::create(CreateClouds::staticMetaObject.className(), "creates cloud default values") );
 		core->addDataFactory( core::DataFactoryT<ImportClouds>::create(ImportClouds::staticMetaObject.className(), "imports initial cloud state to simobject") );
 		core->addDataFactory( core::DataFactoryT<ExportClouds>::create(ExportClouds::staticMetaObject.className(), "exports cloud state from simobject") );
-		core->addDataFactory( core::DataFactoryT<Advect2d>::create(Advect2d::staticMetaObject.className(), "advects name identified field in 2d given a name identified velocity ") );
-		core->addDataFactory( core::DataFactoryT<Project2d>::create(Project2d::staticMetaObject.className(), "projects name identified 2d velocity field ") );
+		core->addDataFactory( core::DataFactoryT<Advect2D>::create(Advect2D::staticMetaObject.className(), "advects name identified field in 2d given a name identified velocity ") );
+		core->addDataFactory( core::DataFactoryT<Project2D>::create(Project2D::staticMetaObject.className(), "projects name identified 2d velocity field ") );
 		core->addDataFactory( core::DataFactoryT<WaterContinuity>::create(WaterContinuity::staticMetaObject.className(), "balances water vapor and condensed cloud water") );
 		core->addDataFactory( core::DataFactoryT<AddSource>::create(AddSource::staticMetaObject.className(), "adds a source to a field") );
 		core->addDataFactory( core::DataFactoryT<Buoyancy>::create(Buoyancy::staticMetaObject.className(), "adds vertical velocity depending on temperature and water") );

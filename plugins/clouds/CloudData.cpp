@@ -20,13 +20,13 @@ CloudData::CloudData() : SimObject()
 	t0 = 		295;		// temp on ground in Kelvin
 	hum = 		0.6f;		// humidty
 	buoyancy =  0.8f;
-	vorticity = 0.5f;
+	vorticity = 0.3f;
 	wind = 		0.0f;
 	heatSrc = 	0.0f;
 
 	resolution = math::Vec3i(100,100,1);
 
-	density = std::make_shared<ScalarField>();
+	ScalarField::Ptr density = std::make_shared<ScalarField>();
 	density->resize(resolution);
 	density->localToWorld(math::V3f(2,2,1));
 	density->fill(0.0f);
@@ -35,7 +35,7 @@ CloudData::CloudData() : SimObject()
 
 	// TEMP --------
 	// staggered grid for velocity test
-	velocity = std::make_shared<VectorField>( VectorField::FACE );
+	VectorField::Ptr velocity = std::make_shared<VectorField>( VectorField::FACE );
 	velocity->resize(resolution);
 	//velocity->setBound( math::Box3f( math::V3f(-0.51f), math::V3f(0.51f) ) );
 	//velocity->fill( math::V3f(1.0f, 1.0f, 1.0f) );
@@ -63,15 +63,15 @@ CloudData::CloudData() : SimObject()
 
 void CloudData::reset()
 {
-	pt = std::make_shared<ScalarField>();
+	ScalarField::Ptr pt = std::make_shared<ScalarField>();
 	pt->resize(resolution);
 	addSubData("pt", pt);
 
-	qv = std::make_shared<ScalarField>();
+	ScalarField::Ptr qv = std::make_shared<ScalarField>();
 	qv->resize(resolution);
 	addSubData("qv", qv);
 
-	qc = std::make_shared<ScalarField>();
+	ScalarField::Ptr qc = std::make_shared<ScalarField>();
 	qc->resize(resolution);
 	addSubData("qc", qc);
 
