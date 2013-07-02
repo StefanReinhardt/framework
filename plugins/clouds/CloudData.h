@@ -24,6 +24,7 @@ public:
 	void							setTimestep(float);
 
 	void							setBounds(int, ScalarField::Ptr);
+	void							setBounds2D(int, ScalarField::Ptr);
 
 
 	math::V3i						resolution;

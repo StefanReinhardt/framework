@@ -2,18 +2,18 @@
 #include <plugins/clouds/CloudData.h>
 
 
-VortexConfinement::VortexConfinement()
+VortexConfinement2D::VortexConfinement2D()
 {
 }
 
-void VortexConfinement::setField(QString name)
+void VortexConfinement2D::setField(QString name)
 {
 this->vortField = name;
 }
 
 
 
-void VortexConfinement::apply(SimObject::Ptr so)
+void VortexConfinement2D::apply(SimObject::Ptr so)
 {
 	if (vortField == 0)
 	{
@@ -91,7 +91,7 @@ void VortexConfinement::apply(SimObject::Ptr so)
 }
 
 
-float VortexConfinement::curl(int i, int j, int k){
+float VortexConfinement2D::curl(int i, int j, int k){
 
 	k=0;
 	// central diff of vel_y in x direction
@@ -113,7 +113,7 @@ float VortexConfinement::curl(int i, int j, int k){
 
 
 // Serialize
-void VortexConfinement::store( QJsonObject &o, QJsonDocument &doc )
+void VortexConfinement2D::store( QJsonObject &o, QJsonDocument &doc )
 {
 	Operator::store( o, doc );
 
@@ -121,7 +121,7 @@ void VortexConfinement::store( QJsonObject &o, QJsonDocument &doc )
 }
 
 
-void VortexConfinement::load( QJsonObject &o )
+void VortexConfinement2D::load( QJsonObject &o )
 {
 	Operator::load( o );
 

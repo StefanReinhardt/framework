@@ -4,18 +4,18 @@
 #include <plugins/primitives/VectorField.h>
 
 
-AddSource::AddSource()
+AddSource2D::AddSource2D()
 {
 }
 
-void AddSource::setFields(QString field, QString source)
+void AddSource2D::setFields(QString field, QString source)
 {
 	this->m_field = field;
 	this->m_source = source;
 }
 
 
-void AddSource::apply(SimObject::Ptr so)
+void AddSource2D::apply(SimObject::Ptr so)
 {
 	// TODO:
 	// - sampling with wold space transformations
@@ -66,7 +66,7 @@ void AddSource::apply(SimObject::Ptr so)
 }
 
 
-void AddSource::store( QJsonObject &o, QJsonDocument &doc )
+void AddSource2D::store( QJsonObject &o, QJsonDocument &doc )
 {
 	Operator::store( o, doc );
 
@@ -76,7 +76,7 @@ void AddSource::store( QJsonObject &o, QJsonDocument &doc )
 
 
 
-void AddSource::load( QJsonObject &o )
+void AddSource2D::load( QJsonObject &o )
 {
 	Operator::load( o );
 

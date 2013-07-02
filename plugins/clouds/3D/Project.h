@@ -2,21 +2,23 @@
 
 #include <plugins/sim/Operator.h>
 
-class AddSource2D : public Operator
+class Project : public Operator
 {
 	Q_OBJECT
 public:
-	typedef std::shared_ptr<AddSource2D> Ptr;
-	AddSource2D();
+	typedef std::shared_ptr<Project> Ptr;
+	Project();
 
 	virtual void apply( SimObject::Ptr so )override;
 
-	void setFields(QString field, QString source);
+	void setField(QString);
 
 	// overloads from Data
 	virtual void                       store( QJsonObject &o, QJsonDocument &doc );
 	virtual void                       load( QJsonObject &o );
+
 private:
-	QString			m_source;
-	QString			m_field;
+	//QString m_name;
+	float dt;			// Timestep
+	QString projectionField;
 };

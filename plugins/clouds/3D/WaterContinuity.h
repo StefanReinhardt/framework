@@ -2,12 +2,12 @@
 
 #include <plugins/sim/Operator.h>
 
-class AddHeatSource2D : public Operator
+class WaterContinuity : public Operator
 {
 	Q_OBJECT
 public:
-	typedef std::shared_ptr<AddHeatSource2D> Ptr;
-	AddHeatSource2D();
+	typedef std::shared_ptr<WaterContinuity> Ptr;
+	WaterContinuity();
 
 	virtual void apply( SimObject::Ptr so )override;
 
@@ -15,6 +15,5 @@ public:
 	//virtual void                       store( QJsonObject &o, QJsonDocument &doc );
 	//virtual void                       load( QJsonObject &o );
 private:
-	//QString			m_source;
-	//QString			m_field;
+	float dt;			// Timestep
 };

@@ -4,12 +4,12 @@
 #include <plugins/primitives/VectorField.h>
 #include <plugins/primitives/ScalarField.h>
 
-class VortexConfinement : public Operator
+class VortexConfinement2D : public Operator
 {
 	Q_OBJECT
 public:
-	typedef std::shared_ptr<VortexConfinement> Ptr;
-	VortexConfinement();
+	typedef std::shared_ptr<VortexConfinement2D> Ptr;
+	VortexConfinement2D();
 
 	virtual void                       apply( SimObject::Ptr so )override;
 

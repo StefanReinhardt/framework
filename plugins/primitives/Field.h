@@ -167,6 +167,7 @@ void Field<T>::resize( math::V3i resolution )
 {
 	m_resolution = resolution;
 	m_data.resize(m_resolution.x*m_resolution.y*m_resolution.z);
+	memset( &m_data[0], 0, m_resolution.x*m_resolution.y*m_resolution.z*sizeof(T));
 	m_worldToVoxel = m_worldToLocal*math::M44f().scale( math::V3f(m_resolution) );
 	m_voxelToWorld = m_worldToVoxel.inverse();
 }

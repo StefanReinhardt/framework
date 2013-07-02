@@ -15,6 +15,10 @@
 #include <plugins/clouds/2D/AddHeatSource2D.h>
 
 #include <plugins/clouds/3D/Advect.h>
+#include <plugins/clouds/3D/Project.h>
+#include <plugins/clouds/3D/WaterContinuity.h>
+#include <plugins/clouds/3D/Buoyancy.h>
+#include <plugins/clouds/3D/AddHeatSource.h>
 
 void logger(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -78,9 +82,9 @@ int main(int argc, char ** argv)
 		core::GraphNode::Ptr cloudCreate = graph->createNode("CreateClouds");
 		Solver::Ptr solver = std::dynamic_pointer_cast<Solver>(graph->createNode("Solver"));
 		core::GraphNode::Ptr cloudExport = graph->createNode("ExportClouds", "export");
-
+/*
 		//***********************************************************************************************
-		// setup Nodes
+		// setup Nodes 2D
 		//***********************************************************************************************
 
 
@@ -88,9 +92,9 @@ int main(int argc, char ** argv)
 		//********** ADVECT FIELDS
 
 		// Advect Density
-		Advect::Ptr advectDensity = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect density" ));
+		Advect2D::Ptr advectDensity = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect density" ));
 		advectDensity->setType("density", "velocity", true);
-/*
+
 		// Advect qv
 		Advect2D::Ptr advectQv = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect qv" ));
 		advectQv->setType("qv", "velocity", true);
@@ -132,13 +136,75 @@ int main(int argc, char ** argv)
 		// Project
 		Project2D::Ptr project = std::dynamic_pointer_cast<Project2D>(solver->createOperator( "Project2D", "projection step" ) );
 		project->setField("velocity");
+
+
+
+		//***********************************************************************************************
+		// setup Nodes 2D end
+		//***********************************************************************************************
 */
 
 
+
 		//***********************************************************************************************
-		// setup Nodes end
+		// setup Nodes 3D
 		//***********************************************************************************************
 
+
+
+		//********** ADVECT FIELDS
+
+		// Advect Density
+		Advect::Ptr advectDensity = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect density" ));
+		advectDensity->setType("density", "velocity", true);
+
+		// Advect qv
+		Advect::Ptr advectQv = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect qv" ));
+		advectQv->setType("qv", "velocity", true);
+
+		// Advect qc
+		Advect::Ptr advectQc = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect qc" ));
+		advectQc->setType("qc", "velocity", false);
+
+		// Advect pt
+		Advect::Ptr advectPt = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect qc" ));
+		advectPt->setType("pt", "velocity", false);
+
+		// Advect Velocity
+		Advect::Ptr advectVelocity = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect velocity" ));
+		advectVelocity->setType("velocity", "velocity", false);
+
+
+
+
+
+		//********** SOLVE FOR QC & QV & PT
+		// Watercontinuity
+		WaterContinuity::Ptr WaterCont = std::dynamic_pointer_cast<WaterContinuity>(solver->createOperator( "WaterContinuity", "water continuity" ));
+
+		//********** ADD FORCES
+
+		// Buoyancy
+		Buoyancy::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy>(solver->createOperator( "Buoyancy", "apply buoyant Force" ));
+
+		// Add Heat Src
+		AddHeatSource::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource>(solver->createOperator( "AddHeatSource", "add heat field" ));
+
+
+		// Vortex confinement
+		//VortexConfinement::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement>(solver->createOperator("VortexConfinement", "add curls back in"));
+		//vortConf->setField("velocity");
+
+		//********** PROJECT
+		// Project
+		Project::Ptr project = std::dynamic_pointer_cast<Project>(solver->createOperator( "Project", "projection step" ) );
+		project->setField("velocity");
+
+
+
+		//***********************************************************************************************
+		// setup Nodes 3D end
+		//***********************************************************************************************
 
 		//
 		// set inputs
@@ -168,7 +234,7 @@ int main(int argc, char ** argv)
 		// evaluate this node for 10 frames
 		core::Timer timer;
 		timer.start();
-		graph->render( cloudExport, 1, 10 );
+		graph->render( cloudExport, 1, 600 );
 		timer.stop();
 		qCritical() << "time taken: " << timer.elapsedSeconds() << "s";
 	}

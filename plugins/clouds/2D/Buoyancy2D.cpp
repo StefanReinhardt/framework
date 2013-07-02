@@ -5,13 +5,13 @@
 #include <plugins/primitives/VectorField.h>
 #include <plugins/clouds/CloudData.h>
 
-Buoyancy::Buoyancy()
+Buoyancy2D::Buoyancy2D()
 {
 }
 
 
 
-void Buoyancy::apply(SimObject::Ptr so)
+void Buoyancy2D::apply(SimObject::Ptr so)
 {
 
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);

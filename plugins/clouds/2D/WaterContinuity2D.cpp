@@ -2,11 +2,11 @@
 #include <plugins/clouds/CloudData.h>
 #include <math.h>
 
-WaterContinuity::WaterContinuity()
+WaterContinuity2D::WaterContinuity2D()
 {
 }
 
-void WaterContinuity::apply(SimObject::Ptr so)
+void WaterContinuity2D::apply(SimObject::Ptr so)
 {
 
 

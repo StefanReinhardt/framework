@@ -46,8 +46,8 @@ void Project2D::apply( SimObject::Ptr so )
 			}
 	}
 
-	cd->setBounds(0, div);
-	cd->setBounds(0,q);
+	cd->setBounds2D(0, div);
+	cd->setBounds2D(0,q);
 	//so->setSubData("div", div);
 
 
@@ -58,7 +58,7 @@ void Project2D::apply( SimObject::Ptr so )
 	float w = 1.8f;
 	float error = std::numeric_limits<float>::max();
 
-	for(int l=0; error>0.01f; l++)
+	for(int l=0; error>0.0001f; l++)
 	//for( int k=1;k<res.z-1;++k )
 	{
 		error=0;
@@ -73,7 +73,7 @@ void Project2D::apply( SimObject::Ptr so )
 				q->lvalue(i,j,k)=temp;
 			}
 	}
-	cd->setBounds(0,q);
+	cd->setBounds2D(0,q);
 	//so->setSubData("q", q);
 
 
@@ -90,10 +90,24 @@ void Project2D::apply( SimObject::Ptr so )
 				vel->getScalarField(1)->lvalue(i,j,k) -= ((q->lvalue(i,j,k) - q->lvalue(i,j-1,k)) / h);
 			}
 	}
-	cd->setBounds(1,vel->getScalarField(0));
-	cd->setBounds(2,vel->getScalarField(1));
-	//cd->setBounds(3,vel_z);
+	cd->setBounds2D(1,vel->getScalarField(0));
+	cd->setBounds2D(2,vel->getScalarField(1));
+	//cd->setBounds2D(3,vel_z);
 
+	// divergence field for Debugging
+
+		for( int j=1;j<res.y-1;++j )
+			for( int i=1;i<res.x-1;++i )
+			{
+				div->lvalue(i,j,0) = h*(	vel->getScalarField(0)->lvalue(i+1,j,0) - vel->getScalarField(0)->lvalue(i,j,0)
+										+ 	vel->getScalarField(1)->lvalue(i,j+1,0) - vel->getScalarField(1)->lvalue(i,j,0));
+			}
+
+	cd->setBounds2D(0,div);
+	if(so->hasSubData("div"))
+			so->setSubData("div",div);
+	else
+			so->addSubData("div", div);
 
 }
 

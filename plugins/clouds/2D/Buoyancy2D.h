@@ -2,12 +2,12 @@
 
 #include <plugins/sim/Operator.h>
 
-class Buoyancy : public Operator
+class Buoyancy2D : public Operator
 {
 	Q_OBJECT
 public:
-	typedef std::shared_ptr<Buoyancy> Ptr;
-	Buoyancy();
+	typedef std::shared_ptr<Buoyancy2D> Ptr;
+	Buoyancy2D();
 
 	virtual void apply( SimObject::Ptr so )override;
 
