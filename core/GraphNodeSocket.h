@@ -36,7 +36,6 @@ namespace core
 		GraphNodeSocket();
 		GraphNodeSocket( const QString &name, Direction direction );
 
-		const QString&                                   getName()const;
 		Direction                                        getDirection()const;
 
 		void                                             setData( Data::Ptr data );
@@ -71,7 +70,6 @@ namespace core
 
 		void                                             updateFrom( GraphNodeSocket *src ); // updates this socket from remote socket
 
-		QString                                          m_name;
 		Type                                             m_type;
 		State                                            m_state;
 		Direction                                        m_direction;

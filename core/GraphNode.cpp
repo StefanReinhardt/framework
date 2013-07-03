@@ -5,14 +5,10 @@
 namespace core
 {
 
-	GraphNode::GraphNode() : Data(), m_name("unnamed")
+	GraphNode::GraphNode() : Data()
 	{
 	}
 
-	QString GraphNode::getName()const
-	{
-		return m_name;
-	}
 
 	bool GraphNode::hasSocket( const QString &name )const
 	{
@@ -38,7 +34,7 @@ namespace core
 
 	void GraphNode::addSocket( GraphNodeSocket::Ptr socket )
 	{
-		const QString &name = socket->getName();
+		const QString &name = socket->objectName();
 		qDebug() << metaObject()->className() << " adding socket " << name;
 
 		if( socket->getDirection() == GraphNodeSocket::INPUT )
@@ -81,7 +77,7 @@ namespace core
 		Data::store(o,doc);
 
 		// name ---
-		o.insert("nodename", QJsonValue(m_name));
+		o.insert("nodename", QJsonValue(objectName()));
 
 		// sockets ----
 		QJsonArray sockets = doc.array();
@@ -96,7 +92,7 @@ namespace core
 		Data::load(o);
 
 		// name ---
-		m_name = o["nodename"].toString();
+		setObjectName( o["nodename"].toString() );
 
 		// sockets ----
 		QJsonArray sockets = o["sockets"].toArray();
@@ -111,7 +107,7 @@ namespace core
 		for( auto it = m_sockets.begin(), end = m_sockets.end(); it != end; ++it )
 		{
 			auto socket = it->second;
-			qDebug() << "\t\t" << socket->getName();
+			qDebug() << "\t\t" << socket->objectName();
 		}
 	}
 

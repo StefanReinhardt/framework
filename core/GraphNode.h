@@ -18,7 +18,6 @@ namespace core
 
 		GraphNode();
 
-		QString                                          getName()const;
 		GraphNodeSocket::Ptr                             addInputSocket( const QString &name );
 		GraphNodeSocket::Ptr                             addOutputSocket( const QString &name );
 		GraphNodeSocket::Ptr                             getSocket( const QString name );
@@ -44,8 +43,6 @@ namespace core
 		void                                             addSocket( GraphNodeSocket::Ptr socket );
 		void                                             updateAll( GraphNodeSocket* ); // adapter for GraphNodeSocket:: m_update functional (will ignore given ptr and just call update)
 
-
-		QString                                          m_name; // name which is unique within scope of graph
 		std::map<QString, GraphNodeSocket::Ptr>          m_sockets; // for fast name based lookup
 	};
 }
