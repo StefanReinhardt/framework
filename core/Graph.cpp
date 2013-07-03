@@ -23,7 +23,7 @@ namespace core
 				int i = 1;
 				do
 				{
-					newName = QString("%1%2").arg(type, QString::number(i));
+					newName = QString("%1%2").arg(type, QString::number(i++));
 				}while( hasNode(newName) );
 				node->m_name = newName;
 			}

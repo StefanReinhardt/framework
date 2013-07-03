@@ -42,14 +42,17 @@ namespace core
 		void                                             setData( Data::Ptr data );
 		Data::Ptr                                        getData();
 		template<typename T> std::shared_ptr<T>          getData();
+		template<typename T> std::shared_ptr<T>          getDataWithoutUpdate();
 
 		const QVariant&                                  getValue();
 		void                                             setValue( const QVariant &value );
 		template<typename T> void                        setValue( const T &value);
 		QString                                          asString();
 		int                                              asInt();
+		float                                            asFloat();
 		void                                             setString( const QString &value );
 		void                                             setInt( int value );
+		void                                             setFloat( float value );
 
 
 		void                                             update(); // makeclean
@@ -86,6 +89,12 @@ namespace core
 	std::shared_ptr<T> GraphNodeSocket::getData()
 	{
 		return std::dynamic_pointer_cast<T>(getData());
+	}
+
+	template<typename T>
+	std::shared_ptr<T> GraphNodeSocket::getDataWithoutUpdate()
+	{
+		return std::dynamic_pointer_cast<T>(m_data);
 	}
 
 	template<typename T>

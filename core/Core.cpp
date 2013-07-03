@@ -312,6 +312,9 @@ namespace core
 		if( vtype == "int" )
 			obj.insert( "value", QJsonValue(variant.toInt()) );
 		else
+		if( vtype == "float" )
+			obj.insert( "value", QJsonValue(variant.toFloat()) );
+		else
 			qCritical() <<"Core::serialize unable to serialize variant of type " << vtype;
 
 		return QJsonValue(obj);
@@ -327,6 +330,9 @@ namespace core
 		else
 		if( vtype == "int" )
 			variant = int(obj["value"].toDouble());
+		else
+		if( vtype == "float" )
+			variant = float(obj["value"].toDouble());
 		else
 			qCritical() <<"Core::deserialize unable to deserialize variant of type " << vtype;
 

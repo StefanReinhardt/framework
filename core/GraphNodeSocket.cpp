@@ -52,6 +52,12 @@ namespace core
 		return getValue().toInt();
 	}
 
+	float GraphNodeSocket::asFloat()
+	{
+		return getValue().toFloat();
+	}
+
+
 	void GraphNodeSocket::setString( const QString &value )
 	{
 		setValue<QString>(value);
@@ -62,7 +68,10 @@ namespace core
 		setValue<int>(value);
 	}
 
-
+	void GraphNodeSocket::setFloat( float value )
+	{
+		setValue<float>(value);
+	}
 
 	void GraphNodeSocket::setData( Data::Ptr data )
 	{
@@ -73,7 +82,7 @@ namespace core
 
 	Data::Ptr GraphNodeSocket::getData()
 	{
-		if( m_state == DIRTY )
+		if(m_state == DIRTY)
 			update();
 		return m_data;
 	}
@@ -82,11 +91,13 @@ namespace core
 	// makeclean
 	void GraphNodeSocket::update()
 	{
-		m_state = UPDATING;
-		if( m_update )
-			m_update( this );
 		qDebug() << "graphnodesocket makeClean " << m_name;
-		m_state = CLEAN;
+		if( m_update )
+		{
+			m_state = UPDATING;
+			m_update( this );
+			m_state = CLEAN;
+		}
 	}
 
 	void GraphNodeSocket::makeDirty()
