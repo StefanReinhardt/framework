@@ -1,14 +1,14 @@
 #pragma once
 #include <core/Data.h>
-//#include <math/Math.h>
+#include <math/Math.h>
 
 
 struct Camera : public core::Data
 {
 	Q_OBJECT
 public:
-	/*
-	typedef core::shared_ptr<Camera> Ptr;
+
+	typedef std::shared_ptr<Camera> Ptr;
 
 	Camera();
 
@@ -16,8 +16,9 @@ public:
 	void                        setRaster( int width, int height );
 	void                        setViewToWorld( math::M44f &viewToWorld );
 	void                        setProjection( math::M44f &viewToNDC );
-	void                        store( core::json::ObjectPtr o );
-	void                        load( core::json::ObjectPtr o );
+
+	//void                        store( core::json::ObjectPtr o );
+	//void                        load( core::json::ObjectPtr o );
 
 
 	math::M44f                  m_worldToView; ///< the matrix which transforms from world to camera space - the inverse of this matrix is the transform of the camera
@@ -36,5 +37,4 @@ public:
 	float                       m_aspect;
 	int                         m_width;
 	int                         m_height;
-	*/
 };

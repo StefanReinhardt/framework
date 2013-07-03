@@ -23,7 +23,7 @@ namespace temp
 		return result;
 	}
 }
-
+*/
 
 Camera::Camera() : core::Data()
 {
@@ -91,7 +91,7 @@ void Camera::setProjection( math::M44f &viewToNDC )
 	m_rasterToView = m_rasterToNDC*m_NDCToView;
 }
 
-
+/*
 void Camera::store( core::json::ObjectPtr o )
 {
 	//  m_transform, m_znear, m_zfar, m_fov, m_aspectRatio
