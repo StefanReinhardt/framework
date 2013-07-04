@@ -17,26 +17,28 @@ void AddHeatSource::apply(SimObject::Ptr so)
 
 
 
-
-	int k = 0;
-	int min= cd->pt0;
-	int max = min+15;
-	std::vector<float> random;
-
-	for( int i=0;i<res.x;++i )
+	if(core::getVariable("$F").toInt()<300000)
 	{
-		random.push_back(min + rand()%(max-min+1));
-	}
+		int k = 0;
+		int min= cd->pt0;
+		int max = min+cd->heatSrc;
+		std::vector<float> random;
 
-	for( int k=10;k<res.z-11;++k )
-		for( int i=10;i<res.x-11;++i )
+		for( int i=0;i<res.x;++i )
 		{
-			//int index = k*i+i
-			float r4 = (random.at(i-2)+random.at(i-1)+random.at(i)+random.at(i+1))/4;
-			float r2 = (random.at(i)+random.at(i+1))/2;
-			float r1 = random.at(i);
-
-			pt->lvalue(i,1,k) = min + rand()%(max-min+1); //(r1+r2+r4)/3;
+			random.push_back(min + rand()%(max-min+1));
 		}
 
+
+		for( int k=10;k<res.z-11;++k )
+			for( int i=10;i<res.x-11;++i )
+			{
+				//int index = k*i+i
+				float r4 = (random.at(i-2)+random.at(i-1)+random.at(i)+random.at(i+1))/4;
+				float r2 = (random.at(i)+random.at(i+1))/2;
+				float r1 = random.at(i);
+
+				pt->lvalue(i,1,k) = min + rand()%(max-min+1); //(r1+r2+r4)/3;
+			}
+	}
 }

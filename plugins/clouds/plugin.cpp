@@ -19,6 +19,7 @@
 #include "3D/WaterContinuity.h"
 #include "3D/Buoyancy.h"
 #include "3D/AddHeatSource.h"
+#include "3D/VortexConfinement.h"
 
 
 
@@ -45,6 +46,7 @@ struct CloudsPlugin : public core::Plugin
 		core->addDataFactory( core::DataFactoryT<WaterContinuity>::create(WaterContinuity::staticMetaObject.className(), "balances water vapor and condensed cloud water") );
 		core->addDataFactory( core::DataFactoryT<Buoyancy>::create(Buoyancy::staticMetaObject.className(), "adds vertical velocity depending on temperature and water") );
 		core->addDataFactory( core::DataFactoryT<AddHeatSource>::create(AddHeatSource::staticMetaObject.className(), "adds temperature to pt") );
+		core->addDataFactory( core::DataFactoryT<VortexConfinement>::create(VortexConfinement::staticMetaObject.className(), "adds lost curl energy back in") );
 
 	}
 };
