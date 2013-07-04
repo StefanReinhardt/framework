@@ -8,17 +8,13 @@
 namespace core
 {
 
-	GraphNodeSocket::GraphNodeSocket() : Data(), m_name("unnamed"), m_state(DIRTY), m_type(DATA)
+	GraphNodeSocket::GraphNodeSocket() : Data(), m_state(DIRTY), m_type(DATA)
 	{
 	}
 
-	GraphNodeSocket::GraphNodeSocket(const QString &name, Direction direction ) : Data(), m_name(name), m_state(DIRTY), m_direction(direction), m_type(DATA)
+	GraphNodeSocket::GraphNodeSocket(const QString &name, Direction direction ) : Data(), m_state(DIRTY), m_direction(direction), m_type(DATA)
 	{
-	}
-
-	const QString& GraphNodeSocket::getName()const
-	{
-		return m_name;
+		setObjectName( name );
 	}
 
 	GraphNodeSocket::Direction GraphNodeSocket::getDirection()const
@@ -52,6 +48,12 @@ namespace core
 		return getValue().toInt();
 	}
 
+	float GraphNodeSocket::asFloat()
+	{
+		return getValue().toFloat();
+	}
+
+
 	void GraphNodeSocket::setString( const QString &value )
 	{
 		setValue<QString>(value);
@@ -62,7 +64,10 @@ namespace core
 		setValue<int>(value);
 	}
 
-
+	void GraphNodeSocket::setFloat( float value )
+	{
+		setValue<float>(value);
+	}
 
 	void GraphNodeSocket::setData( Data::Ptr data )
 	{
@@ -73,7 +78,7 @@ namespace core
 
 	Data::Ptr GraphNodeSocket::getData()
 	{
-		if( m_state == DIRTY )
+		if(m_state == DIRTY)
 			update();
 		return m_data;
 	}
@@ -82,18 +87,20 @@ namespace core
 	// makeclean
 	void GraphNodeSocket::update()
 	{
-		m_state = UPDATING;
+		qDebug() << "graphnodesocket makeClean " << objectName();
 		if( m_update )
+		{
+			m_state = UPDATING;
 			m_update( this );
-		qDebug() << "graphnodesocket makeClean " << m_name;
-		m_state = CLEAN;
+			m_state = CLEAN;
+		}
 	}
 
 	void GraphNodeSocket::makeDirty()
 	{
 		if( m_state == CLEAN )
 		{
-			qDebug() << "graphnodesocket dirty " << m_name;
+			qDebug() << "graphnodesocket dirty " << objectName();
 			m_state = DIRTY;
 			emit dirty();
 		}
@@ -102,7 +109,7 @@ namespace core
 	// updates this socket from remote socket
 	void GraphNodeSocket::updateFrom( GraphNodeSocket *src )
 	{
-		qDebug() << "updating graphnodesocket " << m_name << " from " << src->getName();
+		qDebug() << "updating graphnodesocket " << objectName() << " from " << src->objectName();
 		// TODO:switch(socketType)
 		// case Data:
 		switch( m_type )
@@ -118,7 +125,7 @@ namespace core
 	void GraphNodeSocket::store( QJsonObject &o, QJsonDocument &doc )
 	{
 		Data::store(o,doc);
-		o.insert( "socketname", QJsonValue(m_name) );
+		o.insert( "socketname", QJsonValue(objectName()) );
 		o.insert( "sockettype", QJsonValue(int(m_type)) );
 		if( m_type == VALUE )
 			o.insert( "socketvalue", instance()->serialize( m_value ) );
@@ -129,7 +136,7 @@ namespace core
 	void GraphNodeSocket::load( QJsonObject &o )
 	{
 		Data::load(o);
-		m_name = o["socketname"].toString();
+		setObjectName( o["socketname"].toString() );
 		m_type = Type(int(o["sockettype"].toDouble()));
 		m_direction = Direction(int(o["socketdirection"].toDouble()));
 

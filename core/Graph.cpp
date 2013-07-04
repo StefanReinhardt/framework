@@ -23,12 +23,12 @@ namespace core
 				int i = 1;
 				do
 				{
-					newName = QString("%1%2").arg(type, QString::number(i));
+					newName = QString("%1%2").arg(type, QString::number(i++));
 				}while( hasNode(newName) );
-				node->m_name = newName;
+				node->setObjectName(newName);
 			}
 			else
-				node->m_name = name;
+				node->setObjectName(name);
 			addNode( node );
 		}else
 			qCritical() << "Graph: unable to create node " << node->metaObject()->className();
@@ -54,9 +54,9 @@ namespace core
 
 	void Graph::addNode( core::GraphNode::Ptr node )
 	{
-		qDebug() << "Graph: adding node " << node->getName() << "(" << node->metaObject()->className() << ")";
+		qDebug() << "Graph: adding node " << node->objectName() << "(" << node->metaObject()->className() << ")";
 		//m_nodes.push_back( node );
-		m_nodes[node->getName()] = node;
+		m_nodes[node->objectName()] = node;
 	}
 
 	void Graph::addConnection(const QString &variableName, core::GraphNode::Ptr destNode, const QString &destSocketName )
@@ -174,7 +174,7 @@ namespace core
 			if( isVariableSocket( c.first ) )
 			{
 				jsonConnection.insert( "type", QJsonValue( QString("variable->in") ));
-				jsonConnection.insert( "src", QJsonValue( c.first->getName() ) );
+				jsonConnection.insert( "src", QJsonValue( c.first->objectName() ) );
 				jsonConnection.insert( "dest", QJsonValue( instance()->serialize(c.second) ) );
 			}else
 			{
