@@ -7,6 +7,7 @@
 
 Buoyancy::Buoyancy()
 {
+	m_dt = 0.2f;
 }
 
 
@@ -52,7 +53,7 @@ void Buoyancy::apply(SimObject::Ptr so)
 
 				//f[i][j] = k*( ( (vpt-avpt) / avpt ) - 9.81f * qc[i][j] );
 
-				vel_y->lvalue(i,j,k) += cd->buoyancy *( ( (vpt-avpt) / avpt ) - cd->gravity * qc_mid );
+				vel_y->lvalue(i,j,k) += m_dt*cd->buoyancy *( ( (vpt-avpt) / avpt ) - cd->gravity * qc_mid );
 
 			}
 

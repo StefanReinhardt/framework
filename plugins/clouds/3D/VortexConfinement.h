@@ -22,7 +22,7 @@ public:
 
 private:
 	//QString m_name;
-	float dt;			// Timestep
+	float m_dt;			// Timestep
 	QString vortField;
 
 	VectorField::Ptr	vorticity;

@@ -1,5 +1,5 @@
-#ifndef CLOUDDATA_H
-#define CLOUDDATA_H
+#ifndef CloudDataBoundLayer_H
+#define CloudDataBoundLayer_H
 
 #include <plugins/sim/SimObject.h>
 #include <vector>
@@ -7,15 +7,16 @@
 #include <plugins/primitives/VectorField.h>
 
 
-class CloudData  : public SimObject
+class CloudDataBoundLayer  : public SimObject
 {
 public:
 
-	typedef std::shared_ptr<CloudData> Ptr;
+	typedef std::shared_ptr<CloudDataBoundLayer> Ptr;
 
-    CloudData();
+	CloudDataBoundLayer();
 
 	void							reset();
+	void							setMinAltitude();
 
 	math::V3i						getResolution();
 	void							resize(math::V3i);
@@ -34,7 +35,6 @@ public:
 	float							tlr;		// Temperature lapse rate in °C per 100meter
 	float							hum;		// humidity in percent 0-1
 	float							maxAlt;		// upper boarder of altitude in simulation in meter
-	float							minAlt;
 	float							t0;			// ground temp
 	float							p0;			// ground pressure
 	float							pt0;		// ground pot temp
@@ -55,6 +55,7 @@ public:
 
 	std::vector<float>				tLut;		// absolute Temperature at altitude in K
 	std::vector<float>				pLut;		// absolute Pressure at altitude in kPa
+	std::vector<float>				qsLut;
 /*
 	ScalarField::Ptr				pt;
 	ScalarField::Ptr				qv;
@@ -68,4 +69,4 @@ public:
 
 };
 
-#endif // CLOUDDATA_H
+#endif // CloudDataBoundLayer_H

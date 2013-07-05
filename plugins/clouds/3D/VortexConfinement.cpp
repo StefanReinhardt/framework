@@ -4,6 +4,7 @@
 
 VortexConfinement::VortexConfinement()
 {
+	m_dt = 0.2f;
 }
 
 void VortexConfinement::setField(QString name)
@@ -118,9 +119,9 @@ void VortexConfinement::apply(SimObject::Ptr so)
 			for( int i=2;i<res.x-3;++i )
 			{
 
-				vel_x->lvalue(i,j,k) +=  (vorticity->getScalarField(0)->lvalue(i-1,j,k)+vorticity->getScalarField(0)->lvalue(i,j,k))/2 * cd->vorticity;
-				vel_y->lvalue(i,j,k) +=	 (vorticity->getScalarField(1)->lvalue(i,j-1,k)+vorticity->getScalarField(1)->lvalue(i,j,k))/2 * cd->vorticity;
-				vel_z->lvalue(i,j,k) +=	 (vorticity->getScalarField(2)->lvalue(i,j,k-1)+vorticity->getScalarField(2)->lvalue(i,j,k))/2 * cd->vorticity;
+				vel_x->lvalue(i,j,k) +=  m_dt*(vorticity->getScalarField(0)->lvalue(i-1,j,k)+vorticity->getScalarField(0)->lvalue(i,j,k))/2 * cd->vorticity;
+				vel_y->lvalue(i,j,k) +=	 m_dt*(vorticity->getScalarField(1)->lvalue(i,j-1,k)+vorticity->getScalarField(1)->lvalue(i,j,k))/2 * cd->vorticity;
+				vel_z->lvalue(i,j,k) +=	 m_dt*(vorticity->getScalarField(2)->lvalue(i,j,k-1)+vorticity->getScalarField(2)->lvalue(i,j,k))/2 * cd->vorticity;
 			}
 
 }

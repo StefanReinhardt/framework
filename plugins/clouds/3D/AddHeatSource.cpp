@@ -12,6 +12,7 @@ void AddHeatSource::apply(SimObject::Ptr so)
 {
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
 
+	//ScalarField::Ptr qv = cd->getSubData<ScalarField>("qv");
 	ScalarField::Ptr pt = cd->getSubData<ScalarField>("pt");
 	math::V3i res = pt->getResolution();
 
@@ -39,6 +40,7 @@ void AddHeatSource::apply(SimObject::Ptr so)
 				float r1 = random.at(i);
 
 				pt->lvalue(i,1,k) = min + rand()%(max-min+1); //(r1+r2+r4)/3;
+				//qv->lvalue(i,1,k) = qv->lvalue(i,1,k)+((rand()%1000)*(qv->lvalue(i,1,k)/6))/1000; //(r1+r2+r4)/3;
 			}
 	}
 }
