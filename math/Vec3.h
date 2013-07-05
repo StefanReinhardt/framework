@@ -6,6 +6,9 @@ simple vector class
 #pragma once
 #include <iostream>
 
+#ifdef QT_CORE_LIB
+#include <QMetaType>
+#endif
 
 namespace math
 {
@@ -283,3 +286,7 @@ namespace math
 	typedef Vec3<double> V3d;
 	typedef Vec3<int> V3i;
 }
+
+#ifdef QT_CORE_LIB
+Q_DECLARE_METATYPE(math::V3f);
+#endif
