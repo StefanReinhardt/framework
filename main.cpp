@@ -236,7 +236,7 @@ int main(int argc, char ** argv)
 		// evaluate this node for 10 frames
 		core::Timer timer;
 		timer.start();
-		graph->render( cloudExport, 1, 5000 );
+		graph->render( cloudExport, 1, 1000 );
 		timer.stop();
 		qCritical() << "time taken: " << timer.elapsedSeconds() << "s";
 	}

@@ -24,7 +24,7 @@ CloudData::CloudData() : SimObject()
 	wind = 		0.0f;
 	heatSrc = 	15.0f;
 
-	resolution = math::Vec3i(50,50,50);
+	resolution = math::Vec3i(512,512,512);
 
 	ScalarField::Ptr density = std::make_shared<ScalarField>();
 	density->resize(resolution);
