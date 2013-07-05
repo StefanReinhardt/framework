@@ -315,6 +315,15 @@ namespace core
 		if( vtype == "float" )
 			obj.insert( "value", QJsonValue(variant.toFloat()) );
 		else
+		if( vtype == "math::V3f" )
+		{
+			QJsonArray a = m_serializeDoc.array();
+			a.append(QJsonValue(variant.value<math::V3f>().x));
+			a.append(QJsonValue(variant.value<math::V3f>().y));
+			a.append(QJsonValue(variant.value<math::V3f>().z));
+			obj.insert( "value", QJsonValue(a) );
+		}
+		else
 			qCritical() <<"Core::serialize unable to serialize variant of type " << vtype;
 
 		return QJsonValue(obj);
@@ -333,6 +342,12 @@ namespace core
 		else
 		if( vtype == "float" )
 			variant = float(obj["value"].toDouble());
+		else
+		if( vtype == "math::V3f" )
+		{
+			QJsonArray a = obj["value"].toArray();
+			variant.setValue<math::V3f>( math::V3f(float(a.at(0).toDouble()), float(a.at(1).toDouble()), float(a.at(2).toDouble()) ) );
+		}
 		else
 			qCritical() <<"Core::deserialize unable to deserialize variant of type " << vtype;
 
