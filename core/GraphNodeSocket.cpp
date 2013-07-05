@@ -53,6 +53,10 @@ namespace core
 		return getValue().toFloat();
 	}
 
+	math::V3f GraphNodeSocket::asV3f()
+	{
+		return getValue().value<math::V3f>();
+	}
 
 	void GraphNodeSocket::setString( const QString &value )
 	{
@@ -69,6 +73,12 @@ namespace core
 		setValue<float>(value);
 	}
 
+
+	void GraphNodeSocket::setV3f( math::V3f value )
+	{
+		setValue<math::V3f>(value);
+	}
+
 	void GraphNodeSocket::setData( Data::Ptr data )
 	{
 		makeDirty();
@@ -83,6 +93,11 @@ namespace core
 		return m_data;
 	}
 
+
+	bool GraphNodeSocket::isDirty()const
+	{
+		return m_state == DIRTY;
+	}
 
 	// makeclean
 	void GraphNodeSocket::update()

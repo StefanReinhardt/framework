@@ -2,6 +2,8 @@
 
 #include "Data.h"
 
+#include <math/Math.h>
+
 #include <QVariant>
 
 #include <functional>
@@ -49,11 +51,14 @@ namespace core
 		QString                                          asString();
 		int                                              asInt();
 		float                                            asFloat();
+		math::V3f                                        asV3f();
 		void                                             setString( const QString &value );
 		void                                             setInt( int value );
 		void                                             setFloat( float value );
+		void                                             setV3f( math::V3f value );
 
 
+		bool                                             isDirty()const;
 		void                                             update(); // makeclean
 
 		virtual void                                     store( QJsonObject &o, QJsonDocument &doc )override;
