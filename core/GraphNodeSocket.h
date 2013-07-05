@@ -63,7 +63,6 @@ namespace core
 		void                                             dirty();
 	public slots:
 		void                                             makeDirty();
-
 	private:
 		friend class GraphNode; // required for GraphNode deserialization
 		friend class Graph; // required for setting update callback when making connections

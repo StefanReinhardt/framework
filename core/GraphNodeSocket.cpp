@@ -88,12 +88,12 @@ namespace core
 	void GraphNodeSocket::update()
 	{
 		qDebug() << "graphnodesocket makeClean " << objectName();
+		m_state = UPDATING;
 		if( m_update )
 		{
-			m_state = UPDATING;
 			m_update( this );
-			m_state = CLEAN;
 		}
+		m_state = CLEAN;
 	}
 
 	void GraphNodeSocket::makeDirty()
