@@ -6,7 +6,7 @@
 
 Project::Project() : Operator()
 {
-
+	m_dt = 0.2f;
 }
 void Project::setField(QString name)
 {

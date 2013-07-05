@@ -19,6 +19,9 @@
 #include <plugins/clouds/3D/WaterContinuity.h>
 #include <plugins/clouds/3D/Buoyancy.h>
 #include <plugins/clouds/3D/AddHeatSource.h>
+#include <plugins/clouds/3D/AddHeatSource.h>
+#include <plugins/clouds/3D/VortexConfinement.h>
+
 
 void logger(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -80,14 +83,14 @@ int main(int argc, char ** argv)
 		// create nodes
 		//core::GraphNode::Ptr cloudImport = graph->createNode("ImportClouds");
 		core::GraphNode::Ptr cloudCreate = graph->createNode("CreateClouds");
-		Solver::Ptr solver = std::dynamic_pointer_cast<Solver>(graph->createNode("Solver"));
+		Solver::Ptr solver = std::dynamic_pointer_cast<Solver>(graph->createNode("Solver", "solver"));
 		core::GraphNode::Ptr cloudExport = graph->createNode("ExportClouds", "export");
-/*
+
 		//***********************************************************************************************
 		// setup Nodes 2D
 		//***********************************************************************************************
 
-
+/*
 
 		//********** ADVECT FIELDS
 
@@ -117,19 +120,19 @@ int main(int argc, char ** argv)
 
 		//********** SOLVE FOR QC & QV & PT
 		// Watercontinuity
-		WaterContinuity::Ptr WaterCont = std::dynamic_pointer_cast<WaterContinuity>(solver->createOperator( "WaterContinuity", "water continuity" ));
+		WaterContinuity2D::Ptr WaterCont = std::dynamic_pointer_cast<WaterContinuity2D>(solver->createOperator( "WaterContinuity2D", "water continuity" ));
 
 		//********** ADD FORCES
 
 		// Buoyancy
-		Buoyancy::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy>(solver->createOperator( "Buoyancy", "apply buoyant Force" ));
+		Buoyancy2D::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy2D>(solver->createOperator( "Buoyancy2D", "apply buoyant Force" ));
 
 		// Add Heat Src
-		AddHeatSource::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource>(solver->createOperator( "AddHeatSource", "add heat field" ));
+		AddHeatSource2D::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource2D>(solver->createOperator( "AddHeatSource2D", "add heat field" ));
 
 
 		// Vortex confinement
-		VortexConfinement::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement>(solver->createOperator("VortexConfinement", "add curls back in"));
+		VortexConfinement2D::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement2D>(solver->createOperator("VortexConfinement2D", "add curls back in"));
 		vortConf->setField("velocity");
 
 		//********** PROJECT
@@ -143,7 +146,6 @@ int main(int argc, char ** argv)
 		// setup Nodes 2D end
 		//***********************************************************************************************
 */
-
 
 
 		//***********************************************************************************************
@@ -192,8 +194,8 @@ int main(int argc, char ** argv)
 
 
 		// Vortex confinement
-		//VortexConfinement::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement>(solver->createOperator("VortexConfinement", "add curls back in"));
-		//vortConf->setField("velocity");
+		VortexConfinement::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement>(solver->createOperator("VortexConfinement", "add curls back in"));
+		vortConf->setField("velocity");
 
 		//********** PROJECT
 		// Project
@@ -234,7 +236,7 @@ int main(int argc, char ** argv)
 		// evaluate this node for 10 frames
 		core::Timer timer;
 		timer.start();
-		graph->render( cloudExport, 1, 600 );
+		graph->render( cloudExport, 1, 5000 );
 		timer.stop();
 		qCritical() << "time taken: " << timer.elapsedSeconds() << "s";
 	}

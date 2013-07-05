@@ -6,7 +6,7 @@
 
 Advect::Advect() : Operator()
 {
-	m_dt= 1.0f;
+	m_dt= 0.20f;
 	m_periodic=false;
 }
 
@@ -96,6 +96,8 @@ void Advect::apply( SimObject::Ptr so)
 
 void Advect::advect(ScalarField::Ptr field, ScalarField::Ptr field_old, VectorField::Ptr vecField)
 {
+	//TODO:
+	// Worldspace transformation
 
 	// perform backtracking
 	math::V3i res= field->getResolution();

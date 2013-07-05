@@ -1,9 +1,9 @@
-#include "CloudData.h"
+#include "CloudDataBoundLayer.h"
 
 
-CloudData::CloudData() : SimObject()
+CloudDataBoundLayer::CloudDataBoundLayer() : SimObject()
 {
-	dt = 0.2f;
+	dt = 1.0f;
 
 	diff = 0.0000f;         // diffusion
 	visc = 0.000000000f;    // viscosity
@@ -15,14 +15,14 @@ CloudData::CloudData() : SimObject()
 	lh = 		2501;		// Latent heat of vaporization of water (J/kg)
 	cp = 		1005;		// specific heat capacity J/(kg K)
 
-	maxAlt = 	4000;		// altitude in meter on top of sim grid
+	maxAlt = 	2000;		// altitude in meter on top of sim grid
 	tlr = 		0.009f; 	// Kelvin per 1 meter (between 0.55 and 0.99)
 	t0 = 		295;		// temp on ground in Kelvin
 	hum = 		0.6f;		// humidty
 	buoyancy =  0.8f;
-	vorticity = 0.2f;
+	vorticity = 0.05f;
 	wind = 		0.0f;
-	heatSrc = 	15.0f;
+	heatSrc = 	8.0f;
 
 	resolution = math::Vec3i(50,50,50);
 
@@ -59,14 +59,12 @@ CloudData::CloudData() : SimObject()
 	velocity->getScalarField(2)->fill(0,math::Box3f(0.4f,0.1f,0,0.6f,0.9f,1.0f));
 
 
-	//p0 = 82.8f;
-	//t0 = 285.40f;
-
+	p0 = 79.0f;
+	t0 = 283.0f;
 	reset();
-
 }
 
-void CloudData::reset()
+void CloudDataBoundLayer::reset()
 {
 	ScalarField::Ptr pt = std::make_shared<ScalarField>();
 	pt->resize(resolution);
@@ -125,28 +123,35 @@ void CloudData::reset()
 				// temp in °C and p in Pa
 				qs		=		(float) (  (380/(pLut.at(j)*1000)  ) * exp( (17.67*(tLut.at(j)-273.15)) / (tLut.at(j)-273.15+243.5))) ;
 				qv->lvalue(i,j,k) = 		qs * hum;
+				//qCritical() << qs;
 			}
 
 	//pt->fill(305.0,math::Box3f(0.4f,0.05f,0.4f,0.60f,0.91f,0.6f));
 
 }
 
-float CloudData::getTimestep()
+void CloudDataBoundLayer::setMinAltitude()
+{
+	p0  = pLut[int(pLut.size()/2)];
+	t0  = tLut[int(tLut.size()/2)];
+}
+
+float CloudDataBoundLayer::getTimestep()
 {
 	return dt;
 }
 
-math::V3i CloudData::getResolution()
+math::V3i CloudDataBoundLayer::getResolution()
 {
 	return resolution;
 }
 
-void CloudData::resize(math::V3i size)
+void CloudDataBoundLayer::resize(math::V3i size)
 {
 	resolution = size;
 }
 
-void CloudData::setTimestep(float timestep)
+void CloudDataBoundLayer::setTimestep(float timestep)
 {
 	dt=timestep;
 }
@@ -155,7 +160,7 @@ void CloudData::setTimestep(float timestep)
 // ========Settings for b
 // 0=NeumannBounds || 1=vel_x || 2=vel_y || 3=vel_z || 4=potentialTemperature || 5=waterVapor || 6=cloudWater
 
-void CloudData::setBounds(int b, ScalarField::Ptr f)
+void CloudDataBoundLayer::setBounds(int b, ScalarField::Ptr f)
 {
 	math::V3i res = f->getResolution();
 
@@ -416,7 +421,7 @@ void CloudData::setBounds(int b, ScalarField::Ptr f)
 
 }
 
-void CloudData::setBounds2D(int b, ScalarField::Ptr f)
+void CloudDataBoundLayer::setBounds2D(int b, ScalarField::Ptr f)
 {
 	math::V3i res = f->getResolution();
 	int k=0;
@@ -482,10 +487,6 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 				{
 					f->lvalue(i,0,k) = 0;
 					f->lvalue(i,1,k) = 0;
-					//if(i>30 && i<70){
-					//	f->lvalue(i,0,k) = 0.1;
-					//	f->lvalue(i,1,k) = 0.1;
-					//}
 					f->lvalue(i,res.y-1,k) = 0;
 					f->lvalue(i,res.y-2,k) = 0;
 				}
