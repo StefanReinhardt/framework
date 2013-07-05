@@ -357,9 +357,18 @@ namespace houdini
 
 						// get first invalid tileindex in each dimension
 						math::Vec3i tileEnd;
-						tileEnd.x = res.x / 16 + 1;
-						tileEnd.y = res.y / 16 + 1;
-						tileEnd.z = res.z / 16 + 1;
+						tileEnd.x = res.x / 16;
+						tileEnd.y = res.y / 16;
+						tileEnd.z = res.z / 16;
+
+						// if there are some voxels remaining, add another tile
+						if( res.x%16 )
+							++tileEnd.x;
+						if( res.y%16 )
+							++tileEnd.y;
+						if( res.z%16 )
+							++tileEnd.z;
+
 
 						math::Vec3i voxelOffset; // start offset (in voxels) for current tile
 						math::Vec3i numVoxels;   // number of voxels for current tile (may differ in each dimension)
