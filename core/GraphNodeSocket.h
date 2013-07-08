@@ -52,10 +52,12 @@ namespace core
 		int                                              asInt();
 		float                                            asFloat();
 		math::V3f                                        asV3f();
+		math::V3i                                        asV3i();
 		void                                             setString( const QString &value );
 		void                                             setInt( int value );
 		void                                             setFloat( float value );
 		void                                             setV3f( math::V3f value );
+		void                                             setV3i( math::V3i value );
 
 
 		bool                                             isDirty()const;

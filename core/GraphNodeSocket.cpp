@@ -58,6 +58,11 @@ namespace core
 		return getValue().value<math::V3f>();
 	}
 
+	math::V3i GraphNodeSocket::asV3i()
+	{
+		return getValue().value<math::V3i>();
+	}
+
 	void GraphNodeSocket::setString( const QString &value )
 	{
 		setValue<QString>(value);
@@ -77,6 +82,11 @@ namespace core
 	void GraphNodeSocket::setV3f( math::V3f value )
 	{
 		setValue<math::V3f>(value);
+	}
+
+	void GraphNodeSocket::setV3i( math::V3i value )
+	{
+		setValue<math::V3i>(value);
 	}
 
 	void GraphNodeSocket::setData( Data::Ptr data )

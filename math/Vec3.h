@@ -289,4 +289,5 @@ namespace math
 
 #ifdef QT_CORE_LIB
 Q_DECLARE_METATYPE(math::V3f);
+Q_DECLARE_METATYPE(math::V3i);
 #endif
