@@ -96,7 +96,7 @@ int main(int argc, char ** argv)
 
 		// Advect Density
 		Advect2D::Ptr advectDensity = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect density" ));
-		advectDensity->setType("density", "velocity", true);
+		advectDensity->setType("density", "velocity", false);
 
 		// Advect qv
 		Advect2D::Ptr advectQv = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect qv" ));
@@ -115,25 +115,23 @@ int main(int argc, char ** argv)
 		advectVelocity->setType("velocity", "velocity", false);
 
 
+		//********** ADD FORCES
+		// buoyancy and vort Conf should have same vel input field.
+		// Buoyancy
+		Buoyancy2D::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy2D>(solver->createOperator( "Buoyancy2D", "apply buoyant Force" ));
 
+		// Vortex confinement
+		VortexConfinement2D::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement2D>(solver->createOperator("VortexConfinement2D", "add curls back in"));
+		vortConf->setField("velocity");
 
 
 		//********** SOLVE FOR QC & QV & PT
 		// Watercontinuity
 		WaterContinuity2D::Ptr WaterCont = std::dynamic_pointer_cast<WaterContinuity2D>(solver->createOperator( "WaterContinuity2D", "water continuity" ));
 
-		//********** ADD FORCES
-
-		// Buoyancy
-		Buoyancy2D::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy2D>(solver->createOperator( "Buoyancy2D", "apply buoyant Force" ));
 
 		// Add Heat Src
 		AddHeatSource2D::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource2D>(solver->createOperator( "AddHeatSource2D", "add heat field" ));
-
-
-		// Vortex confinement
-		VortexConfinement2D::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement2D>(solver->createOperator("VortexConfinement2D", "add curls back in"));
-		vortConf->setField("velocity");
 
 		//********** PROJECT
 		// Project
@@ -145,8 +143,8 @@ int main(int argc, char ** argv)
 		//***********************************************************************************************
 		// setup Nodes 2D end
 		//***********************************************************************************************
-*/
 
+*/
 
 		//***********************************************************************************************
 		// setup Nodes 3D
@@ -156,51 +154,51 @@ int main(int argc, char ** argv)
 
 		//********** ADVECT FIELDS
 
-		// Advect Density
-		Advect::Ptr advectDensity = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect density" ));
-		advectDensity->setType("density", "velocity", true);
+//		// Advect Density
+//		Advect::Ptr advectDensity = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect density" ));
+//		advectDensity->setType("density", "velocity", true);
 
-		// Advect qv
-		Advect::Ptr advectQv = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect qv" ));
-		advectQv->setType("qv", "velocity", true);
+//		// Advect qv
+//		Advect::Ptr advectQv = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect qv" ));
+//		advectQv->setType("qv", "velocity", true);
 
-		// Advect qc
-		Advect::Ptr advectQc = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect qc" ));
-		advectQc->setType("qc", "velocity", false);
+//		// Advect qc
+//		Advect::Ptr advectQc = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect qc" ));
+//		advectQc->setType("qc", "velocity", false);
 
-		// Advect pt
-		Advect::Ptr advectPt = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect qc" ));
-		advectPt->setType("pt", "velocity", false);
+//		// Advect pt
+//		Advect::Ptr advectPt = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect qc" ));
+//		advectPt->setType("pt", "velocity", false);
 
-		// Advect Velocity
-		Advect::Ptr advectVelocity = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect velocity" ));
-		advectVelocity->setType("velocity", "velocity", false);
-
-
+//		// Advect Velocity
+//		Advect::Ptr advectVelocity = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect velocity" ));
+//		advectVelocity->setType("velocity", "velocity", false);
 
 
 
-		//********** SOLVE FOR QC & QV & PT
-		// Watercontinuity
-		WaterContinuity::Ptr WaterCont = std::dynamic_pointer_cast<WaterContinuity>(solver->createOperator( "WaterContinuity", "water continuity" ));
 
-		//********** ADD FORCES
 
-		// Buoyancy
-		Buoyancy::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy>(solver->createOperator( "Buoyancy", "apply buoyant Force" ));
+//		//********** SOLVE FOR QC & QV & PT
+//		// Watercontinuity
+//		WaterContinuity::Ptr WaterCont = std::dynamic_pointer_cast<WaterContinuity>(solver->createOperator( "WaterContinuity", "water continuity" ));
 
-		// Add Heat Src
-		AddHeatSource::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource>(solver->createOperator( "AddHeatSource", "add heat field" ));
+//		//********** ADD FORCES
+
+//		// Buoyancy
+//		Buoyancy::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy>(solver->createOperator( "Buoyancy", "apply buoyant Force" ));
+
+//		// Add Heat Src
+//		AddHeatSource::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource>(solver->createOperator( "AddHeatSource", "add heat field" ));
 
 
 		// Vortex confinement
-		VortexConfinement::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement>(solver->createOperator("VortexConfinement", "add curls back in"));
-		vortConf->setField("velocity");
+//		VortexConfinement::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement>(solver->createOperator("VortexConfinement", "add curls back in"));
+//		vortConf->setField("velocity");
 
-		//********** PROJECT
-		// Project
-		Project::Ptr project = std::dynamic_pointer_cast<Project>(solver->createOperator( "Project", "projection step" ) );
-		project->setField("velocity");
+//		//********** PROJECT
+//		// Project
+//		Project::Ptr project = std::dynamic_pointer_cast<Project>(solver->createOperator( "Project", "projection step" ) );
+//		project->setField("velocity");
 
 
 
@@ -220,7 +218,7 @@ int main(int argc, char ** argv)
 		graph->addConnection( solver, "output", cloudExport, "input" );
 
 		// save graph
-		core::save( "$HERE/test.json", graph );
+		//core::save( "$HERE/test.json", graph );
 
 	}
 	// debug
@@ -236,7 +234,7 @@ int main(int argc, char ** argv)
 		// evaluate this node for 10 frames
 		core::Timer timer;
 		timer.start();
-		graph->render( cloudExport, 1, 1000 );
+		graph->render( cloudExport, 1, 2 );
 		timer.stop();
 		qCritical() << "time taken: " << timer.elapsedSeconds() << "s";
 	}

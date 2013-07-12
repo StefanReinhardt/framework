@@ -10,60 +10,69 @@
 class CloudData  : public SimObject
 {
 public:
+	struct Parameters
+	{
+		Parameters()
+		{
+			m_dt =                       1.0f;
+			m_maxAlt =                   4000.0f;		// altitude in meter on top of sim grid
+			m_tlr =                      0.009f;		// Kelvin per 1 meter (between 0.55 and 0.99)
+			m_t0 =                       295.0f;		// temp on ground in Kelvin
+			m_hum =                      0.6f;			// humidty
+			m_buoyancy =                 0.8f;
+			m_vorticity =                0.05f;
+			m_wind =                     0.0f;
+			m_heatSrc =                  10.0f;
+			m_resolution =               math::Vec3i(50,50,1);
+		}
+
+		float                            m_dt;
+		float                            m_maxAlt;		// altitude in meter on top of sim grid
+		float                            m_tlr;			// Kelvin per 1 meter (between 0.55 and 0.99)
+		float                            m_t0;			// temp on ground in Kelvin
+		float                            m_hum;			// humidty
+		float                            m_buoyancy;
+		float                            m_vorticity;
+		float                            m_wind;
+		float                            m_heatSrc;
+		math::V3i                        m_resolution;
+	};
 
 	typedef std::shared_ptr<CloudData> Ptr;
 
     CloudData();
+	CloudData( Parameters parms );
 
-	void							reset();
-
-	math::V3i						getResolution();
-	void							resize(math::V3i);
-
-	float							getTimestep();
-	void							setTimestep(float);
-
-	void							setBounds(int, ScalarField::Ptr);
-	void							setBounds2D(int, ScalarField::Ptr);
+	void                                 reset();
+	void                                 initialize();
 
 
-	math::V3i						resolution;
+	math::V3i                            getResolution();
+	void                                 resize(math::V3i);
 
-	float							dt;
+	float                                getTimestep();
+	void                                 setTimestep(float);
 
-	float							tlr;		// Temperature lapse rate in °C per 100meter
-	float							hum;		// humidity in percent 0-1
-	float							maxAlt;		// upper boarder of altitude in simulation in meter
-	float							minAlt;
-	float							t0;			// ground temp
-	float							p0;			// ground pressure
-	float							pt0;		// ground pot temp
-	float							vorticity;
-	float							buoyancy;
-	float							gravity;
+	void                                 setBounds(int, ScalarField::Ptr);
+	void                                 setBounds2D(int, ScalarField::Ptr);
 
-	float							diff; 		// Viscosity
-	float							visc; 		// Diffusionrate
-	float							wind;		// horizontal wind
-	float							heatSrc;	// input temperature
 
-	float							rd;
-	float							lh;
-	float							cp;
-	float							exner;
-	float							qs;
+	Parameters                           m_parms;
 
-	std::vector<float>				tLut;		// absolute Temperature at altitude in K
-	std::vector<float>				pLut;		// absolute Pressure at altitude in kPa
-/*
-	ScalarField::Ptr				pt;
-	ScalarField::Ptr				qv;
-	ScalarField::Ptr				qc;
+	math::V3i                            m_resolution;
+	float                                m_gravity;
+	float                                m_diff;			// Viscosity
+	float                                m_visc;			// Diffusionrate
+	float                                m_p0;			// ground pressure
+	float                                m_pt0;			// ground pot temp
+	float                                m_rd;
+	float                                m_lh;
+	float                                m_cp;
+	float                                m_exner;
+	float                                m_qs;
 
-	VectorField::Ptr				velocity;
-
-	ScalarField::Ptr				density;
-*/
+	std::vector<float>                   m_tLut;			// absolute Temperature at altitude in K
+	std::vector<float>                   m_pLut;			// absolute Pressure at altitude in kPa
 
 
 };

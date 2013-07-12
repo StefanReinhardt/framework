@@ -1,83 +1,72 @@
 #include "CloudData.h"
 
 
+CloudData::CloudData( Parameters parms ) : SimObject()
+{
+	m_parms = parms;
+	initialize();
+	reset();
+}
+
 CloudData::CloudData() : SimObject()
 {
-	dt = 0.2f;
-
-	diff = 0.0000f;         // diffusion
-	visc = 0.000000000f;    // viscosity
-
-	//Constants
-	rd = 		287; 		// specific gas constant for dry air
-	p0 = 		100;		// pressure at sea level (kPa)
-	gravity = 	9.81f;		// gravitational acceleration (m/s²)
-	lh = 		2501;		// Latent heat of vaporization of water (J/kg)
-	cp = 		1005;		// specific heat capacity J/(kg K)
-
-	maxAlt = 	4000;		// altitude in meter on top of sim grid
-	tlr = 		0.009f; 	// Kelvin per 1 meter (between 0.55 and 0.99)
-	t0 = 		295;		// temp on ground in Kelvin
-	hum = 		0.6f;		// humidty
-	buoyancy =  0.8f;
-	vorticity = 0.2f;
-	wind = 		0.0f;
-	heatSrc = 	15.0f;
-
-	resolution = math::Vec3i(512,512,512);
-
-	ScalarField::Ptr density = std::make_shared<ScalarField>();
-	density->resize(resolution);
-	density->localToWorld(math::V3f(2,2,1));
-	density->fill(0.0f);
-	density->fill(33.3f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.3f,0.6f));
-	addSubData("density", density);
-
-	// TEMP --------
-	// staggered grid for velocity test
-	VectorField::Ptr velocity = std::make_shared<VectorField>( VectorField::FACE );
-	velocity->resize(resolution);
-	//velocity->setBound( math::Box3f( math::V3f(-0.51f), math::V3f(0.51f) ) );
-	//velocity->fill( math::V3f(1.0f, 1.0f, 1.0f) );
-	addSubData("velocity", velocity);
-
-
-	//vel_x = std::make_shared<ScalarField>();
-	//vel_x->resize(resVelX);
-	//vel_x->localToWorld(math::V3f(2,2,1));
-	velocity->getScalarField(0)->fill(0.0f);
-	velocity->getScalarField(0)->fill(0,math::Box3f(0.30f,0.15f,0,0.80f,0.9f,1.0f));
-	//addSubData("vel_x", vel_x );
-
-	//vel_y = std::make_shared<ScalarField>();
-	//vel_y->resize(resVelY);
-	//vel_y->localToWorld(math::V3f(2,2,1));
-	velocity->getScalarField(1)->fill(0.0f);
-	velocity->getScalarField(1)->fill(0,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.3f,0.6f));
-	//addSubData("vel_y", vel_y);
-	//velocity->getScalarField(2)->fill(0.0f);
-	velocity->getScalarField(2)->fill(0,math::Box3f(0.4f,0.1f,0,0.6f,0.9f,1.0f));
-
-
-	//p0 = 82.8f;
-	//t0 = 285.40f;
-
+	initialize();
 	reset();
 
 }
 
+
+
+void CloudData::initialize()
+{
+	m_diff = 0.0000f;         // diffusion
+	m_visc = 0.000000000f;    // viscosity
+
+	m_resolution = m_parms.m_resolution;
+	//Constants
+	m_rd = 		287; 		// specific gas constant for dry air
+	m_p0 = 		100;		// pressure at sea level (kPa)
+	m_gravity = 	9.81f;		// gravitational acceleration (m/s²)
+	m_lh = 		2501;		// Latent heat of vaporization of water (J/kg)
+	m_cp = 		1005;		// specific heat capacity J/(kg K)
+
+	ScalarField::Ptr density = std::make_shared<ScalarField>();
+	density->resize(m_resolution);
+	density->localToWorld(math::V3f(2,2,1));
+	density->fill(0.0f);
+	density->fill(33.3f,math::Box3f(0.4f,0.4f,0,0.6f,0.6f,1.0f));
+	addSubData("density", density);
+
+	VectorField::Ptr velocity = std::make_shared<VectorField>( VectorField::FACE );
+	velocity->resize(m_resolution);
+	//velocity->setBound( math::Box3f( math::V3f(-0.51f), math::V3f(0.51f) ) );
+	//velocity->fill( math::V3f(1.0f, 1.0f, 1.0f) );
+	addSubData("velocity", velocity);
+
+	velocity->getScalarField(0)->fill(0.0f);
+	velocity->getScalarField(0)->fill(0.0f,math::Box3f(0.4f,0.4f,0.4f,0.6f,0.6f,0.6f));
+
+	velocity->getScalarField(1)->fill(0.0f);
+	velocity->getScalarField(1)->fill(0.0f,math::Box3f(0.4f,0.4f,0.4f,0.6f,0.6f,0.6f));
+
+	velocity->getScalarField(2)->fill(0.0f);
+	velocity->getScalarField(2)->fill(0.0f,math::Box3f(0.4f,0.1f,0,0.6f,0.9f,1.0f));
+}
+
+
+
 void CloudData::reset()
 {
 	ScalarField::Ptr pt = std::make_shared<ScalarField>();
-	pt->resize(resolution);
+	pt->resize(m_resolution);
 	addSubData("pt", pt);
 
 	ScalarField::Ptr qv = std::make_shared<ScalarField>();
-	qv->resize(resolution);
+	qv->resize(m_resolution);
 	addSubData("qv", qv);
 
 	ScalarField::Ptr qc = std::make_shared<ScalarField>();
-	qc->resize(resolution);
+	qc->resize(m_resolution);
 	addSubData("qc", qc);
 
 
@@ -87,44 +76,44 @@ void CloudData::reset()
 
 	// Initialize absolute Temp lookup
 	//************************************************************
-	for(int y= 0; y<resolution.y; y++){
+	for(int y= 0; y<m_resolution.y; y++){
 		// Ground Temp - (altitude / 100)* tempLapseRate
-		tLut.push_back(t0 - (( (float)y/(float)resolution.y ) * maxAlt) * tlr);
+		m_tLut.push_back(m_parms.m_t0 - (( (float)y/(float)m_resolution.y ) * m_parms.m_maxAlt) * m_parms.m_tlr);
 	}
 
 	// Initialize absolute Pressure lookup in kPa
 	//************************************************************
-	for(int y= 0; y<resolution.y; y++){
-		float alt = ( (float)y / (float)resolution.y ) * maxAlt;
-		pLut.push_back((float) (p0* pow(( 1- ( (alt*tlr)/t0 ) ),(gravity/(tlr*rd)) )) );
+	for(int y= 0; y<m_resolution.y; y++){
+		float alt = ( (float)y / (float)m_resolution.y ) * m_parms.m_maxAlt;
+		m_pLut.push_back((float) (m_p0* pow(( 1- ( (alt*m_parms.m_tlr)/m_parms.m_t0 ) ),(m_gravity/(m_parms.m_tlr*m_rd)) )) );
 	}
 
 	// Initialize pot temp
 	//************************************************************
-	for(int k= 0; k<resolution.z; k++)
-		for(int i= 0; i<resolution.x; i++)
-			for(int j= 0; j<resolution.y; j++)
+	for(int k= 0; k<m_resolution.z; k++)
+		for(int i= 0; i<m_resolution.x; i++)
+			for(int j= 0; j<m_resolution.y; j++)
 			{
 				//					K                   kPa/kPa
-				pt->lvalue(i,j,k)= (float) (tLut.at(j) * ( pow( (p0/pLut.at(j)) , 0.286)));
+				pt->lvalue(i,j,k)= (float) (m_tLut.at(j) * ( pow( (m_p0/m_pLut.at(j)) , 0.286)));
 				//pt_old->lvalue(i,j,k) = pt->lvalue(i,j,k);
 			}
 
 
 	// Init ground pot temp
 	//************************************************************
-	pt0 = tLut.at(0) * pow( p0/pLut.at(0) , 0.286);
+	m_pt0 = m_tLut[0] * pow( m_p0/m_pLut[0] , 0.286);
 
 	// Initialize Saturation vapor mixing ratio and water vapor mixing ratio
 	//************************************************************
 	//T in celsius
-	for(int k= 0; k<resolution.z; k++)
-		for(int i= 0; i<resolution.x; i++)
-			for(int j= 0; j<resolution.y; j++)
+	for(int k= 0; k<m_resolution.z; k++)
+		for(int i= 0; i<m_resolution.x; i++)
+			for(int j= 0; j<m_resolution.y; j++)
 			{
 				// temp in °C and p in Pa
-				qs		=		(float) (  (380/(pLut.at(j)*1000)  ) * exp( (17.67*(tLut.at(j)-273.15)) / (tLut.at(j)-273.15+243.5))) ;
-				qv->lvalue(i,j,k) = 		qs * hum;
+				m_qs		=		(float) (  (380/(m_pLut[j]*1000)  ) * exp( (17.67*(m_tLut[j]-273.15)) / (m_tLut[j]-273.15+243.5))) ;
+				qv->lvalue(i,j,k) = 		m_qs * m_parms.m_hum;
 			}
 
 	//pt->fill(305.0,math::Box3f(0.4f,0.05f,0.4f,0.60f,0.91f,0.6f));
@@ -133,22 +122,22 @@ void CloudData::reset()
 
 float CloudData::getTimestep()
 {
-	return dt;
+	return m_parms.m_dt;
 }
 
 math::V3i CloudData::getResolution()
 {
-	return resolution;
+	return m_parms.m_resolution;
 }
 
 void CloudData::resize(math::V3i size)
 {
-	resolution = size;
+	m_resolution = size;
 }
 
 void CloudData::setTimestep(float timestep)
 {
-	dt=timestep;
+	m_parms.m_dt=timestep;
 }
 
 
@@ -201,10 +190,10 @@ void CloudData::setBounds(int b, ScalarField::Ptr f)
 			for( int k=0;k<res.z;++k )
 				for( int j=0;j<res.y;++j )
 				{
-					f->lvalue(0,j,k) = wind;
-					f->lvalue(1,j,k) = wind;
-					f->lvalue(res.x-1,j,k) = wind;
-					f->lvalue(res.x-2,j,k) = wind;
+					f->lvalue(0,j,k) = m_parms.m_wind;
+					f->lvalue(1,j,k) = m_parms.m_wind;
+					f->lvalue(res.x-1,j,k) =  m_parms.m_wind;
+					f->lvalue(res.x-2,j,k) =  m_parms.m_wind;
 				}
 
 			// bottom 	= noslip
@@ -298,15 +287,15 @@ void CloudData::setBounds(int b, ScalarField::Ptr f)
 		case 4:
 			{
 				float pt_trav=0;
-				float pt0 = tLut[0]*pow(100/pLut[0], 0.286);
-				float pty = tLut[res.y-1]*pow(100/pLut[res.y-1], 0.286);
+				float pt0 = m_tLut[0]*pow(100/m_pLut[0], 0.286);
+				float pty = m_tLut[res.y-1]*pow(100/m_pLut[res.y-1], 0.286);
 
 				qDebug()  << "setBounds with b=4 (pt)";
 
 				// Sides
 				for( int j=0;j<res.y;++j )
 				{
-					pt_trav=tLut[j]*pow(100/pLut[j], 0.286);
+					pt_trav=m_tLut[j]*pow(100/m_pLut[j], 0.286);
 					for( int k=0;k<res.z;++k )
 					{
 						f->lvalue(0,j,k) =			pt_trav;
@@ -447,10 +436,10 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 			// sides 	= user defined wind
 			for( int j=0;j<res.y;++j )
 				{
-					f->lvalue(0,j,k) = wind;
-					f->lvalue(1,j,k) = wind;
-					f->lvalue(res.x-1,j,k) = wind;
-					f->lvalue(res.x-2,j,k) = wind;
+					f->lvalue(0,j,k) =  m_parms.m_wind;
+					f->lvalue(1,j,k) =  m_parms.m_wind;
+					f->lvalue(res.x-1,j,k) =  m_parms.m_wind;
+					f->lvalue(res.x-2,j,k) =  m_parms.m_wind;
 				}
 
 			// bottom 	= noslip
@@ -471,8 +460,8 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 			//for( int k=0;k<res.z;++k )
 				for( int j=0;j<res.y;++j )
 				{
-					f->lvalue(0,j,k)= 0;
-					f->lvalue(res.x-1,j,k)= 0;
+					f->lvalue(0,j,k)= -f->lvalue(1,j,k);
+					f->lvalue(res.x-1,j,k)= -f->lvalue(res.x-2,j,k);
 				}
 
 			// bottom 	= noslip
@@ -503,8 +492,8 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 			for( int k=0;k<res.z;++k )
 				for( int j=0;j<res.y;++j )
 				{
-					f->lvalue(0,j,k) = tLut.at(j)*pow(100/pLut.at(j), 0.286);
-					f->lvalue(res.x-1,j,k) = tLut.at(j)*pow(100/pLut.at(j), 0.286);
+					f->lvalue(0,j,k) = m_tLut.at(j)*pow(100/m_pLut.at(j), 0.286);
+					f->lvalue(res.x-1,j,k) = m_tLut.at(j)*pow(100/m_pLut.at(j), 0.286);
 				}
 
 			// bottom 	= noslip
@@ -512,27 +501,32 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 			for( int k=0;k<res.z;++k )
 				for( int i=0;i<res.x;++i )
 				{
-					f->lvalue(i,0,k) = tLut.at(0)*pow(100/pLut.at(0), 0.286);
-					f->lvalue(i,res.y-1,k) = tLut.at(res.y-1)*pow(100/pLut.at(res.y-1), 0.286);
+					f->lvalue(i,0,k) = m_tLut.at(0)*pow(100/m_pLut.at(0), 0.286);
+					f->lvalue(i,res.y-1,k) = m_tLut.at(res.y-1)*pow(100/m_pLut.at(res.y-1), 0.286);
 				}
 			break;
 
 
 		case 5:
+		{
 			qDebug()  << "setBounds with b=5 (qv)";
 			// sides = periodic
-			for( int k=0;k<res.z;++k )
-				for( int j=0;j<res.y;++j )
+			float qv=0;
+			for( int j=0;j<res.y;++j )
+			{
+				qv = m_parms.m_hum * (float) (  (380/(m_pLut[j]*1000)  ) * exp( (17.67*(m_tLut[j]-273.15)) / (m_tLut[j]-273.15+243.5))) ;
+				for( int k=0;k<res.z;++k )
 				{
-					f->lvalue(0,j,k) = 13370.1337f;
-					f->lvalue(res.x-1,j,k) = 13370.1337f;
+					f->lvalue(0,j,k) = qv;
+					f->lvalue(res.x-1,j,k) = qv;
 				}
+			}
 			// bottom 	= noise
 			// top 		= 0
 			for( int k=0;k<res.z;++k )
 				for( int i=0;i<res.x;++i )
 				{
-					f->lvalue(i,0,k) = 33.3f;
+					//f->lvalue(i,0,k) = 33.3f;
 					f->lvalue(i,res.y-1,k) = 0;
 				}
 			// frontBack = periodic?
@@ -542,6 +536,7 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 					//f->lvalue(i,j,0) = tLut.at(j)*pow(100/pLut.at(j), 0.286);
 					//f->lvalue(i,j,res.z-1) = tLut.at(j)*pow(100/pLut.at(j), 0.286);
 				}
+		}
 			break;
 
 

@@ -19,6 +19,5 @@ public:
 
 private:
 	//QString m_name;
-	float m_dt;			// Timestep
 	QString projectionField;
 };
