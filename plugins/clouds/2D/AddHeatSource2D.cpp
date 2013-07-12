@@ -43,9 +43,8 @@ void AddHeatSource2D::apply(SimObject::Ptr so)
 	//float qs= (float) ( (380.16f / (cd->pLut.at(1)*1000) ) * exp( (17.67f * T) / (T + 243.5f) ) );
 	//float t_env=283.8f;
 
-
+	float scale = 50.0f/res.x;
 	int height = int(ceil(res.y/70.0f));
-	qCritical() << height;
 	int size = int(res.x/3.3);
 	for (int j=0; j<height+1; ++j)
 		for( int i=size;i<res.x-size;++i )
@@ -53,7 +52,7 @@ void AddHeatSource2D::apply(SimObject::Ptr so)
 			//pt->lvalue(i,1,k) = min + (rand()%(max-min+1))*0.5*(1.2+sin(0.01f*core::getVariable("$F").toFloat())); //(r1+r2+r4)/3;
 			//pt->lvalue(i,0,k) = pt->lvalue(i,1,k);
 
-			pt->lvalue(i,j,k) = abs(math::max(-1.0f,math::min(1.0f, contrast*(add+noise.perlinNoise_2D((float)i,(float)(t+j))))));
+			pt->lvalue(i,j,k) = abs(math::max(-1.0f,math::min(1.0f, contrast*(add+noise.perlinNoise_2D((float)i*scale,(float)(t+j)*scale)))));
 			pt->lvalue(i,j,k) = pt->lvalue(i,j,k) * cd->m_parms.m_heatSrc + cd->m_pt0;
 
 
