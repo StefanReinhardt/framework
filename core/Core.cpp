@@ -6,6 +6,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QFile>
+#include <QDir>
 #include <QStringList>
 #include <QDebug>
 #include <QVariantMap>
@@ -40,7 +41,7 @@ namespace core
 
 	Graph::Ptr  load( const QString &filename )
 	{
-		return g_core->load( expand(filename) );
+		return g_core->load( filename );
 	}
 
 	void save( const QString &filename, Graph::Ptr graph )
@@ -148,14 +149,40 @@ namespace core
 	}
 
 
-	Graph::Ptr Core::load( const QString &filename )
+	Graph::Ptr Core::load( const QString &_filename )
 	{
+		// expand since _filename may contain variables (e.g. $HERE)
+		QString filename = expand(_filename);
+		QFileInfo fileinfo( filename );
+
+		// check if file exists
+		if( !fileinfo.exists() )
+		{
+			qCritical() << filename << " doesnt exist!" << endl;
+			return Graph::Ptr();
+		}
+
+		// get graphDirectory which we will use to update $HERE
+		QString graphDirectory = fileinfo.absoluteDir().path();
+		// update $HERE variable
+		setVariable( "$HERE", QVariant(graphDirectory) );
+
+		// reassemble filename
+		filename = graphDirectory + "/" + fileinfo.fileName();
+
 		// open new file
-		qDebug() << "loading file " << filename;
 		QFile file;
 		file.setFileName(filename);
-		file.open(QIODevice::ReadOnly | QIODevice::Text);
+		bool result = file.open(QIODevice::ReadOnly | QIODevice::Text);
 
+		// check if fileopen was successfull
+		if( !result )
+		{
+			qCritical() << "unable to load " << filename;
+			return Graph::Ptr();
+		}
+
+		qDebug() << "loading file " << filename;
 		QJsonDocument sd = QJsonDocument::fromJson(file.readAll());
 		QJsonObject root = sd.object();
 
@@ -292,6 +319,7 @@ namespace core
 		// deserialize
 		QJsonObject jsonData = m_deserializeJsonData[QString::number( id )].toObject();
 		QString type = jsonData["type"].toString();
+		std::cout << "CHECK " << type.toStdString()<<std::endl;
 		Data::Ptr data = createData( type );
 		m_deserializeMap[id] = data;
 

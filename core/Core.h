@@ -61,7 +61,7 @@ namespace core
 		void                                                   stepFrame();
 
 		// load/save ---
-		Graph::Ptr                                             load(const QString &filename );
+		Graph::Ptr                                             load(const QString &_filename );
 		void                                                   save(const QString &filename, Graph::Ptr graph );
 		QJsonValue                                             serialize( Data::Ptr data );
 		Data::Ptr                                              deserialize( QJsonValue obj );

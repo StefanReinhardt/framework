@@ -3,7 +3,6 @@
 #include <core/Core.h>
 #include <plugins/sim/SimObject.h>
 #include <plugins/clouds/CloudData.h>
-#include <plugins/clouds/CloudDataBoundLayer.h>
 #include <plugins/primitives/ScalarField.h>
 
 CreateClouds::CreateClouds() : core::GraphNode()

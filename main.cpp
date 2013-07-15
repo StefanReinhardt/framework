@@ -29,7 +29,7 @@ void logger(QtMsgType type, const QMessageLogContext &context, const QString &ms
 	switch (type) {
 	case QtDebugMsg:
 		//fprintf(stderr, "Debug: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
-		//fprintf(stderr, "Debug: %s\n", localMsg.constData());
+		fprintf(stderr, "Debug: %s\n", localMsg.constData());
 		break;
 	case QtWarningMsg:
 		//fprintf(stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
@@ -58,24 +58,10 @@ int main(int argc, char ** argv)
 	bool commandline = true;
 	if( !commandline )
 		return app.exec();
+
 	// standalone
 	// generate and serialize graph
-
-    {
-/*
-		core::Graph::Ptr graph = std::make_shared<core::Graph>();
-        //core::GraphNode::Ptr cloudImport = graph->createNode("ImportClouds");
-        core::GraphNode::Ptr cloudCreate = graph->createNode("CreateClouds");
-		core::GraphNode::Ptr cloudExport = graph->createNode("ExportClouds", "export");
-
-        graph->addConnection( cloudCreate, "output", cloudExport, "input" );
-
-        //graph->addConnection( cloudImport, "output", cloudExport, "input" );
-
-        core::save( "$HERE/test.json", graph );
-*/
-	}
-
+	if(QApplication::arguments().size()<2)
 	{
 
 		core::Graph::Ptr graph = std::make_shared<core::Graph>();
@@ -222,22 +208,36 @@ int main(int argc, char ** argv)
 
 	}
 	// debug
-	// deserialize and execute graph
+	// deserialize and execute local graph if no arguments are given
+	QString graphfilename = "$HERE/test.json";
+	QString nodename = "export";
+
+	//arguments:
+	// 0 - executeable filename
+	// 1 - graph filepath
+	// 2 - nodename to evaluate
+	if( QApplication::arguments().size() >= 2 )
+	graphfilename = QApplication::arguments()[1];
+	if( QApplication::arguments().size() >= 3 )
+		nodename = QApplication::arguments()[2];
+
 	{
 		// load graph
-		core::Graph::Ptr graph = core::load( "$HERE/test.json" );
+		core::Graph::Ptr graph = core::load( graphfilename );
 		graph->print();
 
 		// find node which saves cloud data to disk
-		core::GraphNode::Ptr cloudExport = graph->getNode( "export" );
+		core::GraphNode::Ptr node = graph->getNode( nodename );
 
 		// evaluate this node for 10 frames
 		core::Timer timer;
 		timer.start();
-		graph->render( cloudExport, 1, 600 );
+
+		graph->render( node, 1, 2 );
 		timer.stop();
 		qCritical() << "time taken: " << timer.elapsedSeconds() << "s";
 	}
+
 	qDebug() << "EXIT";
 	return 0;
 }
