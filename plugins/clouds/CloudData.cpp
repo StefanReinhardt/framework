@@ -34,7 +34,7 @@ void CloudData::initialize()
 	density->resize(m_resolution);
 	density->localToWorld(math::V3f(2,2,1));
 	density->fill(0.0f);
-	density->fill(33.3f,math::Box3f(0.4f,0.4f,0,0.6f,0.6f,1.0f));
+	density->fill(33.3f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.4f,0.6f));
 	addSubData("density", density);
 
 	VectorField::Ptr velocity = std::make_shared<VectorField>( VectorField::FACE );
@@ -44,13 +44,13 @@ void CloudData::initialize()
 	addSubData("velocity", velocity);
 
 	velocity->getScalarField(0)->fill(0.0f);
-	velocity->getScalarField(0)->fill(0.0f,math::Box3f(0.4f,0.4f,0.4f,0.6f,0.6f,0.6f));
+	velocity->getScalarField(0)->fill(0.0f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.4f,0.6f));
 
 	velocity->getScalarField(1)->fill(0.0f);
-	velocity->getScalarField(1)->fill(0.0f,math::Box3f(0.4f,0.4f,0.4f,0.6f,0.6f,0.6f));
+	velocity->getScalarField(1)->fill(1.0f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.4f,0.6f));
 
 	velocity->getScalarField(2)->fill(0.0f);
-	velocity->getScalarField(2)->fill(0.0f,math::Box3f(0.4f,0.1f,0,0.6f,0.9f,1.0f));
+	velocity->getScalarField(2)->fill(0.0f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.4f,0.6f));
 }
 
 

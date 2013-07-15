@@ -35,13 +35,10 @@ void VortexConfinement::apply(SimObject::Ptr so)
 	math::V3i res = vel_x->getResolution();
 	res = math::V3i(res.x-1,res.y,res.z);
 
-
-	// TODO:
-	//Scalar Field to Vector if Vort in 3D
+	VectorField::Ptr force = std::make_shared<VectorField>();
+	force->resize(res);
 
 	// create vorticity field
-
-
 	if(so->hasSubData("vorticity") )
 	{
 		vorticity = so->getSubData<VectorField>( "vorticity" );
@@ -54,9 +51,8 @@ void VortexConfinement::apply(SimObject::Ptr so)
 	}
 
 
-	float nab_nx, nab_ny, nab_nz, mag_n, nx, ny, nz, f_x, f_y, f_z, w1,w2,w3;
 
-	// TODO: index to res - 2 ??
+	float nab_nx, nab_ny, nab_nz, mag_n, nx, ny, nz, f_x, f_y, f_z, w1,w2,w3;
 
 	//Calculate vorticity magnitude field = n
 	for( int k=1;k<res.z-1;++k )
@@ -67,8 +63,6 @@ void VortexConfinement::apply(SimObject::Ptr so)
 				// absolute value of w
 				curl(i,j,k);
 			}
-
-
 
 
 	//Calculate vorticity Gradient N = (nabla n) / ||n||
@@ -102,23 +96,13 @@ void VortexConfinement::apply(SimObject::Ptr so)
 				f_y = nz * w1 - nx * w3;
 				f_z = nx * w2 - ny * w1;
 
-
 				w1 = vorticity->getScalarField(0)->lvalue(i,j,k);
 				w2 = vorticity->getScalarField(1)->lvalue(i,j,k);
 				w3 = vorticity->getScalarField(2)->lvalue(i,j,k);
 
-				f_x = ny * w3 - nz * w2;
-				f_y = nz * w1 - nx * w3;
-				f_z = nx * w2 - ny * w1;
-
-
-				//vorticity->getScalarField(0)->lvalue(i,j,k) = f_x;
-				//vorticity->getScalarField(1)->lvalue(i,j,k) = f_y;
-				//vorticity->getScalarField(2)->lvalue(i,j,k) = f_z;
-
-				// TODO:
-				// (f_x1+f_x)/2
-
+				force->getScalarField(0)->lvalue(i,j,k) = ny * w3 - nz * w2;
+				force->getScalarField(1)->lvalue(i,j,k) = nz * w1 - nx * w3;
+				force->getScalarField(2)->lvalue(i,j,k) = nx * w2 - ny * w1;
 
 
 			}
@@ -129,9 +113,9 @@ void VortexConfinement::apply(SimObject::Ptr so)
 			for( int i=1;i<res.x-1;++i )
 			{
 
-				vel_x->lvalue(i,j,k) +=  m_dt*(vorticity->getScalarField(0)->lvalue(i-1,j,k)+vorticity->getScalarField(0)->lvalue(i,j,k))/2 * cd->m_parms.m_vorticity;
-				vel_y->lvalue(i,j,k) +=	 m_dt*(vorticity->getScalarField(1)->lvalue(i,j-1,k)+vorticity->getScalarField(1)->lvalue(i,j,k))/2 * cd->m_parms.m_vorticity;
-				vel_z->lvalue(i,j,k) +=	 m_dt*(vorticity->getScalarField(2)->lvalue(i,j,k-1)+vorticity->getScalarField(2)->lvalue(i,j,k))/2 * cd->m_parms.m_vorticity;
+				vel_x->lvalue(i,j,k) +=  m_dt*(force->getScalarField(0)->lvalue(i-1,j,k)+force->getScalarField(0)->lvalue(i,j,k))/2 * cd->m_parms.m_vorticity;
+				vel_y->lvalue(i,j,k) +=	 m_dt*(force->getScalarField(1)->lvalue(i,j-1,k)+force->getScalarField(1)->lvalue(i,j,k))/2 * cd->m_parms.m_vorticity;
+				vel_z->lvalue(i,j,k) +=	 m_dt*(force->getScalarField(2)->lvalue(i,j,k-1)+force->getScalarField(2)->lvalue(i,j,k))/2 * cd->m_parms.m_vorticity;
 			}
 
 }

@@ -34,7 +34,7 @@ void AddHeatSource2D::apply(SimObject::Ptr so)
 		{
 			wPos =   pt->voxelToWorld(math::V3f(float(i),float(j),float(k))) * m_scale;
 			random = abs(math::max(-1.0f,math::min(1.0f, m_contrast*(m_add+noise.perlinNoise_3D(wPos.x,wPos.y,t) ) ) ) );
-			pt->lvalue(i,j,k) += m_dt * cd->m_parms.m_heatSrc * random;
+			pt->lvalue(i,j,k) += 0.1f * m_dt * cd->m_parms.m_heatSrc * random;
 
 		}
 }

@@ -44,7 +44,7 @@ void AddHeatSource::apply(SimObject::Ptr so)
 				{
 					wPos *= m_scale;
 					random = abs(math::max(-1.0f,math::min(1.0f, m_contrast*(m_add+noise.perlinNoise_4D(wPos.x,wPos.y,wPos.z,t) ) ) ) );
-					pt->lvalue(i,j,k) += 0.1 * m_dt * cd->m_parms.m_heatSrc;
+					pt->lvalue(i,j,k) += 0.1 * m_dt * cd->m_parms.m_heatSrc * random;
 				}
 			}
 }
