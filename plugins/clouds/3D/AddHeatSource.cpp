@@ -6,41 +6,45 @@
 AddHeatSource::AddHeatSource()
 {
 	srand(time(NULL));
+	m_scale = 30.0f;
+	m_contrast = 5.0f;
+	m_add = 0.0f;
+	m_dt = 1.0;
 }
 
 void AddHeatSource::apply(SimObject::Ptr so)
 {
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
+	m_dt = cd->m_parms.m_dt;
 
-	//ScalarField::Ptr qv = cd->getSubData<ScalarField>("qv");
 	ScalarField::Ptr pt = cd->getSubData<ScalarField>("pt");
 	math::V3i res = pt->getResolution();
 
+	float t  = -core::getVariable("$F").toFloat()*0.05f;
+	math::PerlinNoise noise = math::PerlinNoise();
+	float random;
+
+	math::V3f wPos;
+	math::V3f min = math::V3f(res.x/3.3f,-0.01f,res.z/3.3f);
+	math::V3f max = math::V3f(res.x-res.x/3.3f, ceil(res.y/70.0f)+1, res.z-res.z/3.3f);
+	min = pt->voxelToWorld(min);
+	max = pt->voxelToWorld(max);
 
 
-	if(core::getVariable("$F").toInt()<300000)
-	{
-		int k = 0;
-		int min= cd->m_pt0;
-		int max = min+cd->m_parms.m_heatSrc;
-		std::vector<float> random;
+	math::BoundingBox3f tempInput = math::BoundingBox3f(min, max);
 
-		for( int i=0;i<res.x;++i )
-		{
-			random.push_back(min + rand()%(max-min+1));
-		}
-
-
-		for( int k=10;k<res.z-11;++k )
-			for( int i=10;i<res.x-11;++i )
+	for( int k=0;k<res.z;++k )
+		for (int j=0; j<res.y; ++j)
+			for( int i=0;i<res.x;++i )
 			{
-				//int index = k*i+i
-				float r4 = (random.at(i-2)+random.at(i-1)+random.at(i)+random.at(i+1))/4;
-				float r2 = (random.at(i)+random.at(i+1))/2;
-				float r1 = random.at(i);
+				wPos =   pt->voxelToWorld(math::V3f(float(i),float(j),float(k)));
 
-				pt->lvalue(i,1,k) = min + rand()%(max-min+1); //(r1+r2+r4)/3;
-				//qv->lvalue(i,1,k) = qv->lvalue(i,1,k)+((rand()%1000)*(qv->lvalue(i,1,k)/6))/1000; //(r1+r2+r4)/3;
+				// If input box is within pt box
+				if(tempInput.encloses(wPos))
+				{
+					wPos *= m_scale;
+					random = abs(math::max(-1.0f,math::min(1.0f, m_contrast*(m_add+noise.perlinNoise_4D(wPos.x,wPos.y,wPos.z,t) ) ) ) );
+					pt->lvalue(i,j,k) += 0.1 * m_dt * cd->m_parms.m_heatSrc;
+				}
 			}
-	}
 }
