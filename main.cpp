@@ -232,7 +232,7 @@ int main(int argc, char ** argv)
 		// evaluate this node for 10 frames
 		core::Timer timer;
 		timer.start();
-		graph->render( node, 1, 2 );
+		graph->render( node, 1, 2000 );
 		timer.stop();
 		qCritical() << "time taken: " << timer.elapsedSeconds() << "s";
 	}
