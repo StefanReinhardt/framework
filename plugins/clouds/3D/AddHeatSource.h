@@ -15,6 +15,9 @@ public:
 	//virtual void                       store( QJsonObject &o, QJsonDocument &doc );
 	//virtual void                       load( QJsonObject &o );
 private:
-	//QString			m_source;
-	//QString			m_field;
+	float                                m_scale;
+	float                                m_contrast;
+	float                                m_add;
+	float                                m_dt;
+
 };
