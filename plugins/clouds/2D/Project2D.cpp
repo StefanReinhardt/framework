@@ -29,17 +29,26 @@ void Project2D::apply( SimObject::Ptr so )
 	q->resize(res);
 
 
+	// periodic sides:
+	//for( int j=0;j<res.y-1;++j )
+	//	vel->getScalarField(0)->lvalue(res.x-1,j,0) = vel->getScalarField(0)->lvalue(0,j,0);
+
+
+
 	float h = 1.0f;
 
 	//calculate divergence field
 	//for( int k=1;k<res.z-1;++k )
 	{
 		int k=0;
-		for( int j=1;j<res.y-1;++j )
-			for( int i=1;i<res.x-1;++i )
+		for( int j=0;j<res.y-1;++j )
+			for( int i=0;i<res.x-1;++i )
 			{
 				div->lvalue(i,j,k) = h*(	vel->getScalarField(0)->lvalue(i+1,j,k) - vel->getScalarField(0)->lvalue(i,j,k)
 										+ 	vel->getScalarField(1)->lvalue(i,j+1,k) - vel->getScalarField(1)->lvalue(i,j,k) );
+
+				// TODO: for periodic
+				// IF res-1 is sampled get value from 0
 
 				//initialize pressure for gauss seidel relaxation
 				q->lvalue(i,j,k) = 0;
@@ -47,7 +56,7 @@ void Project2D::apply( SimObject::Ptr so )
 	}
 
 	cd->setBounds2D(0, div);
-	cd->setBounds2D(0,q);
+	cd->setBounds2D(0, q);
 	//so->setSubData("div", div);
 
 

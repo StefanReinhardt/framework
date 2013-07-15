@@ -14,7 +14,7 @@ public:
 	virtual void                       apply( SimObject::Ptr so )override;
 
 	void                               setField(QString);
-	void                               curl(int i, int j, int k, bool abs);
+	void                               curl(int i, int j, int k);
 
 	// overloads from Data
 	virtual void                       store( QJsonObject &o, QJsonDocument &doc );

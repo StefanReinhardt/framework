@@ -37,6 +37,7 @@ public:
 	void									fill( math::V3f value ); // fills all voxels with the same value
 
 	ScalarField::Ptr						getScalarField( int component )const; // gives scalarfield for given component
+	float									getLength(int i, int j, int k); // gives Magnitude of vector at given grid position
 private:
 	ScalarField::Ptr						m_fields[3];
 	Sampling								m_sampling;

@@ -4,7 +4,7 @@
 
 VortexConfinement::VortexConfinement()
 {
-	m_dt = 0.2f;
+	m_dt = 1.0f;
 }
 
 void VortexConfinement::setField(QString name)
@@ -30,6 +30,7 @@ void VortexConfinement::apply(SimObject::Ptr so)
 
 
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
+	m_dt = cd->m_parms.m_dt;
 
 	math::V3i res = vel_x->getResolution();
 	res = math::V3i(res.x-1,res.y,res.z);
@@ -47,7 +48,7 @@ void VortexConfinement::apply(SimObject::Ptr so)
 	}
 	else
 	{
-		vorticity =std::make_shared<VectorField>();
+		vorticity =std::make_shared<VectorField>(VectorField::CENTER );
 		vorticity->resize(res);
 		so->addSubData( "vorticity", vorticity );
 	}
@@ -58,31 +59,31 @@ void VortexConfinement::apply(SimObject::Ptr so)
 	// TODO: index to res - 2 ??
 
 	//Calculate vorticity magnitude field = n
-	for( int k=1;k<res.z-3;++k )
-		for (int i=1; i<res.x-3; i++)
-			for (int j=1; j<res.y-3; j++)
+	for( int k=1;k<res.z-1;++k )
+		for (int i=1; i<res.x-1; i++)
+			for (int j=1; j<res.y-1; j++)
 			{
 				//vorticity->lvalue(i,j,k)= abs(curl(i,j,k));
 				// absolute value of w
-				curl(i,j,k, true);
+				curl(i,j,k);
 			}
 
 
 
 
 	//Calculate vorticity Gradient N = (nabla n) / ||n||
-	for( int k=2;k<res.z-3;++k )
-		for( int j=2;j<res.y-3;++j )
-			for( int i=2;i<res.x-3;++i )
+	for( int k=1;k<res.z-1;++k )
+		for( int j=1;j<res.y-1;++j )
+			for( int i=1;i<res.x-1;++i )
 			{
 				//calc nabla n for x and y by central difference
 				//(n = del |w|)
-				nab_nx =( vorticity->getScalarField(0)->lvalue(i+1,j,k) -vorticity->getScalarField(0)->lvalue(i-1,j,k) ) / 2;
-				nab_ny =( vorticity->getScalarField(0)->lvalue(i,j+1,k) -vorticity->getScalarField(0)->lvalue(i,j-1,k) ) / 2;
-				nab_nz =( vorticity->getScalarField(0)->lvalue(i,j,k+1) -vorticity->getScalarField(0)->lvalue(i,j,k-1) ) / 2;
+				nab_nx =( vorticity->getLength(i+1,j,k) - vorticity->getLength(i-1,j,k) ) / 2;
+				nab_ny =( vorticity->getLength(i,j+1,k) - vorticity->getLength(i,j-1,k) ) / 2;
+				nab_nz =( vorticity->getLength(i,j,k+1) - vorticity->getLength(i,j,k-1) ) / 2;
 
 				//calculate magnitude of the vector (nab_nx , nab_ny)
-				//add small value to prevent divide by zero
+				//add small value to prevent division by zero
 				//(|n|)
 				mag_n = (float) sqrt(nab_nx*nab_nx + nab_ny*nab_ny + nab_nz*nab_nz) + 0.00000001f;
 
@@ -92,7 +93,16 @@ void VortexConfinement::apply(SimObject::Ptr so)
 				nz = nab_nz / mag_n;
 
 				// F = N x vorticity
-				curl(i,j,k,false);
+
+				w1 = vorticity->getScalarField(0)->lvalue(i,j,k);
+				w2 = vorticity->getScalarField(1)->lvalue(i,j,k);
+				w3 = vorticity->getScalarField(2)->lvalue(i,j,k);
+
+				f_x = ny * w3 - nz * w2;
+				f_y = nz * w1 - nx * w3;
+				f_z = nx * w2 - ny * w1;
+
+
 				w1 = vorticity->getScalarField(0)->lvalue(i,j,k);
 				w2 = vorticity->getScalarField(1)->lvalue(i,j,k);
 				w3 = vorticity->getScalarField(2)->lvalue(i,j,k);
@@ -114,21 +124,21 @@ void VortexConfinement::apply(SimObject::Ptr so)
 			}
 
 	//Calculate vorticity Gradient N = (nabla n) / ||n||
-	for( int k=2;k<res.z-3;++k )
-		for( int j=2;j<res.y-3;++j )
-			for( int i=2;i<res.x-3;++i )
+	for( int k=1;k<res.z-1;++k )
+		for( int j=1;j<res.y-1;++j )
+			for( int i=1;i<res.x-1;++i )
 			{
 
-				vel_x->lvalue(i,j,k) +=  m_dt*(vorticity->getScalarField(0)->lvalue(i-1,j,k)+vorticity->getScalarField(0)->lvalue(i,j,k))/2 * cd->vorticity;
-				vel_y->lvalue(i,j,k) +=	 m_dt*(vorticity->getScalarField(1)->lvalue(i,j-1,k)+vorticity->getScalarField(1)->lvalue(i,j,k))/2 * cd->vorticity;
-				vel_z->lvalue(i,j,k) +=	 m_dt*(vorticity->getScalarField(2)->lvalue(i,j,k-1)+vorticity->getScalarField(2)->lvalue(i,j,k))/2 * cd->vorticity;
+				vel_x->lvalue(i,j,k) +=  m_dt*(vorticity->getScalarField(0)->lvalue(i-1,j,k)+vorticity->getScalarField(0)->lvalue(i,j,k))/2 * cd->m_parms.m_vorticity;
+				vel_y->lvalue(i,j,k) +=	 m_dt*(vorticity->getScalarField(1)->lvalue(i,j-1,k)+vorticity->getScalarField(1)->lvalue(i,j,k))/2 * cd->m_parms.m_vorticity;
+				vel_z->lvalue(i,j,k) +=	 m_dt*(vorticity->getScalarField(2)->lvalue(i,j,k-1)+vorticity->getScalarField(2)->lvalue(i,j,k))/2 * cd->m_parms.m_vorticity;
 			}
 
 }
 
 
-void VortexConfinement::curl(int i, int j, int k, bool abs){
-
+void VortexConfinement::curl(int i, int j, int k)
+{
 	//evaluate velocity values at cell faces - then central diff
 
 	// w1 =  (w_j+1 - w_j-1 - v_k+1 + v_k-1)/2h
@@ -136,7 +146,6 @@ void VortexConfinement::curl(int i, int j, int k, bool abs){
 				-vel_y->evaluate(math::V3f(i+0.5f,j+0.5f,k+1.0f))+vel_y->evaluate(math::V3f(i+0.5f,j+0.5f,k)))/2;
 
 	// w2 =  (u_k+1 - u_k-1 - w_i+1 + w_i-1)/2h
-
 	float w2 =	(vel_x->evaluate(math::V3f(i+0.5f,j+0.5f,k+1.0f))-vel_x->evaluate(math::V3f(i+0.5f,j+0.5f,k))
 				-vel_z->evaluate(math::V3f(i+1.0f,j+0.5f,k+0.5f))+vel_z->evaluate(math::V3f(i,j+0.5f,k+0.5f)))/2;
 
@@ -144,15 +153,9 @@ void VortexConfinement::curl(int i, int j, int k, bool abs){
 	float w3 =	(vel_y->evaluate(math::V3f(i+1.0f,j+0.5f,k+0.5f))-vel_y->evaluate(math::V3f(i,j+0.5f,k+0.5f))
 				-vel_x->evaluate(math::V3f(i+0.5f,j+1.0f,k+0.5f))+vel_x->evaluate(math::V3f(i+0.5f,j,k+0.5f)))/2;
 
-	if(abs)
-		vorticity->getScalarField(0)->lvalue(i,j,k)= sqrt(w1*w1+w2*w2+w3*w3);
-	else
-	{
-		vorticity->getScalarField(0)->lvalue(i,j,k) = w1;
-		vorticity->getScalarField(1)->lvalue(i,j,k) = w2;
-		vorticity->getScalarField(2)->lvalue(i,j,k) = w3;
-	}
-
+	vorticity->getScalarField(0)->lvalue(i,j,k) = w1;
+	vorticity->getScalarField(1)->lvalue(i,j,k) = w2;
+	vorticity->getScalarField(2)->lvalue(i,j,k) = w3;
 
 }
 

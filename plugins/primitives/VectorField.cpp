@@ -50,6 +50,24 @@ ScalarField::Ptr VectorField::getScalarField( int component )const
 }
 
 
+float VectorField::getLength(int i, int j, int k)
+{
+	if(m_sampling==CENTER)
+	{
+		return sqrt(m_fields[0]->lvalue(i,j,k)*m_fields[0]->lvalue(i,j,k)
+				+	m_fields[1]->lvalue(i,j,k)*m_fields[1]->lvalue(i,j,k)
+				+	m_fields[2]->lvalue(i,j,k)*m_fields[2]->lvalue(i,j,k));
+	}
+	else if(m_sampling==FACE)
+	{
+		return sqrt(pow((m_fields[0]->lvalue(i,j,k)+m_fields[0]->lvalue(i+1,j,k))/2, 2 )
+				+	pow((m_fields[1]->lvalue(i,j,k)+m_fields[1]->lvalue(i,j+1,k))/2, 2 )
+				+	pow((m_fields[2]->lvalue(i,j,k)+m_fields[2]->lvalue(i,j,k+1))/2, 2 ));
+	}
+	else
+		return 0;
+}
+
 void VectorField::resize( int x, int y, int z )
 {
 	resize(math::V3i(x, y, z));

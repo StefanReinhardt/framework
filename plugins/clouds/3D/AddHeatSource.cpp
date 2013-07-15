@@ -21,8 +21,8 @@ void AddHeatSource::apply(SimObject::Ptr so)
 	if(core::getVariable("$F").toInt()<300000)
 	{
 		int k = 0;
-		int min= cd->pt0;
-		int max = min+cd->heatSrc;
+		int min= cd->m_pt0;
+		int max = min+cd->m_parms.m_heatSrc;
 		std::vector<float> random;
 
 		for( int i=0;i<res.x;++i )

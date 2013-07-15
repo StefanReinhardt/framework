@@ -6,7 +6,7 @@
 
 Advect::Advect() : Operator()
 {
-	m_dt= 0.20f;
+	m_dt= 1.00f;
 	m_periodic=false;
 }
 
@@ -19,6 +19,7 @@ void Advect::setType(QString field, QString vecField, bool periodic)
 
 void Advect::apply( SimObject::Ptr so)
 {
+
 	if(advectionField==0 || vecField==0)
 	{
 		qCritical() << "Advect: no fields set!";
@@ -31,6 +32,12 @@ void Advect::apply( SimObject::Ptr so)
 	Data::Ptr f = so->getSubData<Data>(advectionField);
 	VectorField::Ptr f_v = so->getSubData<VectorField>(vecField);
 
+	// set Timestep
+	if(std::dynamic_pointer_cast<CloudData>(so))
+	{
+		CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
+		m_dt = cd->m_parms.m_dt;
+	}
 
 	// IF Vector field is advected
 	if(std::dynamic_pointer_cast<VectorField>(f))

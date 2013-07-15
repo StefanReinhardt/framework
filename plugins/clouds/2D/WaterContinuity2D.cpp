@@ -37,7 +37,7 @@ void WaterContinuity2D::apply(SimObject::Ptr so)
 			// 			L = Lapse rate in °K or °C per meter
 			//			Rd = ideal gas constant ~ 287 J/(kg K)
 
-			exner = pow(cd->pLut.at(j)/cd->p0,0.286f);
+			exner = pow(cd->m_pLut.at(j)/cd->m_p0,0.286f);
 
 			//p = (float) Math.pow(10*(1-(alt*tlr/t0)),(9.81/(tlr*rd)));
 			//
@@ -51,7 +51,7 @@ void WaterContinuity2D::apply(SimObject::Ptr so)
 			//
 			//compute 	qs= (380.16/p)exp((17.67*T)/(T+243.5))
 			// with T in °C and P in Pa
-			qs = (float) ( (380.16f / (cd->pLut.at(j)*1000) ) * exp( (17.67f * T) / (T + 243.5f) ) );
+			qs = (float) ( (380.16f / (cd->m_pLut.at(j)*1000) ) * exp( (17.67f * T) / (T + 243.5f) ) );
 
 			d_qv  = math::min(qs - qv->lvalue(i,j,k),qc->lvalue(i,j,k));
 
@@ -70,13 +70,13 @@ void WaterContinuity2D::apply(SimObject::Ptr so)
 			//_______________L_____/___cp___*________PI___________*____________C_________________________________
 			T += 273.15f;
 
-			pt->lvalue(i,j,k) += (cd->lh / ( cd->cp * exner )) * (-d_qv);
+			pt->lvalue(i,j,k) += (cd->m_lh / ( cd->m_cp * exner )) * (-d_qv);
 		}
 
 	//set Boundary values
-	//cd->setBounds(4,cd->pt);
-	//cd->setBounds(5,cd->qv);
-	//cd->setBounds(6,cd->qc);
+	cd->setBounds2D(4,so->getSubData<ScalarField>("pt"));
+	cd->setBounds2D(5,so->getSubData<ScalarField>("qv"));
+	cd->setBounds2D(6,so->getSubData<ScalarField>("qc"));
 
 
 

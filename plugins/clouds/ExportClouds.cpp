@@ -56,8 +56,8 @@ void ExportClouds::update(core::GraphNodeSocket *output)
 		{
 			QString subDataName = subDataNames[i];
 
-			if((subDataName!="qc") && (subDataName!="qv") )
-				continue;
+			//if((subDataName!="qc") && (subDataName!="qv") )
+			//	continue;
 
 			// ScalarField?
 			if( so->getSubData<ScalarField>(subDataName) )

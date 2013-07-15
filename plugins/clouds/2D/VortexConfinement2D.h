@@ -22,7 +22,7 @@ public:
 
 private:
 	//QString m_name;
-	float dt;			// Timestep
+	float m_dt;			// Timestep
 	QString vortField;
 
 	ScalarField::Ptr	vel_x,vel_y,vel_z;

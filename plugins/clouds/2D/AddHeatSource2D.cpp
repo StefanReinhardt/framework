@@ -20,8 +20,8 @@ void AddHeatSource2D::apply(SimObject::Ptr so)
 
 
 	int k = 0;
-	int min= cd->pt0;
-	int max = min+15;
+	int min= cd->m_pt0;
+	int max = min+cd->m_parms.m_heatSrc;
 	std::vector<float> random;
 
 	for( int i=0;i<res.x;++i )
@@ -31,19 +31,45 @@ void AddHeatSource2D::apply(SimObject::Ptr so)
 
 
 
+	math::PerlinNoise noise = math::PerlinNoise();
+	float contrast = 5.0f;
+	float add = 0.0f;
 
+	float t  = -core::getVariable("$F").toFloat()*0.1f;
 	// Ground Vapor Saturation Ratio
-	float exner = pow(cd->pLut.at(1)/cd->p0,0.286f);
-	float T = pt->lvalue(1,1,0)*exner;
-	T -= 273.15f;
-	float qs= (float) ( (380.16f / (cd->pLut.at(1)*1000) ) * exp( (17.67f * T) / (T + 243.5f) ) );
-	float t_env=283.8f;
+	//float exner = pow(cd->pLut.at(1)/cd->p0,0.286f);
+	//float T = pt->lvalue(1,1,0)*exner;
+	//T -= 273.15f;
+	//float qs= (float) ( (380.16f / (cd->pLut.at(1)*1000) ) * exp( (17.67f * T) / (T + 243.5f) ) );
+	//float t_env=283.8f;
 
-	for( int i=1;i<res.x-1;++i )
-	{
-		pt->lvalue(i,1,k) = min + rand()%(max-min+1); //(r1+r2+r4)/3;
+	float scale = 50.0f/res.x;
+	int height = int(ceil(res.y/70.0f));
+	int size = int(res.x/3.3);
+	for (int j=0; j<height+1; ++j)
+		for( int i=size;i<res.x-size;++i )
+		{
+			//pt->lvalue(i,1,k) = min + (rand()%(max-min+1))*0.5*(1.2+sin(0.01f*core::getVariable("$F").toFloat())); //(r1+r2+r4)/3;
+			//pt->lvalue(i,0,k) = pt->lvalue(i,1,k);
 
-		//if(i>31 && i<69)
-			//qv->lvalue(i,1,k) = qs*0.10*math::max((core::getVariable("$F").toFloat()/50.0f),1.0f);
-	}
+			pt->lvalue(i,j,k) = abs(math::max(-1.0f,math::min(1.0f, contrast*(add+noise.perlinNoise_2D((float)i*scale,(float)(t+j)*scale)))));
+			pt->lvalue(i,j,k) = pt->lvalue(i,j,k) * cd->m_parms.m_heatSrc + cd->m_pt0;
+
+
+	//		pt->lvalue(i,0,k) = abs(noise.perlinNoise_2D(float(i),t+0.0f))*cd->heatSrc+cd->pt0;
+	//		pt->lvalue(i,1,k) = abs(noise.perlinNoise_2D(float(i),t+1.0f))*cd->heatSrc+cd->pt0;
+	//		pt->lvalue(i,2,k) = abs(noise.perlinNoise_2D(float(i),t+2.0f))*cd->heatSrc+cd->pt0;
+	//		pt->lvalue(i,3,k) = abs(noise.perlinNoise_2D(float(i),t+3.0f))*cd->heatSrc+min;
+	//		pt->lvalue(i,4,k) = abs(noise.perlinNoise_2D(float(i),t+4.0f))*cd->heatSrc+min;
+	//		pt->lvalue(i,5,k) = abs(noise.perlinNoise_2D(float(i),t+5.0f))*cd->heatSrc+min;
+	//		pt->lvalue(i,6,k) = abs(noise.perlinNoise_2D(float(i),t+6.0f))*cd->heatSrc+min;
+	//		pt->lvalue(i,7,k) = abs(noise.perlinNoise_2D(float(i),t+7.0f))*cd->heatSrc+min;
+
+
+			//qv->lvalue(i,0,k) += 0.0015;
+			//qv->lvalue(i,1,k) += 0.0015; //(r1+r2+r4)/3;
+
+			//if(i>31 && i<69)
+				//qv->lvalue(i,1,k) = qs*0.10*math::max((core::getVariable("$F").toFloat()/50.0f),1.0f);
+		}
 }

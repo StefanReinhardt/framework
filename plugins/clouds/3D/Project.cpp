@@ -6,7 +6,6 @@
 
 Project::Project() : Operator()
 {
-	m_dt = 0.2f;
 }
 void Project::setField(QString name)
 {
@@ -32,9 +31,9 @@ void Project::apply( SimObject::Ptr so )
 	float h = 1.0f;
 
 	//calculate divergence field
-	for( int k=1;k<res.z-1;++k )
-		for( int j=1;j<res.y-1;++j )
-			for( int i=1;i<res.x-1;++i )
+	for( int k=0;k<res.z-1;++k )
+		for( int j=0;j<res.y-1;++j )
+			for( int i=0;i<res.x-1;++i )
 			{
 				/*
 				div->lvalue(i,j,k) = h*(	vel->getScalarField(0)->lvalue(i+1,j,k) - vel->getScalarField(0)->lvalue(i,j,k)
