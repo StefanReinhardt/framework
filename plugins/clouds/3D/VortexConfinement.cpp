@@ -108,9 +108,9 @@ void VortexConfinement::apply(SimObject::Ptr so)
 			}
 
 	//Calculate vorticity Gradient N = (nabla n) / ||n||
-	for( int k=1;k<res.z-1;++k )
-		for( int j=1;j<res.y-1;++j )
-			for( int i=1;i<res.x-1;++i )
+	for( int k=2;k<res.z-2;++k )
+		for( int j=2;j<res.y-2;++j )
+			for( int i=2;i<res.x-2;++i )
 			{
 
 				vel_x->lvalue(i,j,k) +=  m_dt*(force->getScalarField(0)->lvalue(i-1,j,k)+force->getScalarField(0)->lvalue(i,j,k))/2 * cd->m_parms.m_vorticity;

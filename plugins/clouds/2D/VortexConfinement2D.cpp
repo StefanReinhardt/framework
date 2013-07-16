@@ -74,8 +74,8 @@ void VortexConfinement2D::apply(SimObject::Ptr so)
 
 	//Calculate vorticity Gradient N = (nabla n) / ||n||
 	//for( int k=2;k<res.z-3;++k )
-		for( int j=1;j<res.y-1;++j )
-			for( int i=1;i<res.x-1;++i )
+		for( int j=2;j<res.y-2;++j )
+			for( int i=2;i<res.x-2;++i )
 			{
 				//calc nabla n for x and y by central difference
 				nab_nx = (abs(vorticity->lvalue(i+1,j,k)) - abs(vorticity->lvalue(i-1,j,k)))/2;
@@ -94,8 +94,10 @@ void VortexConfinement2D::apply(SimObject::Ptr so)
 
 				// F = N x vorticity
 				// F = Nx * vort_y - Ny * vort_x
-				vel_x->lvalue(i,j,k) +=	-	ny * ( vorticity->lvalue(i,j,k) + vorticity->lvalue(i-1,j,k) ) * 0.5f * cd->m_parms.m_vorticity * m_dt;
-				vel_y->lvalue(i,j,k) +=		nx * ( vorticity->lvalue(i,j,k) + vorticity->lvalue(i,j-1,k) ) * 0.5f * cd->m_parms.m_vorticity * m_dt;
+				//if(i>1 && i<res.x-2)
+					vel_x->lvalue(i,j,k) +=	-	ny * ( vorticity->lvalue(i,j,k) + vorticity->lvalue(i-1,j,k) ) * 0.5f * cd->m_parms.m_vorticity * m_dt;
+				//if(j>1 && j<res.y-2)
+					vel_y->lvalue(i,j,k) +=		nx * ( vorticity->lvalue(i,j,k) + vorticity->lvalue(i,j-1,k) ) * 0.5f * cd->m_parms.m_vorticity * m_dt;
 				//vel_y->lvalue(i,j,k) = vel_y->evaluate(math::V3f(i+0.5f,j,k+0.5f));
 				//vel_x->lvalue(i,j,k) = vel_x->evaluate(math::V3f(i,j+0.5f,k+0.5f));
 			}

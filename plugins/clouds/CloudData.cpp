@@ -116,6 +116,8 @@ void CloudData::reset()
 				qv->lvalue(i,j,k) = 		m_qs * m_parms.m_hum;
 			}
 
+	m_qv1 = qv->lvalue(0,m_resolution.y-1,0);
+
 	//pt->fill(305.0,math::Box3f(0.4f,0.05f,0.4f,0.60f,0.91f,0.6f));
 
 }
@@ -339,8 +341,8 @@ void CloudData::setBounds(int b, ScalarField::Ptr f)
 			for( int k=0;k<res.z;++k )
 				for( int i=0;i<res.x;++i )
 				{
-					f->lvalue(i,0,k) = 0;
-					f->lvalue(i,res.y-1,k) = 0;
+					//f->lvalue(i,0,k) = 0;
+					//f->lvalue(i,res.y-1,k) = 0;
 				}
 
 			// frontBack = periodic?
@@ -527,7 +529,7 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 				for( int i=0;i<res.x;++i )
 				{
 					//f->lvalue(i,0,k) = 33.3f;
-					f->lvalue(i,res.y-1,k) = 0;
+					f->lvalue(i,res.y-1,k) = m_qv1;
 				}
 			// frontBack = periodic?
 			for( int j=0;j<res.y;++j )

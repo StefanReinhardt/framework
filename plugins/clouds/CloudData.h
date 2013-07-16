@@ -71,6 +71,8 @@ public:
 	float                                m_exner;
 	float                                m_qs;
 
+	float                                m_qv1;
+
 	std::vector<float>                   m_tLut;			// absolute Temperature at altitude in K
 	std::vector<float>                   m_pLut;			// absolute Pressure at altitude in kPa
 
