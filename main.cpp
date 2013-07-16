@@ -75,7 +75,7 @@ int main(int argc, char ** argv)
 		//***********************************************************************************************
 		// setup Nodes 2D
 		//***********************************************************************************************
-/*
+
 
 
 
@@ -131,7 +131,7 @@ int main(int argc, char ** argv)
 		// setup Nodes 2D end
 		//***********************************************************************************************
 
-*/
+
 		//***********************************************************************************************
 		// setup Nodes 3D
 		//***********************************************************************************************
@@ -139,11 +139,11 @@ int main(int argc, char ** argv)
 
 
 		//********** ADVECT FIELDS
-
+/*
 		// Advect Density
 		Advect::Ptr advectDensity = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect density" ));
 		advectDensity->setType("density", "velocity", true);
-/*
+
 		// Advect qv
 		Advect::Ptr advectQv = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect qv" ));
 		advectQv->setType("qv", "velocity", true);
@@ -155,12 +155,11 @@ int main(int argc, char ** argv)
 		// Advect pt
 		Advect::Ptr advectPt = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect qc" ));
 		advectPt->setType("pt", "velocity", false);
-*/
+
 		// Advect Velocity
 		Advect::Ptr advectVelocity = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect velocity" ));
 		advectVelocity->setType("velocity", "velocity", false);
-
-
+*/
 
 
 /*
@@ -175,7 +174,6 @@ int main(int argc, char ** argv)
 
 		// Add Heat Src
 		AddHeatSource::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource>(solver->createOperator( "AddHeatSource", "add heat field" ));
-*/
 
 		// Vortex confinement
 		VortexConfinement::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement>(solver->createOperator("VortexConfinement", "add curls back in"));
@@ -185,7 +183,7 @@ int main(int argc, char ** argv)
 		// Project
 		Project::Ptr project = std::dynamic_pointer_cast<Project>(solver->createOperator( "Project", "projection step" ) );
 		project->setField("velocity");
-
+*/
 
 
 		//***********************************************************************************************
@@ -221,6 +219,7 @@ int main(int argc, char ** argv)
 	if( QApplication::arguments().size() >= 3 )
 		nodename = QApplication::arguments()[2];
 
+	if(1)
 	{
 		// load graph
 		core::Graph::Ptr graph = core::load( graphfilename );
@@ -233,7 +232,7 @@ int main(int argc, char ** argv)
 		core::Timer timer;
 		timer.start();
 
-		graph->render( node, 1, 500 );
+		graph->render( node, 1, 6000 );
 
 		timer.stop();
 		qCritical() << "time taken: " << timer.elapsedSeconds() << "s";

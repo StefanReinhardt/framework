@@ -47,7 +47,7 @@ void CloudData::initialize()
 	velocity->getScalarField(0)->fill(0.0f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.4f,0.6f));
 
 	velocity->getScalarField(1)->fill(0.0f);
-	velocity->getScalarField(1)->fill(1.0f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.4f,0.6f));
+	velocity->getScalarField(1)->fill(0.0f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.4f,0.6f));
 
 	velocity->getScalarField(2)->fill(0.0f);
 	velocity->getScalarField(2)->fill(0.0f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.4f,0.6f));

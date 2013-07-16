@@ -17,8 +17,8 @@ CreateClouds::CreateClouds() : core::GraphNode()
 	m_cloudParms.m_buoyancy =    0.8f;
 	m_cloudParms.m_vorticity =   0.123456789f;
 	m_cloudParms.m_wind =        0.0f;
-	m_cloudParms.m_heatSrc =     3.0f;
-	m_cloudParms.m_resolution =  math::Vec3i(100,100,100);
+	m_cloudParms.m_heatSrc =     0.15f;
+	m_cloudParms.m_resolution =  math::Vec3i(512,512,1);
 
 
 

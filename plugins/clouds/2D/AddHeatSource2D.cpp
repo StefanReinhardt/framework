@@ -6,7 +6,7 @@
 AddHeatSource2D::AddHeatSource2D()
 {
 	srand(time(NULL));
-	m_scale = 30.0f;
+	m_scale = 10.0f;
 	m_contrast = 5.0f;
 	m_add = 0.0f;
 	m_dt = 1.0f;
@@ -21,14 +21,14 @@ void AddHeatSource2D::apply(SimObject::Ptr so)
 	math::V3i res = pt->getResolution();
 
 	int k = 0;
-	float t  = -core::getVariable("$F").toFloat()*0.05f;
+	float t  = -core::getVariable("$F").toFloat()*0.02f;
 	float random;
 	math::PerlinNoise noise = math::PerlinNoise();
 
 	math::V3f wPos;
 
 	int height = int(ceil(res.y/70.0f));
-	int size = int(res.x/3.3);
+	int size = int(res.x/2.7);
 	for (int j=0; j<height+1; ++j)
 		for( int i=size;i<res.x-size;++i )
 		{
