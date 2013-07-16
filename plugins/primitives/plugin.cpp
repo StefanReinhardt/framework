@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "ScalarField.h"
 #include "VectorField.h"
+#include "Attribute.h"
 
 
 
@@ -15,6 +16,7 @@ struct PrimitivesPlugin : public core::Plugin
 		core->addDataFactory( core::DataFactoryT<Camera>::create(Camera::staticMetaObject.className(), "camera primitive") );
 		core->addDataFactory( core::DataFactoryT<ScalarField>::create(ScalarField::staticMetaObject.className(), "scalar field") );
 		core->addDataFactory( core::DataFactoryT<VectorField>::create(VectorField::staticMetaObject.className(), "vector field") );
+		core->addDataFactory( core::DataFactoryT<Attribute>::create(Attribute::staticMetaObject.className(), "attribute") );
 	}
 };
 

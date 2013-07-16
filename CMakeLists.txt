@@ -28,6 +28,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # Widgets finds its own dependencies.
 find_package(Qt5Widgets REQUIRED)
+find_package(Qt5OpenGL REQUIRED)
 
 
 # sources ==========================================
@@ -42,4 +43,8 @@ file(GLOB_RECURSE app_sources ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp ${CMAKE_CURRENT_
 # executeable =====================================
 add_executable(${APP_NAME} ${app_sources})
 
-qt5_use_modules(${APP_NAME} Widgets)
+qt5_use_modules(${APP_NAME} Widgets OpenGL)
+
+# OpenGL
+INCLUDE(FindOpenGL)
+target_link_libraries(${APP_NAME} ${OPENGL_gl_LIBRARY})
