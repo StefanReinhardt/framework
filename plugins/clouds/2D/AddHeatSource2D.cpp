@@ -7,6 +7,7 @@ AddHeatSource2D::AddHeatSource2D()
 {
 	srand(time(NULL));
 
+
 	m_frequency =      15.0f;	// frequency of the input noise
 	m_contrast =       5.0f;	// contrast of the noise pattern
 	m_emitterSize =    0.50f;	// size of the ground input field (between 0.0 and 1.0)
@@ -14,6 +15,7 @@ AddHeatSource2D::AddHeatSource2D()
 	m_dt =             1.0f;	// timestep
 	m_animationSpeed = 0.05f;	// speed of the animated noise
 	m_tempInput =      5.0f;	// Temp input in 1/100 °C per second
+
 }
 
 
@@ -24,6 +26,7 @@ void AddHeatSource2D::apply(SimObject::Ptr so)
 
 	ScalarField::Ptr pt = cd->getSubData<ScalarField>("pt");
 	math::V3i res = pt->getResolution();
+
 
 	math::PerlinNoise noise = math::PerlinNoise();
 	math::V3f wPos;

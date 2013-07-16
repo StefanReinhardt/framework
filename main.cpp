@@ -136,8 +136,7 @@ int main(int argc, char ** argv)
 		//***********************************************************************************************
 		// setup Nodes 2D end
 		//***********************************************************************************************
-/*
-*/
+
 		//***********************************************************************************************
 		// setup Nodes 3D
 		//***********************************************************************************************
@@ -145,7 +144,7 @@ int main(int argc, char ** argv)
 /*
 
 		//********** ADVECT FIELDS
-
+/*
 		// Advect Density
 		Advect::Ptr advectDensity = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect density" ));
 		advectDensity->setType("density", "velocity", true);
@@ -165,8 +164,7 @@ int main(int argc, char ** argv)
 		// Advect Velocity
 		Advect::Ptr advectVelocity = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect velocity" ));
 		advectVelocity->setType("velocity", "velocity", false);
-
-
+*/
 
 
 
@@ -182,10 +180,13 @@ int main(int argc, char ** argv)
 
 		// Add Heat Src
 		AddHeatSource::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource>(solver->createOperator( "AddHeatSource", "add heat field" ));
+<<<<<<< HEAD
 		heatInput->setAnimationSpeed(0.05f);
 		heatInput->setContrast(5.0f);
 		heatInput->setEmitterSize(0.5333333f);
 		heatInput->setFrequence(15.0f);
+=======
+>>>>>>> 55bef5d01e38dfd7df7697a628f81b3c809548af
 
 		// Vortex confinement
 		VortexConfinement::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement>(solver->createOperator("VortexConfinement", "add curls back in"));
@@ -195,8 +196,13 @@ int main(int argc, char ** argv)
 		// Project
 		Project::Ptr project = std::dynamic_pointer_cast<Project>(solver->createOperator( "Project", "projection step" ) );
 		project->setField("velocity");
+<<<<<<< HEAD
 
 */
+=======
+*/
+
+>>>>>>> 55bef5d01e38dfd7df7697a628f81b3c809548af
 
 		//***********************************************************************************************
 		// setup Nodes 3D end
@@ -231,6 +237,7 @@ int main(int argc, char ** argv)
 	if( QApplication::arguments().size() >= 3 )
 		nodename = QApplication::arguments()[2];
 
+	if(1)
 	{
 		// load graph
 		core::Graph::Ptr graph = core::load( graphfilename );
@@ -243,7 +250,11 @@ int main(int argc, char ** argv)
 		core::Timer timer;
 		timer.start();
 
+<<<<<<< HEAD
 		graph->render( node, 1, 800 );
+=======
+		graph->render( node, 1, 6000 );
+>>>>>>> 55bef5d01e38dfd7df7697a628f81b3c809548af
 
 		timer.stop();
 		qCritical() << "time taken: " << timer.elapsedSeconds() << "s";
