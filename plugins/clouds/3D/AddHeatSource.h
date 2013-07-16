@@ -11,13 +11,23 @@ public:
 
 	virtual void apply( SimObject::Ptr so )override;
 
-	// overloads from Data
-	//virtual void                       store( QJsonObject &o, QJsonDocument &doc );
-	//virtual void                       load( QJsonObject &o );
+	void                                setAnimationSpeed(float speed);
+	void                                setContrast(float contrast);
+	void                                setEmitterSize(float size);
+	void                                setFrequence(float frequency);
+	void                                setTemperature(float temp);
+
 private:
-	float                                m_scale;
+	float                                m_frequency;
+	float                                m_emitterSize;
 	float                                m_contrast;
 	float                                m_add;
 	float                                m_dt;
+	float                                m_animationSpeed;
+	float                                m_tempInput;
+
+	// overloads from Data
+	virtual void                       store( QJsonObject &o, QJsonDocument &doc );
+	virtual void                       load( QJsonObject &o );
 
 };

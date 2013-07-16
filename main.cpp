@@ -75,7 +75,7 @@ int main(int argc, char ** argv)
 		//***********************************************************************************************
 		// setup Nodes 2D
 		//***********************************************************************************************
-/*
+
 
 
 
@@ -106,6 +106,7 @@ int main(int argc, char ** argv)
 		// buoyancy and vort Conf should have same vel input field.
 		// Buoyancy
 		Buoyancy2D::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy2D>(solver->createOperator( "Buoyancy2D", "apply buoyant Force" ));
+		buoyantForce->setStrenght(0.8f);
 
 		// Vortex confinement
 		VortexConfinement2D::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement2D>(solver->createOperator("VortexConfinement2D", "add curls back in"));
@@ -119,6 +120,11 @@ int main(int argc, char ** argv)
 
 		// Add Heat Src
 		AddHeatSource2D::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource2D>(solver->createOperator( "AddHeatSource2D", "add heat field" ));
+		heatInput->setAnimationSpeed(0.05f);
+		heatInput->setContrast(5.0f);
+		heatInput->setEmitterSize(0.2333333f);
+		heatInput->setFrequence(15.0f);
+		heatInput->setTemperature(50.0f);
 
 		//********** PROJECT
 		// Project
@@ -130,20 +136,20 @@ int main(int argc, char ** argv)
 		//***********************************************************************************************
 		// setup Nodes 2D end
 		//***********************************************************************************************
-
+/*
 */
 		//***********************************************************************************************
 		// setup Nodes 3D
 		//***********************************************************************************************
 
-
+/*
 
 		//********** ADVECT FIELDS
 
 		// Advect Density
 		Advect::Ptr advectDensity = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect density" ));
 		advectDensity->setType("density", "velocity", true);
-/*
+
 		// Advect qv
 		Advect::Ptr advectQv = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect qv" ));
 		advectQv->setType("qv", "velocity", true);
@@ -155,7 +161,7 @@ int main(int argc, char ** argv)
 		// Advect pt
 		Advect::Ptr advectPt = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect qc" ));
 		advectPt->setType("pt", "velocity", false);
-*/
+
 		// Advect Velocity
 		Advect::Ptr advectVelocity = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect velocity" ));
 		advectVelocity->setType("velocity", "velocity", false);
@@ -163,7 +169,7 @@ int main(int argc, char ** argv)
 
 
 
-/*
+
 		//********** SOLVE FOR QC & QV & PT
 		// Watercontinuity
 		WaterContinuity::Ptr WaterCont = std::dynamic_pointer_cast<WaterContinuity>(solver->createOperator( "WaterContinuity", "water continuity" ));
@@ -172,10 +178,14 @@ int main(int argc, char ** argv)
 
 		// Buoyancy
 		Buoyancy::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy>(solver->createOperator( "Buoyancy", "apply buoyant Force" ));
+		buoyantForce->setStrenght(0.8f);
 
 		// Add Heat Src
 		AddHeatSource::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource>(solver->createOperator( "AddHeatSource", "add heat field" ));
-*/
+		heatInput->setAnimationSpeed(0.05f);
+		heatInput->setContrast(5.0f);
+		heatInput->setEmitterSize(0.5333333f);
+		heatInput->setFrequence(15.0f);
 
 		// Vortex confinement
 		VortexConfinement::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement>(solver->createOperator("VortexConfinement", "add curls back in"));
@@ -186,7 +196,7 @@ int main(int argc, char ** argv)
 		Project::Ptr project = std::dynamic_pointer_cast<Project>(solver->createOperator( "Project", "projection step" ) );
 		project->setField("velocity");
 
-
+*/
 
 		//***********************************************************************************************
 		// setup Nodes 3D end
@@ -233,7 +243,7 @@ int main(int argc, char ** argv)
 		core::Timer timer;
 		timer.start();
 
-		graph->render( node, 1, 500 );
+		graph->render( node, 1, 800 );
 
 		timer.stop();
 		qCritical() << "time taken: " << timer.elapsedSeconds() << "s";
