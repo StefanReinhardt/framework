@@ -234,6 +234,7 @@ int main(int argc, char ** argv)
 		timer.start();
 
 		graph->render( node, 1, 500 );
+
 		timer.stop();
 		qCritical() << "time taken: " << timer.elapsedSeconds() << "s";
 	}
