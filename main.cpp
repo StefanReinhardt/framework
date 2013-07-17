@@ -6,27 +6,6 @@
 
 
 
-
-// these includes are here only for building the graph in code =========================
-#include <plugins/sim/Solver.h>
-
-#include <plugins/clouds/2D/Advect2D.h>
-#include <plugins/clouds/2D/Project2D.h>
-#include <plugins/clouds/2D/WaterContinuity2D.h>
-#include <plugins/clouds/2D/AddSource2D.h>
-#include <plugins/clouds/2D/Buoyancy2D.h>
-#include <plugins/clouds/2D/VortexConfinement2D.h>
-#include <plugins/clouds/2D/AddHeatSource2D.h>
-
-#include <plugins/clouds/3D/Advect.h>
-#include <plugins/clouds/3D/Project.h>
-#include <plugins/clouds/3D/WaterContinuity.h>
-#include <plugins/clouds/3D/Buoyancy.h>
-#include <plugins/clouds/3D/AddHeatSource.h>
-#include <plugins/clouds/3D/AddHeatSource.h>
-#include <plugins/clouds/3D/VortexConfinement.h>
-
-
 void logger(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
 	QByteArray localMsg = msg.toLocal8Bit();
@@ -69,7 +48,8 @@ public:
 	}
 };
 
-extern core::Graph::Ptr grandyn_demo1();
+extern core::Graph::Ptr clouds_graph1();
+//extern core::Graph::Ptr grandyn_demo1();
 
 int main(int argc, char ** argv)
 {
@@ -84,160 +64,22 @@ int main(int argc, char ** argv)
 		app.setOrganizationName("app");
 		app.setApplicationName("app");
 		return app.exec();
-	}
-	if( standalone )
+	}else
 	{
 		// Standalone/commandline ================
 		StandaloneApplication app(argc, argv);
 		app.setOrganizationName("app");
 		app.setApplicationName("app");
 
-		// standalone
-		// generate and serialize graph
+		// generate and serialize some hardcoded graph if there are no arguments
 		if(QApplication::arguments().size()<2)
 		{
-
-			core::Graph::Ptr graph = std::make_shared<core::Graph>();
-
-			// create nodes
-			//core::GraphNode::Ptr cloudImport = graph->createNode("ImportClouds");
-			core::GraphNode::Ptr cloudCreate = graph->createNode("CreateClouds");
-			Solver::Ptr solver = std::dynamic_pointer_cast<Solver>(graph->createNode("Solver", "solver"));
-			core::GraphNode::Ptr cloudExport = graph->createNode("ExportClouds", "export");
-
-			//***********************************************************************************************
-			// setup Nodes 2D
-			//***********************************************************************************************
-
-
-
-
-			//********** ADVECT FIELDS
-
-			// Advect Density
-			Advect2D::Ptr advectDensity = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect density" ));
-			advectDensity->setType("density", "velocity", false);
-
-			// Advect qv
-			Advect2D::Ptr advectQv = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect qv" ));
-			advectQv->setType("qv", "velocity", true);
-
-			// Advect qc
-			Advect2D::Ptr advectQc = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect qc" ));
-			advectQc->setType("qc", "velocity", false);
-
-			// Advect pt
-			Advect2D::Ptr advectPt = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect qc" ));
-			advectPt->setType("pt", "velocity", false);
-
-			// Advect Velocity
-			Advect2D::Ptr advectVelocity = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect velocity" ));
-			advectVelocity->setType("velocity", "velocity", false);
-
-
-			//********** ADD FORCES
-			// buoyancy and vort Conf should have same vel input field.
-			// Buoyancy
-			Buoyancy2D::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy2D>(solver->createOperator( "Buoyancy2D", "apply buoyant Force" ));
-
-			// Vortex confinement
-			VortexConfinement2D::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement2D>(solver->createOperator("VortexConfinement2D", "add curls back in"));
-			vortConf->setField("velocity");
-
-
-			//********** SOLVE FOR QC & QV & PT
-			// Watercontinuity
-			WaterContinuity2D::Ptr WaterCont = std::dynamic_pointer_cast<WaterContinuity2D>(solver->createOperator( "WaterContinuity2D", "water continuity" ));
-
-
-			// Add Heat Src
-			AddHeatSource2D::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource2D>(solver->createOperator( "AddHeatSource2D", "add heat field" ));
-
-			//********** PROJECT
-			// Project
-			Project2D::Ptr project = std::dynamic_pointer_cast<Project2D>(solver->createOperator( "Project2D", "projection step" ) );
-			project->setField("velocity");
-
-
-
-			//***********************************************************************************************
-			// setup Nodes 2D end
-			//***********************************************************************************************
-
-
-			//***********************************************************************************************
-			// setup Nodes 3D
-			//***********************************************************************************************
-
-
-
-			//********** ADVECT FIELDS
-	/*
-			// Advect Density
-			Advect::Ptr advectDensity = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect density" ));
-			advectDensity->setType("density", "velocity", true);
-
-			// Advect qv
-			Advect::Ptr advectQv = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect qv" ));
-			advectQv->setType("qv", "velocity", true);
-
-			// Advect qc
-			Advect::Ptr advectQc = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect qc" ));
-			advectQc->setType("qc", "velocity", false);
-
-			// Advect pt
-			Advect::Ptr advectPt = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect qc" ));
-			advectPt->setType("pt", "velocity", false);
-
-			// Advect Velocity
-			Advect::Ptr advectVelocity = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect velocity" ));
-			advectVelocity->setType("velocity", "velocity", false);
-	*/
-
-
-	/*
-			//********** SOLVE FOR QC & QV & PT
-			// Watercontinuity
-			WaterContinuity::Ptr WaterCont = std::dynamic_pointer_cast<WaterContinuity>(solver->createOperator( "WaterContinuity", "water continuity" ));
-
-			//********** ADD FORCES
-
-			// Buoyancy
-			Buoyancy::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy>(solver->createOperator( "Buoyancy", "apply buoyant Force" ));
-
-			// Add Heat Src
-			AddHeatSource::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource>(solver->createOperator( "AddHeatSource", "add heat field" ));
-
-			// Vortex confinement
-			VortexConfinement::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement>(solver->createOperator("VortexConfinement", "add curls back in"));
-			vortConf->setField("velocity");
-
-			//********** PROJECT
-			// Project
-			Project::Ptr project = std::dynamic_pointer_cast<Project>(solver->createOperator( "Project", "projection step" ) );
-			project->setField("velocity");
-	*/
-
-
-			//***********************************************************************************************
-			// setup Nodes 3D end
-			//***********************************************************************************************
-
-			//
-			// set inputs
-			//cloudImport->getSocket("file")->setString("$HERE/cloud_initial.bgeo");
-			cloudExport->getSocket("file")->setString("$HERE/cloud_output.$F4.bgeo");
-
-			// make connections
-			graph->addConnection( cloudCreate, "output", solver, "input" );
-			//graph->addConnection( cloudImport, "output", solver, "input" );
-			graph->addConnection( "$F", solver, "frame" );
-			graph->addConnection( solver, "output", cloudExport, "input" );
+			core::Graph::Ptr graph = clouds_graph1();
 
 			// save graph
 			core::save( "$HERE/test.json", graph );
-
 		}
+
 		// debug
 		// deserialize and execute local graph if no arguments are given
 		QString graphfilename = "$HERE/test.json";
@@ -262,14 +104,14 @@ int main(int argc, char ** argv)
 
 			graph->print();
 
-			// find node which saves cloud data to disk
+			// find node to render
 			core::GraphNode::Ptr node = graph->getNode( nodename );
 
-			// evaluate this node for 10 frames
+			// evaluate this node for some frames
 			core::Timer timer;
 			timer.start();
 
-			graph->render( node, 1, 6000 );
+			graph->render( node, 1, 2 );
 
 			timer.stop();
 			qCritical() << "time taken: " << timer.elapsedSeconds() << "s";

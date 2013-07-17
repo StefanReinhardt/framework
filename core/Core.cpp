@@ -277,10 +277,15 @@ namespace core
 		addDataFactory( DataFactoryT<GraphNodeSocket>::create(GraphNodeSocket::staticMetaObject.className(), "used to establish node connections") );
 
 		// TODO: these should be loaded from dlls
-		m_plugins.push_back(getPlugin_primitives( g_core ));
-		m_plugins.push_back(getPlugin_houdini( g_core ));
-		m_plugins.push_back(getPlugin_clouds( g_core ));
-		m_plugins.push_back(getPlugin_sim( g_core ));
+		loadPlugin(getPlugin_primitives);
+		loadPlugin(getPlugin_houdini);
+		loadPlugin(getPlugin_clouds);
+		loadPlugin(getPlugin_sim);
+	}
+
+	void Core::loadPlugin(std::function<Plugin::Ptr(Core::Ptr)> entrypoint )
+	{
+		m_plugins.push_back(entrypoint( g_core ));
 	}
 
 	// used during load/save -------------------
