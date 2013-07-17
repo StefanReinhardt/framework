@@ -86,16 +86,17 @@ core::Graph::Ptr clouds_graph2D()
 	Advect2D::Ptr advectVelocity = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect velocity" ));
 	advectVelocity->setType("velocity", "velocity", false);
 
+	// Vortex confinement
+	VortexConfinement2D::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement2D>(solver->createOperator("VortexConfinement2D", "add curls back in"));
+	vortConf->setField("velocity");
+	vortConf->setStrenght(0.0511111f);
 
 	//********** ADD FORCES
 	// buoyancy and vort Conf should have same vel input field.
 	// Buoyancy
 	Buoyancy2D::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy2D>(solver->createOperator( "Buoyancy2D", "apply buoyant Force" ));
-	buoyantForce->setStrenght(0.8f);
+	buoyantForce->setStrenght(1.0f);
 
-	// Vortex confinement
-	VortexConfinement2D::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement2D>(solver->createOperator("VortexConfinement2D", "add curls back in"));
-	vortConf->setField("velocity");
 
 
 	//********** SOLVE FOR QC & QV & PT
@@ -105,11 +106,11 @@ core::Graph::Ptr clouds_graph2D()
 
 	// Add Heat Src
 	AddHeatSource2D::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource2D>(solver->createOperator( "AddHeatSource2D", "add heat field" ));
-	heatInput->setAnimationSpeed(0.05f);
+	heatInput->setAnimationSpeed(0.02f);
 	heatInput->setContrast(5.0f);
-	heatInput->setEmitterSize(0.2333333f);
+	heatInput->setEmitterSize(0.4333333f);
 	heatInput->setFrequence(15.0f);
-	heatInput->setTemperature(50.0f);
+	heatInput->setTemperature(15.0f);
 
 	//********** PROJECT
 	// Project
