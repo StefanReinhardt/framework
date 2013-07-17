@@ -324,7 +324,7 @@ namespace core
 		// deserialize
 		QJsonObject jsonData = m_deserializeJsonData[QString::number( id )].toObject();
 		QString type = jsonData["type"].toString();
-		std::cout << "CHECK " << type.toStdString()<<std::endl;
+
 		Data::Ptr data = createData( type );
 		m_deserializeMap[id] = data;
 
