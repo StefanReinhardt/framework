@@ -10,9 +10,5 @@ public:
 	typedef std::shared_ptr<WaterContinuity2D> Ptr;
 	WaterContinuity2D();
 
-	virtual void apply( SimObject::Ptr so )override;
-
-	// overloads from Data
-	//virtual void                       store( QJsonObject &o, QJsonDocument &doc );
-	//virtual void                       load( QJsonObject &o );
+	virtual void                         apply( SimObject::Ptr so, float dt )override;
 };

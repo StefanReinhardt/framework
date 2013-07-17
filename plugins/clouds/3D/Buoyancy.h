@@ -9,7 +9,7 @@ public:
 	typedef std::shared_ptr<Buoyancy> Ptr;
 	Buoyancy();
 
-	virtual void apply( SimObject::Ptr so )override;
+	virtual void                        apply( SimObject::Ptr so, float dt )override;
 
 	void                                setStrenght(float buoyancy);
 

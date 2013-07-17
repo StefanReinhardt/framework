@@ -17,7 +17,7 @@ void Advect2D::setType(QString field, QString vecField, bool periodic)
 	this->vecField = vecField;
 }
 
-void Advect2D::apply( SimObject::Ptr so)
+void Advect2D::apply( SimObject::Ptr so, float dt)
 {
 	if(advectionField==0 || vecField==0)
 	{

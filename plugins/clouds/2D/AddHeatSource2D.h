@@ -9,7 +9,7 @@ public:
 	typedef std::shared_ptr<AddHeatSource2D> Ptr;
 	AddHeatSource2D();
 
-	virtual void apply( SimObject::Ptr so )override;
+	virtual void                        apply( SimObject::Ptr so, float dt )override;
 
 	void                                setAnimationSpeed(float speed);
 	void                                setContrast(float contrast);

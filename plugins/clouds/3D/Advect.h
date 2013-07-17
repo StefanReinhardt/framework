@@ -19,20 +19,19 @@ public:
 	typedef std::shared_ptr<Advect> Ptr;
 	Advect();
 
-	virtual void apply( SimObject::Ptr so )override;
-
-	void	setType(QString field, QString vecField, bool periodic);
+	virtual void                        apply( SimObject::Ptr so, float dt )override;
+	void                                setType(QString field, QString vecField, bool periodic);
 
 
 	// overloads from Data
-	virtual void						store( QJsonObject &o, QJsonDocument &doc );
-	virtual void						load( QJsonObject &o );
+	virtual void                        store( QJsonObject &o, QJsonDocument &doc );
+	virtual void                        load( QJsonObject &o );
 
 private:
 	QString                             advectionField;
 	QString                             vecField;
 
-	void 								advect(ScalarField::Ptr field, ScalarField::Ptr field_old, VectorField::Ptr vecField);
+	void                                advect(ScalarField::Ptr field, ScalarField::Ptr field_old, VectorField::Ptr vecField);
 
 	//QString m_name;
 	bool                                m_periodic;

@@ -14,7 +14,7 @@ this->vortField = name;
 
 
 
-void VortexConfinement2D::apply(SimObject::Ptr so)
+void VortexConfinement2D::apply(SimObject::Ptr so, float dt)
 {
 	if (vortField == 0)
 	{

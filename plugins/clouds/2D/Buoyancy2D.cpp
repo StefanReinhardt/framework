@@ -13,7 +13,7 @@ Buoyancy2D::Buoyancy2D()
 
 
 
-void Buoyancy2D::apply(SimObject::Ptr so)
+void Buoyancy2D::apply(SimObject::Ptr so, float dt)
 {
 
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);

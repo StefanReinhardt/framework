@@ -14,7 +14,7 @@ void Project2D::setField(QString name)
 }
 
 
-void Project2D::apply( SimObject::Ptr so )
+void Project2D::apply( SimObject::Ptr so, float dt )
 {
 	qDebug() << "Project2D::apply";
 

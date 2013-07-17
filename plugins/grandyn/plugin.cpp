@@ -21,7 +21,7 @@ struct GrandynPlugin : public core::Plugin
 
 		// 2D
 		core->addDataFactory( core::DataFactoryT<Gravity2D>::create(Gravity2D::staticMetaObject.className(), "adds gravity force") );
-		//core->addDataFactory( core::DataFactoryT<Integrate2D>::create(Integrate2D::staticMetaObject.className(), "proceeds particles") );
+		core->addDataFactory( core::DataFactoryT<Integrate2D>::create(Integrate2D::staticMetaObject.className(), "proceeds particles") );
 	}
 };
 
@@ -51,6 +51,7 @@ core::Graph::Ptr grandyn_demo2D()
 
 	// setup solver =================
 	solver->createOperator("Gravity2D", "gravity force");
+	solver->createOperator("Integrate2D", "integrate");
 
 
 	return graph;

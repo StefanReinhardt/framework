@@ -9,12 +9,12 @@ VortexConfinement::VortexConfinement()
 
 void VortexConfinement::setField(QString name)
 {
-this->vortField = name;
+	this->vortField = name;
 }
 
 
 
-void VortexConfinement::apply(SimObject::Ptr so)
+void VortexConfinement::apply(SimObject::Ptr so, float dt)
 {
 	if (vortField == 0)
 	{
