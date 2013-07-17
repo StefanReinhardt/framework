@@ -47,8 +47,6 @@ public:
 	}
 };
 
-extern core::Graph::Ptr clouds_graph2D();
-//extern core::Graph::Ptr grandyn_demo1();
 
 // seems like QCoreApplication::arguments() has a bug causing memory explosion...
 QStringList arguments( int argc, char ** argv )
@@ -65,6 +63,18 @@ QStringList arguments( int argc, char ** argv )
 	return list;
 }
 
+extern core::Plugin::Ptr getPlugin_clouds( core::Core::Ptr core );
+extern core::Plugin::Ptr getPlugin_grandyn( core::Core::Ptr core );
+
+extern core::Graph::Ptr clouds_graph2D();
+extern core::Graph::Ptr grandyn_demo2D();
+
+void loadPlugins()
+{
+	core::loadPlugin(getPlugin_clouds);
+	core::loadPlugin(getPlugin_grandyn);
+}
+
 int main(int argc, char ** argv)
 {
 	QStringList args = arguments(argc, argv);
@@ -78,6 +88,7 @@ int main(int argc, char ** argv)
 		frontend::Application app(argc, argv);
 		app.setOrganizationName("app");
 		app.setApplicationName("app");
+		loadPlugins();
 		return app.exec();
 	}else
 	{
@@ -85,11 +96,13 @@ int main(int argc, char ** argv)
 		StandaloneApplication app(argc, argv);
 		app.setOrganizationName("app");
 		app.setApplicationName("app");
+		loadPlugins();
 
 		// generate and serialize some hardcoded graph if there are no arguments
 		if(args.size()<2)
 		{
-			core::Graph::Ptr graph = clouds_graph2D();
+			//core::Graph::Ptr graph = clouds_graph2D();
+			core::Graph::Ptr graph = grandyn_demo2D();
 
 			// save graph
 			core::save( "$HERE/test.json", graph );
@@ -99,7 +112,7 @@ int main(int argc, char ** argv)
 		// deserialize and execute local graph if no arguments are given
 		QString graphfilename = "$HERE/test.json";
 		QString nodename = "export";
-		int numFrames = 1;
+		int numFrames = 10;
 
 
 		//arguments:
@@ -138,7 +151,6 @@ int main(int argc, char ** argv)
 			}else
 				qCritical() << "unable to find node " << nodename;
 		}
-
 	}
 
 	qDebug() << "EXIT";

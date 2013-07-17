@@ -54,6 +54,11 @@ namespace core
 		return g_core->createData( type );
 	}
 
+	bool loadPlugin( std::function<Plugin::Ptr(Core::Ptr)> entrypoint )
+	{
+		return g_core->loadPlugin(entrypoint);
+	}
+
 	Core::Ptr instance()
 	{
 		return g_core;
@@ -200,18 +205,11 @@ namespace core
 		return graph;
 	}
 
-	void Core::save( const QString &filename, Graph::Ptr graph )
+	bool Core::save( const QString &filename, Graph::Ptr graph )
 	{
-		// open new file
-		qDebug() << "saving file " << filename;
-		QFile file;
-		file.setFileName(filename);
-		file.open(QIODevice::WriteOnly | QIODevice::Text);
-
+		m_serializationFailed = false;
 
 		m_serializeDoc = QJsonDocument();
-
-
 		QJsonObject root = m_serializeDoc.object();
 
 		//
@@ -233,9 +231,17 @@ namespace core
 		// we store the id of the graph object
 		root.insert("graph", graphObj);
 
-
 		m_serializeDoc.setObject(root);
-		file.write( m_serializeDoc.toJson() );
+
+		if(!m_serializationFailed)
+		{
+			// open new file
+			qDebug() << "saving file " << filename;
+			QFile file;
+			file.setFileName(filename);
+			file.open(QIODevice::WriteOnly | QIODevice::Text);
+			file.write( m_serializeDoc.toJson() );
+		}
 
 
 		// clean up
@@ -243,6 +249,8 @@ namespace core
 		m_deserializeMap.clear();
 		m_deserializeJsonData = QJsonObject();
 		m_serializeDoc = QJsonDocument();
+
+		return m_serializationFailed;
 	}
 
 	Core::Core()
@@ -279,13 +287,20 @@ namespace core
 		// TODO: these should be loaded from dlls
 		loadPlugin(getPlugin_primitives);
 		loadPlugin(getPlugin_houdini);
-		loadPlugin(getPlugin_clouds);
 		loadPlugin(getPlugin_sim);
+
 	}
 
-	void Core::loadPlugin(std::function<Plugin::Ptr(Core::Ptr)> entrypoint )
+	bool Core::loadPlugin(std::function<Plugin::Ptr(Core::Ptr)> entrypoint )
 	{
 		m_plugins.push_back(entrypoint( g_core ));
+
+		return true;
+	}
+
+	bool Core::canCreate( const QString &type )
+	{
+		return m_factories.find(type) != m_factories.end();
 	}
 
 	// used during load/save -------------------
@@ -295,6 +310,12 @@ namespace core
 		if( it != m_serializeMap.end() )
 			return it->second.first;
 
+		// sanity check : datatype has to be recognized
+		if( !canCreate(data->metaObject()->className()) )
+		{
+			qCritical() << "unable to serialize data of type " << data->metaObject()->className();
+			return QJsonValue(-1);
+		}
 
 		// id and json object into which we will serialize data
 		int id = (int)m_serializeMap.size();
