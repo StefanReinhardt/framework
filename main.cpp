@@ -69,6 +69,7 @@ public:
 	}
 };
 
+extern core::Graph::Ptr grandyn_demo1();
 
 int main(int argc, char ** argv)
 {
