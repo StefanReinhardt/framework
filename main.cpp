@@ -40,7 +40,6 @@ public:
 		core::init();
 		core::setVariable( "$HERE", applicationDirPath() );
 	}
-
 	virtual ~StandaloneApplication()
 	{
 		//  shutdown core =======================
@@ -48,11 +47,27 @@ public:
 	}
 };
 
-extern core::Graph::Ptr clouds_graph1();
+extern core::Graph::Ptr clouds_graph2D();
 //extern core::Graph::Ptr grandyn_demo1();
+
+// seems like QCoreApplication::arguments() has a bug causing memory explosion...
+QStringList arguments( int argc, char ** argv )
+{
+	QStringList list;
+
+	const int ac = argc;
+	char ** const av = argv;
+	list.reserve(ac);
+
+	for (int a = 0; a < ac; ++a)
+		list << QString::fromLocal8Bit(av[a]);
+
+	return list;
+}
 
 int main(int argc, char ** argv)
 {
+	QStringList args = arguments(argc, argv);
 	bool standalone = true;
 
 	qInstallMessageHandler(logger);
@@ -72,10 +87,9 @@ int main(int argc, char ** argv)
 		app.setApplicationName("app");
 
 		// generate and serialize some hardcoded graph if there are no arguments
-		//if(QApplication::arguments().size()<2)
-		if(0)
+		if(args.size()<2)
 		{
-			core::Graph::Ptr graph = clouds_graph1();
+			core::Graph::Ptr graph = clouds_graph2D();
 
 			// save graph
 			core::save( "$HERE/test.json", graph );
@@ -85,15 +99,20 @@ int main(int argc, char ** argv)
 		// deserialize and execute local graph if no arguments are given
 		QString graphfilename = "$HERE/test.json";
 		QString nodename = "export";
+		int numFrames = 1;
+
 
 		//arguments:
 		// 0 - executeable filename
 		// 1 - graph filepath
 		// 2 - nodename to evaluate
-		if( QApplication::arguments().size() >= 2 )
-			graphfilename = QApplication::arguments()[1];
-		if( QApplication::arguments().size() >= 3 )
-			nodename = QApplication::arguments()[2];
+		// 3 - number of frames
+		if( args.size() >= 2 )
+			graphfilename = args[1];
+		if( args.size() >= 3 )
+			nodename = args[2];
+		if( args.size() >= 4 )
+			numFrames = args[3].toInt();
 
 		if(1)
 		{
@@ -108,9 +127,18 @@ int main(int argc, char ** argv)
 			// find node to render
 			core::GraphNode::Ptr node = graph->getNode( nodename );
 
-			// evaluate this node for some frames
-			graph->render( node, 1, 2 );
+			if( node )
+			{
+				core::Timer timer;
+				timer.start();
+				// evaluate this node for some frames
+				graph->render( node, 1, numFrames );
+				timer.stop();
+				qDebug() << "time taken: " << timer.elapsedSeconds() << "s";
+			}else
+				qCritical() << "unable to find node " << nodename;
 		}
+
 	}
 
 	qDebug() << "EXIT";

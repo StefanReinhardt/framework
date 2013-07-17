@@ -54,21 +54,14 @@ struct CloudsPlugin : public core::Plugin
 
 
 
-core::Graph::Ptr clouds_graph1()
+core::Graph::Ptr clouds_graph2D()
 {
 	core::Graph::Ptr graph = std::make_shared<core::Graph>();
 
 	// create nodes
-	//core::GraphNode::Ptr cloudImport = graph->createNode("ImportClouds");
 	core::GraphNode::Ptr cloudCreate = graph->createNode("CreateClouds");
 	Solver::Ptr solver = std::dynamic_pointer_cast<Solver>(graph->createNode("Solver", "solver"));
 	core::GraphNode::Ptr cloudExport = graph->createNode("ExportClouds", "export");
-
-	//***********************************************************************************************
-	// setup Nodes 2D
-	//***********************************************************************************************
-
-
 
 
 	//********** ADVECT FIELDS
@@ -124,19 +117,34 @@ core::Graph::Ptr clouds_graph1()
 	project->setField("velocity");
 
 
+	//
+	// set inputs
+	cloudExport->getSocket("file")->setString("$HERE/cloud_output.$F4.bgeo");
 
-	//***********************************************************************************************
-	// setup Nodes 2D end
-	//***********************************************************************************************
+	// make connections
+	graph->addConnection( cloudCreate, "output", solver, "input" );
+	graph->addConnection( "$F", solver, "frame" );
+	graph->addConnection( solver, "output", cloudExport, "input" );
+
+	return  graph;
+}
+
+core::Graph::Ptr clouds_graph3D()
+{
+	core::Graph::Ptr graph = std::make_shared<core::Graph>();
+
+	// create nodes
+	//core::GraphNode::Ptr cloudImport = graph->createNode("ImportClouds");
+	core::GraphNode::Ptr cloudCreate = graph->createNode("CreateClouds");
+	Solver::Ptr solver = std::dynamic_pointer_cast<Solver>(graph->createNode("Solver", "solver"));
+	core::GraphNode::Ptr cloudExport = graph->createNode("ExportClouds", "export");
 
 	//***********************************************************************************************
 	// setup Nodes 3D
 	//***********************************************************************************************
 
-/*
-
 	//********** ADVECT FIELDS
-/*
+
 	// Advect Density
 	Advect::Ptr advectDensity = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect density" ));
 	advectDensity->setType("density", "velocity", true);
@@ -191,7 +199,7 @@ core::Graph::Ptr clouds_graph1()
 	//***********************************************************************************************
 	// setup Nodes 3D end
 	//***********************************************************************************************
-*/
+
 	//
 	// set inputs
 	//cloudImport->getSocket("file")->setString("$HERE/cloud_initial.bgeo");
