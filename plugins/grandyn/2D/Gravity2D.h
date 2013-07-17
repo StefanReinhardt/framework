@@ -1,13 +1,13 @@
 #pragma once
-/*
+
 #include <plugins/sim/Operator.h>
 
-class Buoyancy2D : public Operator
+class Gravity2D : public Operator
 {
 	Q_OBJECT
 public:
-	typedef std::shared_ptr<Buoyancy2D> Ptr;
-	Buoyancy2D();
+	typedef std::shared_ptr<Gravity2D> Ptr;
+	Gravity2D();
 
 	virtual void apply( SimObject::Ptr so )override;
 
@@ -15,6 +15,5 @@ public:
 	//virtual void                       store( QJsonObject &o, QJsonDocument &doc );
 	//virtual void                       load( QJsonObject &o );
 private:
-	float                                m_dt;
 };
-*/
+

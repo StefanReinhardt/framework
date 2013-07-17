@@ -5,6 +5,7 @@
 #include <string>
 
 #include <plugins/primitives/ScalarField.h>
+#include <plugins/primitives/Attribute.h>
 
 #include "json.h"
 #include "HouGeoAdapter.h"
@@ -24,26 +25,29 @@ namespace houdini
 			typedef std::shared_ptr<HouAttribute> Ptr;
 
 			HouAttribute();
+			HouAttribute( const std::string &name, ::Attribute::Ptr attr );
 
-			virtual std::string                                            getName()const;
-			virtual Type                                                   getType()const;
-			virtual int                                               getTupleSize()const;
-			virtual Storage                                             getStorage()const;
-			virtual void                     getPacking( std::vector<int> &packing )const;
-			virtual int                                             getNumElements()const;
-			virtual std::string                               getString( int index )const;
-			virtual RawPointer::Ptr                                       getRawPointer();
+			virtual std::string                   getName()const;
+			virtual Type                          getType()const;
+			virtual int                           getTupleSize()const;
+			virtual Storage                       getStorage()const;
+			virtual void                          getPacking( std::vector<int> &packing )const;
+			virtual int                           getNumElements()const;
+			virtual std::string                   getString( int index )const;
+			virtual RawPointer::Ptr               getRawPointer();
 
-			int                           addV4f(math::V4f value);
-			int                           addString(const std::string &value);
+			//int                                   addV4f(math::V4f value);
+			int                                   addString(const std::string &value);
 
-			std::string                                                              name;
-			int                                                                 tupleSize;
-			Storage                                                               storage;
-			Type                                                                     type;
-			std::vector<char>                                                        data;
-			std::vector<std::string>                                              strings; // used in case of type==string
-			int                                                               numElements;
+			std::string                           m_name;
+			int                                   tupleSize;
+			Storage                               m_storage;
+			Type                                  m_type;
+			//std::vector<char>                     data;
+			std::vector<std::string>              strings; // used in case of type==string
+			int                                   numElements;
+
+			::Attribute::Ptr                      m_attr; // primitives::Attribute
 		};
 
 		struct HouTopology : public Topology
@@ -87,11 +91,11 @@ namespace houdini
 
 		HouGeo();
 
-		static HouGeo::Ptr                                                           create();
+		static HouGeo::Ptr                                   create();
 
-		void                                           setPointAttribute( const std::string &name, HouAttribute::Ptr attr );
-		void                                           setPrimitiveAttribute( const std::string &name, HouAttribute::Ptr attr );
-		void                                           addPrimitive( ScalarField::Ptr field );
+		void                                                 setPointAttribute( HouAttribute::Ptr attr );
+		void                                                 setPrimitiveAttribute( const std::string &name, HouAttribute::Ptr attr );
+		void                                                 addPrimitive( ScalarField::Ptr field );
 
 
 		// inherited from HouGeoAdapter

@@ -45,6 +45,13 @@ void Attribute::clear()
 	m_isDirty = true;
 }
 
+void Attribute::resize( int numElements )
+{
+	if( numElements == m_numElements )
+		return;
+	m_numElements = numElements;
+	m_data.resize(m_numElements*m_elementSize);
+}
 
 
 
@@ -73,17 +80,23 @@ Attribute::Ptr Attribute::createM44f()
 
 Attribute::Ptr Attribute::createV4f( int numElements )
 {
-	return std::make_shared<Attribute>( Attribute::REAL32, 4 );
+	Attribute::Ptr attr = std::make_shared<Attribute>( Attribute::REAL32, 4 );
+	attr->resize(numElements);
+	return attr;
 }
 
 Attribute::Ptr Attribute::createV3f( int numElements )
 {
-	return std::make_shared<Attribute>( Attribute::REAL32, 3 );
+	Attribute::Ptr attr = std::make_shared<Attribute>( Attribute::REAL32, 3 );
+	attr->resize(numElements);
+	return attr;
 }
 
 Attribute::Ptr Attribute::createV2f( int numElements )
 {
-	return std::make_shared<Attribute>( Attribute::REAL32, 2 );
+	Attribute::Ptr attr = std::make_shared<Attribute>( Attribute::REAL32, 2 );
+	attr->resize(numElements);
+	return attr;
 }
 
 Attribute::Ptr Attribute::createFloat()
@@ -108,4 +121,17 @@ int Attribute::componentSize( Attribute::ComponentType ct )
 		throw std::runtime_error( "unknown component type" );
 	};
 	return -1;
+}
+
+Attribute::ComponentType Attribute::componentType( const QString &ct )
+{
+	if( ct == "fpreal32" )
+		return REAL32;
+	else
+	if( ct == "fpreal64" )
+		return REAL64;
+	else
+	if( ct == "int32" )
+		return SINT32;
+	return INVALID;
 }
