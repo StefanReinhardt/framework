@@ -26,7 +26,7 @@ void CloudData::initialize()
 	//Constants
 	m_rd = 		287; 		// specific gas constant for dry air
 	m_p0 = 		100;		// pressure at sea level (kPa)
-	m_gravity = 	9.81f;		// gravitational acceleration (m/s²)
+	m_gravity = 9.81f;		// gravitational acceleration (m/s²)
 	m_lh = 		2501;		// Latent heat of vaporization of water (J/kg)
 	m_cp = 		1005;		// specific heat capacity J/(kg K)
 

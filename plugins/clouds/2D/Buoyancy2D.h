@@ -11,9 +11,14 @@ public:
 
 	virtual void apply( SimObject::Ptr so )override;
 
-	// overloads from Data
-	//virtual void                       store( QJsonObject &o, QJsonDocument &doc );
-	//virtual void                       load( QJsonObject &o );
+	void                                setStrenght(float buoyancy);
+
 private:
 	float                                m_dt;
+	float                                m_buoyancy;
+
+	// overloads from Data
+	virtual void                       store( QJsonObject &o, QJsonDocument &doc );
+	virtual void                       load( QJsonObject &o );
+
 };

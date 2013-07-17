@@ -98,6 +98,7 @@ core::Graph::Ptr clouds_graph1()
 	// buoyancy and vort Conf should have same vel input field.
 	// Buoyancy
 	Buoyancy2D::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy2D>(solver->createOperator( "Buoyancy2D", "apply buoyant Force" ));
+	buoyantForce->setStrenght(0.8f);
 
 	// Vortex confinement
 	VortexConfinement2D::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement2D>(solver->createOperator("VortexConfinement2D", "add curls back in"));
@@ -111,6 +112,11 @@ core::Graph::Ptr clouds_graph1()
 
 	// Add Heat Src
 	AddHeatSource2D::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource2D>(solver->createOperator( "AddHeatSource2D", "add heat field" ));
+	heatInput->setAnimationSpeed(0.05f);
+	heatInput->setContrast(5.0f);
+	heatInput->setEmitterSize(0.2333333f);
+	heatInput->setFrequence(15.0f);
+	heatInput->setTemperature(50.0f);
 
 	//********** PROJECT
 	// Project
@@ -123,12 +129,11 @@ core::Graph::Ptr clouds_graph1()
 	// setup Nodes 2D end
 	//***********************************************************************************************
 
-
 	//***********************************************************************************************
 	// setup Nodes 3D
 	//***********************************************************************************************
 
-
+/*
 
 	//********** ADVECT FIELDS
 /*
@@ -151,10 +156,10 @@ core::Graph::Ptr clouds_graph1()
 	// Advect Velocity
 	Advect::Ptr advectVelocity = std::dynamic_pointer_cast<Advect>(solver->createOperator( "Advect", "advect velocity" ));
 	advectVelocity->setType("velocity", "velocity", false);
-*/
 
 
-/*
+
+
 	//********** SOLVE FOR QC & QV & PT
 	// Watercontinuity
 	WaterContinuity::Ptr WaterCont = std::dynamic_pointer_cast<WaterContinuity>(solver->createOperator( "WaterContinuity", "water continuity" ));
@@ -163,9 +168,15 @@ core::Graph::Ptr clouds_graph1()
 
 	// Buoyancy
 	Buoyancy::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy>(solver->createOperator( "Buoyancy", "apply buoyant Force" ));
+	buoyantForce->setStrenght(0.8f);
 
 	// Add Heat Src
 	AddHeatSource::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource>(solver->createOperator( "AddHeatSource", "add heat field" ));
+	heatInput->setAnimationSpeed(0.05f);
+	heatInput->setContrast(5.0f);
+	heatInput->setEmitterSize(0.5333333f);
+	heatInput->setFrequence(15.0f);
+
 
 	// Vortex confinement
 	VortexConfinement::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement>(solver->createOperator("VortexConfinement", "add curls back in"));
@@ -175,13 +186,12 @@ core::Graph::Ptr clouds_graph1()
 	// Project
 	Project::Ptr project = std::dynamic_pointer_cast<Project>(solver->createOperator( "Project", "projection step" ) );
 	project->setField("velocity");
-*/
 
 
 	//***********************************************************************************************
 	// setup Nodes 3D end
 	//***********************************************************************************************
-
+*/
 	//
 	// set inputs
 	//cloudImport->getSocket("file")->setString("$HERE/cloud_initial.bgeo");
@@ -193,7 +203,8 @@ core::Graph::Ptr clouds_graph1()
 	graph->addConnection( "$F", solver, "frame" );
 	graph->addConnection( solver, "output", cloudExport, "input" );
 
-	return graph;
+	// save graph
+	return  graph;
 }
 
 

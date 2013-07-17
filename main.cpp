@@ -53,7 +53,7 @@ extern core::Graph::Ptr clouds_graph1();
 
 int main(int argc, char ** argv)
 {
-	bool standalone = false;
+	bool standalone = true;
 
 	qInstallMessageHandler(logger);
 
@@ -72,7 +72,8 @@ int main(int argc, char ** argv)
 		app.setApplicationName("app");
 
 		// generate and serialize some hardcoded graph if there are no arguments
-		if(QApplication::arguments().size()<2)
+		//if(QApplication::arguments().size()<2)
+		if(0)
 		{
 			core::Graph::Ptr graph = clouds_graph1();
 
@@ -108,13 +109,7 @@ int main(int argc, char ** argv)
 			core::GraphNode::Ptr node = graph->getNode( nodename );
 
 			// evaluate this node for some frames
-			core::Timer timer;
-			timer.start();
-
 			graph->render( node, 1, 2 );
-
-			timer.stop();
-			qCritical() << "time taken: " << timer.elapsedSeconds() << "s";
 		}
 	}
 
