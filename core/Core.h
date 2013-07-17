@@ -52,6 +52,7 @@ namespace core
 
 		// plugin management ---
 		void                                                   loadPlugins();
+		void                                                   loadPlugin(std::function<Plugin::Ptr(Core::Ptr)> entrypoint );
 		Data::Ptr                                              createData( const QString &type );
 		void                                                   addDataFactory( DataFactory::Ptr df );
 
