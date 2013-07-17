@@ -19,10 +19,7 @@ public:
 			m_tlr =                      0.009f;		// Kelvin per 1 meter (between 0.55 and 0.99)
 			m_t0 =                       295.0f;		// temp on ground in Kelvin
 			m_hum =                      0.6f;			// humidty
-			m_buoyancy =                 0.8f;
-			m_vorticity =                0.05f;
 			m_wind =                     0.0f;
-			m_heatSrc =                  10.0f;
 			m_resolution =               math::Vec3i(50,50,1);
 		}
 
@@ -31,10 +28,7 @@ public:
 		float                            m_tlr;			// Kelvin per 1 meter (between 0.55 and 0.99)
 		float                            m_t0;			// temp on ground in Kelvin
 		float                            m_hum;			// humidty
-		float                            m_buoyancy;
-		float                            m_vorticity;
 		float                            m_wind;
-		float                            m_heatSrc;
 		math::V3i                        m_resolution;
 	};
 
