@@ -15,6 +15,7 @@ void Gravity2D::apply(SimObject::Ptr so, float dt)
 {
 	// gravity force vector
 	math::V3f g(0.0f, -0.91f, 0.0f);
+	float m = 2.0f;
 
 	// modify velocity
 	Attribute::Ptr velAttr = so->getSubData<Attribute>( "velocity" );
@@ -23,7 +24,7 @@ void Gravity2D::apply(SimObject::Ptr so, float dt)
 		// for each particle...
 		for( int i=0, numElements = velAttr->numElements();i<numElements;++i )
 			// ...add force
-			velAttr->get<math::V3f>(i)+=dt*g;
+			velAttr->get<math::V3f>(i)+=dt*g/m;
 	}
 }
 

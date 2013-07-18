@@ -96,7 +96,7 @@ namespace math
 		if( (hitDistance >= ray.tmax) || (hitDistance <= ray.tmin) )
 			return false;
 
-		hitPoint = ray.origin + hitDistance*ray.direction;
+		hitPoint = ray.o + hitDistance*ray.d;
 
 		return true;
 	}
