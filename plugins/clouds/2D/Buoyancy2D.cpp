@@ -34,10 +34,6 @@ void Buoyancy2D::apply(SimObject::Ptr so)
 	buoyForce->resize(res);
 
 	float vpt,avpt;
-	float t_mid;
-	float p_mid;
-	float qv_mid;
-	float qc_mid;
 
 	int k = 0;
 	for (int i=0; i<res.x; i++)
@@ -49,8 +45,8 @@ void Buoyancy2D::apply(SimObject::Ptr so)
 			buoyForce->lvalue(i,j,k) = m_dt * m_buoyancy *( ( (vpt-avpt) / avpt ) - cd->m_gravity * qc->lvalue(i,j,k) );
 		}
 
-	for (int i=1; i<res.x; i++)
-		for (int j=1; j<res.y; j++)
+	for (int i=1; i<res.x-1; i++)
+		for (int j=1; j<res.y-1; j++)
 		{
 			vel_y->lvalue(i,j,k) += (buoyForce->lvalue(i,j,k)+ buoyForce->lvalue(i,j-1,k))*0.5f;
 		}

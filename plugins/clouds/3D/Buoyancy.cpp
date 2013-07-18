@@ -26,32 +26,28 @@ void Buoyancy::apply(SimObject::Ptr so)
 	ScalarField::Ptr qc = cd->getSubData<ScalarField>("qc");
 	ScalarField::Ptr vel_y = cd->getSubData<VectorField>("velocity")->getScalarField(1);
 
+	ScalarField::Ptr buoyForce = std::make_shared<ScalarField>();
+	buoyForce->resize(res);
+
 	// B = (vpt-avpt)/ avpt - (g* qc)
 	// vpt and avpt in Kelvin
 	// g = 9.81 m/s²
 	// qc in g/kg
 
-	float vpt,avpt;
-	float t_mid;
-	float p_mid;
-	float qv_mid;
-	float qc_mid;
-
-	for (int k=1; k<res.z-2; k++)
-		for (int i=1; i<res.x-2; i++)
-			for (int j=1; j<=res.y-2; j++)
+	for (int k=0; k<res.z; k++)
+		for (int i=0; i<res.x; i++)
+			for (int j=0; j<res.y; j++)
 			{
-				t_mid = (cd->m_tLut[j]+cd->m_tLut[j-1])/2;
-				p_mid = (cd->m_pLut[j]+cd->m_pLut[j-1])/2;
-				qv_mid = ( qv->lvalue(i,j,k) + qv->lvalue(i,j-1,k) )/2;
-				qc_mid = ( qc->lvalue(i,j,k) + qc->lvalue(i,j-1,k) )/2;
-
-				avpt = t_mid * pow( cd->m_p0/p_mid, 0.286 ) * (1 + 0.61f *qv_mid );
-				vpt = pt->lvalue(i,j,k) * ( 1 + 0.61f * qv_mid );
-
-				vel_y->lvalue(i,j,k) += m_dt * m_buoyancy *( ( (vpt-avpt) / avpt ) - cd->m_gravity * qc_mid );
-
+				float avpt = cd->m_tLut[j] * pow( cd->m_p0/cd->m_pLut[j], 0.286 ) * (1 + 0.61f * qv->lvalue(i,j,k) );
+				float vpt = pt->lvalue(i,j,k) * ( 1 + 0.61f *  qv->lvalue(i,j,k) );
+				buoyForce->lvalue(i,j,k) = m_dt * m_buoyancy *( ( (vpt-avpt) / avpt ) - cd->m_gravity * qc->lvalue(i,j,k) );
 			}
+
+	for (int k=1; k<res.z-1; k++)
+		for (int i=1; i<res.x-1; i++)
+			for (int j=1; j<res.y-1; j++)
+				vel_y->lvalue(i,j,k) += (buoyForce->lvalue(i,j,k)+buoyForce->lvalue(i,j-1,k))*0.5f;
+
 
 }
 
