@@ -10,12 +10,12 @@ CreateClouds::CreateClouds() : core::GraphNode()
     addOutputSocket( "output" );
 
 	m_cloudParms.m_dt =          1.00f;
-	m_cloudParms.m_maxAlt =      2000.0f;		// altitude in meter on top of sim grid
-	m_cloudParms.m_tlr =         0.009f;		// Kelvin per 1 meter (between 0.55 and 0.99)
+	m_cloudParms.m_maxAlt =      4000.0f;		// altitude in meter on top of sim grid
+	m_cloudParms.m_tlr =         0.006f;		// Kelvin per 1 meter (between 0.55 and 0.99)
 	m_cloudParms.m_t0 =          295.0f;		// temp on ground in Kelvin
-	m_cloudParms.m_hum =         0.7f;			// humidty
+	m_cloudParms.m_hum =         0.95f;			// humidty
 	m_cloudParms.m_wind =        0.0f;
-	m_cloudParms.m_resolution =  math::Vec3i(150,150,1);
+	m_cloudParms.m_resolution =  math::Vec3i(100,100,1);
 
 
 

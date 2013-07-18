@@ -95,7 +95,7 @@ core::Graph::Ptr clouds_graph2D()
 	// buoyancy and vort Conf should have same vel input field.
 	// Buoyancy
 	Buoyancy2D::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy2D>(solver->createOperator( "Buoyancy2D", "apply buoyant Force" ));
-	buoyantForce->setStrenght(1.0f);
+	buoyantForce->setStrenght(0.80f);
 
 
 
@@ -107,10 +107,11 @@ core::Graph::Ptr clouds_graph2D()
 	// Add Heat Src
 	AddHeatSource2D::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource2D>(solver->createOperator( "AddHeatSource2D", "add heat field" ));
 	heatInput->setAnimationSpeed(0.02f);
-	heatInput->setContrast(5.0f);
+	heatInput->setContrast(0.80f);
 	heatInput->setEmitterSize(0.4333333f);
-	heatInput->setFrequence(15.0f);
-	heatInput->setTemperature(15.0f);
+	heatInput->setFrequence(1.0f);
+	heatInput->setTemperature(20.0f);
+	heatInput->setOffset(0.4f);
 
 	//********** PROJECT
 	// Project

@@ -2,7 +2,7 @@
 #include <plugins/clouds/CloudData.h>
 #include <core/Data.h>
 
-#include <core/Core.h>
+
 
 Advect2D::Advect2D() : Operator()
 {
@@ -19,6 +19,8 @@ void Advect2D::setType(QString field, QString vecField, bool periodic)
 
 void Advect2D::apply( SimObject::Ptr so)
 {
+	timer.start();
+
 	if(advectionField==0 || vecField==0)
 	{
 		qCritical() << "Advect2D: no fields set!";
@@ -98,6 +100,8 @@ void Advect2D::apply( SimObject::Ptr so)
 		so->setSubData( advectionField+"_old", field_old );
 	}
 
+	timer.stop();
+	qCritical() << "Advect "<<advectionField<<": "<< core::getVariable("$F").toString() << ":" << timer.elapsedSeconds();
 }
 
 

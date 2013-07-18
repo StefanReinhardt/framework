@@ -16,6 +16,8 @@ void Project2D::setField(QString name)
 
 void Project2D::apply( SimObject::Ptr so )
 {
+	timer.start();
+
 	qDebug() << "Project2D::apply";
 
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
@@ -102,7 +104,7 @@ void Project2D::apply( SimObject::Ptr so )
 	cd->setBounds2D(1,vel->getScalarField(0));
 	cd->setBounds2D(2,vel->getScalarField(1));
 	//cd->setBounds2D(3,vel_z);
-
+/*
 	// divergence field for Debugging
 
 		for( int j=1;j<res.y-1;++j )
@@ -117,7 +119,10 @@ void Project2D::apply( SimObject::Ptr so )
 			so->setSubData("div",div);
 	else
 			so->addSubData("div", div);
+*/
 
+	timer.stop();
+	qCritical() << "Projection:" << core::getVariable("$F").toString() << ":" << timer.elapsedSeconds();
 }
 
 

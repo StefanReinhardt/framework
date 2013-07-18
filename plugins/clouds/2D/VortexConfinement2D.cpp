@@ -11,6 +11,8 @@ VortexConfinement2D::VortexConfinement2D()
 
 void VortexConfinement2D::apply(SimObject::Ptr so)
 {
+	timer.start();
+
 	if (m_vortField == 0)
 	{
 		qCritical() << "vortex confinement: no field set!";
@@ -60,7 +62,7 @@ void VortexConfinement2D::apply(SimObject::Ptr so)
 
 
 
-	float nab_nx, nab_ny, mag_n, nx, ny, nX_x, nX_y, nY_x, nY_y;
+	float nab_nx, nab_ny, mag_n, nx, ny;
 	int k = 0;
 
 	//Calculate vorticity magnitude field = n
@@ -130,14 +132,20 @@ void VortexConfinement2D::apply(SimObject::Ptr so)
 		for( int j=2;j<res.y-2;++j )
 			for( int i=2;i<res.x-2;++i )
 			{
-				vel_x->lvalue(i,j,k) +=		0.5*(vortForce_x->lvalue(i,j,k) + vortForce_x->lvalue(i-1,j,k) ) * m_strenght * m_dt;
-				vel_y->lvalue(i,j,k) +=		0.5*(vortForce_y->lvalue(i,j,k) + vortForce_y->lvalue(i,j-1,k) ) * m_strenght * m_dt;
+				if(cd->getSubData<ScalarField>("qc")->lvalue(i,j,k)>0.000001f)
+				{
+					vel_x->lvalue(i,j,k) +=		0.5*(vortForce_x->lvalue(i,j,k) + vortForce_x->lvalue(i-1,j,k) ) * m_strenght * m_dt;
+					vel_y->lvalue(i,j,k) +=		0.5*(vortForce_y->lvalue(i,j,k) + vortForce_y->lvalue(i,j-1,k) ) * m_strenght * m_dt;
+
+				}
 			}
 
 		cd->setBounds2D(1,vel_x);
 		cd->setBounds2D(2,vel_y);
 
 
+		timer.stop();
+		qCritical() << "VortexConfine:" << core::getVariable("$F").toString() << ":" << timer.elapsedSeconds();
 
 }
 

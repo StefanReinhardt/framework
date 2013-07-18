@@ -1,6 +1,7 @@
 #pragma once
 
 #include <plugins/sim/Operator.h>
+#include <core/Core.h>
 
 class Buoyancy2D : public Operator
 {
@@ -10,15 +11,15 @@ public:
 	Buoyancy2D();
 
 	virtual void apply( SimObject::Ptr so )override;
-
-	void                                setStrenght(float buoyancy);
+	void                                 setStrenght(float buoyancy);
 
 private:
+	core::Timer                          timer;
 	float                                m_dt;
 	float                                m_buoyancy;
 
 	// overloads from Data
-	virtual void                       store( QJsonObject &o, QJsonDocument &doc );
-	virtual void                       load( QJsonObject &o );
+	virtual void                         store( QJsonObject &o, QJsonDocument &doc );
+	virtual void                         load( QJsonObject &o );
 
 };

@@ -2,6 +2,7 @@
 #pragma once
 
 #include <plugins/sim/Operator.h>
+#include <core/Core.h>
 
 class WaterContinuity2D : public Operator
 {
@@ -10,6 +11,7 @@ public:
 	typedef std::shared_ptr<WaterContinuity2D> Ptr;
 	WaterContinuity2D();
 
+	core::Timer                          timer;
 	virtual void apply( SimObject::Ptr so )override;
 
 	// overloads from Data

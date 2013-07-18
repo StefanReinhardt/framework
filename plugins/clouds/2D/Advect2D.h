@@ -11,29 +11,29 @@
 #include <plugins/sim/Operator.h>
 #include <plugins/primitives/ScalarField.h>
 #include <plugins/primitives/VectorField.h>
+#include <core/Core.h>
 
 class Advect2D : public Operator
 {
 	Q_OBJECT
 public:
-	typedef std::shared_ptr<Advect2D> Ptr;
+	typedef std::shared_ptr<Advect2D>   Ptr;
 	Advect2D();
 
-	virtual void apply( SimObject::Ptr so )override;
-
-	void	setType(QString field, QString vecField, bool periodic);
-
-
-	// overloads from Data
-	virtual void						store( QJsonObject &o, QJsonDocument &doc );
-	virtual void						load( QJsonObject &o );
+	virtual void                        apply( SimObject::Ptr so )override;
+	void                                setType(QString field, QString vecField, bool periodic);
 
 private:
-	QString advectionField;
-	QString vecField;
+	QString                             advectionField;
+	QString                             vecField;
+	core::Timer                         timer;
 
-	void 								advect(ScalarField::Ptr field, ScalarField::Ptr field_old, VectorField::Ptr vecField);
-	//QString m_name;
-	bool m_periodic;
-	float m_dt;			// Timestep
+	void                                advect(ScalarField::Ptr field, ScalarField::Ptr field_old, VectorField::Ptr vecField);
+	bool                                m_periodic;
+	float                               m_dt;
+
+	// overloads from Data
+	virtual void                        store( QJsonObject &o, QJsonDocument &doc );
+	virtual void                        load( QJsonObject &o );
+
 };

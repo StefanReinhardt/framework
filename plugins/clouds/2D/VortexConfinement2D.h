@@ -3,6 +3,7 @@
 #include <plugins/sim/Operator.h>
 #include <plugins/primitives/VectorField.h>
 #include <plugins/primitives/ScalarField.h>
+#include <core/Core.h>
 
 class VortexConfinement2D : public Operator
 {
@@ -17,6 +18,8 @@ public:
 	void                               setStrenght(float strenght);
 
 private:
+
+	core::Timer                        timer;
 	float                              m_strenght;
 	float                              m_dt;			// Timestep
 	QString                            m_vortField;

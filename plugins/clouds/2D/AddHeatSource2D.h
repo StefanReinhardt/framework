@@ -1,5 +1,6 @@
 #pragma once
 
+#include <core/Core.h>
 #include <plugins/sim/Operator.h>
 
 class AddHeatSource2D : public Operator
@@ -16,13 +17,16 @@ public:
 	void                                setEmitterSize(float size);
 	void                                setFrequence(float frequency);
 	void                                setTemperature(float temp);
+	void                                setOffset(float offset);
 
 
 private:
+	core::Timer                          timer;
+
 	float                                m_frequency;
 	float                                m_emitterSize;
 	float                                m_contrast;
-	float                                m_add;
+	float                                m_offset;
 	float                                m_dt;
 	float                                m_animationSpeed;
 	float                                m_tempInput;
