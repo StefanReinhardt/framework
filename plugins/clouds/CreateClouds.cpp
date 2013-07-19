@@ -15,7 +15,7 @@ CreateClouds::CreateClouds() : core::GraphNode()
 	m_cloudParms.m_t0 =          295.0f;		// temp on ground in Kelvin
 	m_cloudParms.m_hum =         0.95f;			// humidty
 	m_cloudParms.m_wind =        0.0f;
-	m_cloudParms.m_resolution =  math::Vec3i(100,100,1);
+	m_cloudParms.m_resolution =  math::Vec3i(512,512,1);
 
 
 

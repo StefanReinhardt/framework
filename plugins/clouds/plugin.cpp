@@ -89,7 +89,7 @@ core::Graph::Ptr clouds_graph2D()
 	// Vortex confinement
 	VortexConfinement2D::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement2D>(solver->createOperator("VortexConfinement2D", "add curls back in"));
 	vortConf->setField("velocity");
-	vortConf->setStrenght(0.0511111f);
+	vortConf->setStrenght(0.07f);
 
 	//********** ADD FORCES
 	// buoyancy and vort Conf should have same vel input field.
