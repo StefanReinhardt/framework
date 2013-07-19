@@ -5,11 +5,7 @@
 VortexConfinement::VortexConfinement()
 {
 	m_dt = 1.0f;
-}
-
-void VortexConfinement::setField(QString name)
-{
-	this->vortField = name;
+	m_strenght = 0.123456789f;
 }
 
 
@@ -113,9 +109,9 @@ void VortexConfinement::apply(SimObject::Ptr so, float dt)
 			for( int i=2;i<res.x-2;++i )
 			{
 
-				vel_x->lvalue(i,j,k) +=  m_dt*(force->getScalarField(0)->lvalue(i-1,j,k)+force->getScalarField(0)->lvalue(i,j,k))/2 * cd->m_parms.m_vorticity;
-				vel_y->lvalue(i,j,k) +=	 m_dt*(force->getScalarField(1)->lvalue(i,j-1,k)+force->getScalarField(1)->lvalue(i,j,k))/2 * cd->m_parms.m_vorticity;
-				vel_z->lvalue(i,j,k) +=	 m_dt*(force->getScalarField(2)->lvalue(i,j,k-1)+force->getScalarField(2)->lvalue(i,j,k))/2 * cd->m_parms.m_vorticity;
+				vel_x->lvalue(i,j,k) +=  m_dt*(force->getScalarField(0)->lvalue(i-1,j,k)+force->getScalarField(0)->lvalue(i,j,k))/2 * m_strenght;
+				vel_y->lvalue(i,j,k) +=	 m_dt*(force->getScalarField(1)->lvalue(i,j-1,k)+force->getScalarField(1)->lvalue(i,j,k))/2 * m_strenght;
+				vel_z->lvalue(i,j,k) +=	 m_dt*(force->getScalarField(2)->lvalue(i,j,k-1)+force->getScalarField(2)->lvalue(i,j,k))/2 * m_strenght;
 			}
 
 }
@@ -144,6 +140,15 @@ void VortexConfinement::curl(int i, int j, int k)
 }
 
 
+void VortexConfinement::setField(QString name)
+{
+this->vortField = name;
+}
+
+void VortexConfinement::setStrenght(float strenght)
+{
+m_strenght = strenght;
+}
 
 
 

@@ -9,6 +9,7 @@ WaterContinuity2D::WaterContinuity2D()
 void WaterContinuity2D::apply(SimObject::Ptr so, float dt)
 {
 
+	timer.start();
 
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
 
@@ -81,7 +82,8 @@ void WaterContinuity2D::apply(SimObject::Ptr so, float dt)
 
 
 
-
+	timer.stop();
+	qCritical() << "WaterCont:" << core::getVariable("$F").toString() << ":" << timer.elapsedSeconds();
 
 
 }

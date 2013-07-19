@@ -1,12 +1,13 @@
 #pragma once
 
 #include <plugins/sim/Operator.h>
+#include <core/Core.h>
 
 class Project2D : public Operator
 {
 	Q_OBJECT
 public:
-	typedef std::shared_ptr<Project2D> Ptr;
+	typedef std::shared_ptr<Project2D>  Ptr;
 	Project2D();
 
 	virtual void                       apply( SimObject::Ptr so, float dt )override;
@@ -18,7 +19,9 @@ public:
 	virtual void                       load( QJsonObject &o );
 
 private:
-	//QString m_name;
-	float dt;			// Timestep
-	QString projectionField;
+
+	core::Timer                        timer;
+
+	float                              dt;
+	QString                            projectionField;
 };

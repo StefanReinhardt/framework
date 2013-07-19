@@ -3,6 +3,7 @@
 #include <plugins/sim/Operator.h>
 #include <plugins/primitives/VectorField.h>
 #include <plugins/primitives/ScalarField.h>
+#include <core/Core.h>
 
 class VortexConfinement2D : public Operator
 {
@@ -14,16 +15,19 @@ public:
 	virtual void                       apply( SimObject::Ptr so, float dt )override;
 
 	void                               setField(QString);
+	void                               setStrenght(float strenght);
+
+private:
+
+	core::Timer                        timer;
+	float                              m_strenght;
+	float                              m_dt;			// Timestep
+	QString                            m_vortField;
+	ScalarField::Ptr                   vel_x,vel_y,vel_z;
+
 	float                              curl(int i, int j, int k);
 
 	// overloads from Data
 	virtual void                       store( QJsonObject &o, QJsonDocument &doc );
 	virtual void                       load( QJsonObject &o );
-
-private:
-	//QString m_name;
-	float m_dt;			// Timestep
-	QString vortField;
-
-	ScalarField::Ptr	vel_x,vel_y,vel_z;
 };
