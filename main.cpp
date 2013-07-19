@@ -101,8 +101,8 @@ int main(int argc, char ** argv)
 		// generate and serialize some hardcoded graph if there are no arguments
 		if(args.size()<2)
 		{
-			//core::Graph::Ptr graph = clouds_graph2D();
-			core::Graph::Ptr graph = grandyn_demo2D();
+			core::Graph::Ptr graph = clouds_graph2D();
+			//core::Graph::Ptr graph = grandyn_demo2D();
 
 			// save graph
 			core::save( "$HERE/test.json", graph );
