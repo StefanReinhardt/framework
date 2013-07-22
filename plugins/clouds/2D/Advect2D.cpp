@@ -21,6 +21,8 @@ void Advect2D::apply( SimObject::Ptr so, float dt)
 {
 	timer.start();
 
+	m_dt = dt;
+
 	if(advectionField==0 || vecField==0)
 	{
 		qCritical() << "Advect2D: no fields set!";
@@ -33,7 +35,6 @@ void Advect2D::apply( SimObject::Ptr so, float dt)
 	if(std::dynamic_pointer_cast<CloudData>(so))
 	{
 		CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
-		m_dt = cd->m_p.dt;
 	}
 
 	// get field to advect

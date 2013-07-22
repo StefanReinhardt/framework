@@ -17,7 +17,6 @@ void Buoyancy::apply(SimObject::Ptr so, float dt)
 {
 
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
-	m_dt = cd->m_p.dt;
 
 	math::Vec3i res = cd->getResolution();
 
@@ -40,7 +39,7 @@ void Buoyancy::apply(SimObject::Ptr so, float dt)
 			{
 				float avpt = cd->m_tLut[j] * pow( cd->m_p0/cd->m_pLut[j], 0.286 ) * (1 + 0.61f * qv->lvalue(i,j,k) );
 				float vpt = pt->lvalue(i,j,k) * ( 1 + 0.61f *  qv->lvalue(i,j,k) );
-				buoyForce->lvalue(i,j,k) = m_dt * m_buoyancy *( ( (vpt-avpt) / avpt ) - cd->m_gravity * qc->lvalue(i,j,k) );
+				buoyForce->lvalue(i,j,k) = dt * m_buoyancy *( ( (vpt-avpt) / avpt ) - cd->m_gravity * qc->lvalue(i,j,k) );
 			}
 
 	for (int k=1; k<res.z-1; k++)

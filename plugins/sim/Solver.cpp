@@ -18,6 +18,7 @@ Solver::Solver() : core::GraphNode()
 
 	getSocket("frame")->setInt(1);
 	m_frame = 1;
+	m_timeStretch = 1.0f;			// multiplier to speed up or slow down simulation
 }
 
 
@@ -28,7 +29,7 @@ void Solver::update(core::GraphNodeSocket *output)
 	SimObject::Ptr so = getSocket("input")->getData<SimObject>();
 	int frame = getSocket( "frame" )->asInt();
 	float fps = core::getVariable("$FPS").toDouble();
-	float dt = 1.0/fps;
+	float dt = m_timeStretch * (1.0/fps);
 
 	// Reset if frame == 1
 	if (frame==1)
@@ -85,6 +86,7 @@ void Solver::store( QJsonObject &o, QJsonDocument &doc )
 		operators.append( obj );
 	}
 	o.insert( "operators", operators );
+	o.insert( "timeStretch", m_timeStretch );
 }
 
 
@@ -92,8 +94,10 @@ void Solver::load( QJsonObject &o )
 {
 	GraphNode::load(o);
 
+	m_timeStretch =                  o["timeStretch"].toDouble();
+
 	// operators ---
-	QJsonArray operators = o["operators"].toArray();
+	QJsonArray operators =           o["operators"].toArray();
 	for( auto it = operators.begin(), end = operators.end(); it != end; ++it )
 	{
 		QJsonObject obj = (*it).toObject();

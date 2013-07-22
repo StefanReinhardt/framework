@@ -18,7 +18,6 @@ AddHeatSource::AddHeatSource()
 void AddHeatSource::apply(SimObject::Ptr so, float dt)
 {
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
-	m_dt = cd->m_p.dt;
 
 	ScalarField::Ptr pt = cd->getSubData<ScalarField>("pt");
 	math::V3i res = pt->getResolution();

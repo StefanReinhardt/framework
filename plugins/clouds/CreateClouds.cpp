@@ -13,11 +13,6 @@ CreateClouds::CreateClouds() : core::GraphNode()
 	m_p.dt =          1.00f;
 	m_p.maxAlt =      6000.0f;		// altitude in meter on top of sim grid
 	m_p.minAlt =      2000.0f;		// altitude in meter on ground of sim grid
-	m_p.tlr =         0.006f;		// Kelvin per 1 meter (between 0.55 and 0.99)
-	m_p.t0 =          295.0f;		// temp on ground in Kelvin
-	m_p.hum =         0.95f;		// humidty
-	m_p.wind =        0.0f;
-	m_p.resolution =  math::Vec3i(100,100,1);
 
 	// Temperature Lapse rate		Kelvin per 1 meter (between 0.55 and 0.99)
 	m_p.tlr =         0.006f;		// controlls how likely clouds will form

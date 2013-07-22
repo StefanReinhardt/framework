@@ -27,7 +27,6 @@ void AddHeatSource2D::apply(SimObject::Ptr so, float dt)
 	timer.start();
 
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
-	m_dt = cd->m_p.dt;
 
 	ScalarField::Ptr pt = cd->getSubData<ScalarField>("pt");
 	math::V3i res = pt->getResolution();
@@ -82,14 +81,14 @@ void AddHeatSource2D::apply(SimObject::Ptr so, float dt)
 			random = abs(math::max(-1.0f,math::min(1.0f, m_offset + m_contrast*( noise.perlinNoise_3D(wPos.x,wPos.y,t) ) ) ) );
 
 			if(m_emitPt)
-				pt->lvalue(i,j,k) += 0.01f * m_strenght * random * m_dt;
+				pt->lvalue(i,j,k) += 0.01f * m_strenght * random * dt;
 
 			if(m_emitQv)
-				qv->lvalue(i,1,k) = qv->lvalue(i,0,k) + (m_strenght * random) * m_dt;
+				qv->lvalue(i,1,k) = qv->lvalue(i,0,k) + (m_strenght * random) * dt;
 				//qv->lvalue(i,1,k) = qv->lvalue(i,0,k) * (1.10f + (0.20f * random));
 
 			if(m_emitVel)
-				vel_y->lvalue(i,j+1,k) = m_strenght * random * m_dt;
+				vel_y->lvalue(i,j+1,k) = m_strenght * random * dt;
 				//vel_y->lvalue(i,j+1,k) = 2.6f * random;
 		}
 

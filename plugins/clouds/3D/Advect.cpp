@@ -20,6 +20,8 @@ void Advect::setType(QString field, QString vecField, bool periodic)
 void Advect::apply( SimObject::Ptr so, float dt)
 {
 
+	m_dt = dt;
+
 	if(advectionField==0 || vecField==0)
 	{
 		qCritical() << "Advect: no fields set!";
@@ -36,7 +38,6 @@ void Advect::apply( SimObject::Ptr so, float dt)
 	if(std::dynamic_pointer_cast<CloudData>(so))
 	{
 		CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
-		m_dt = cd->m_p.dt;
 	}
 
 	// IF Vector field is advected

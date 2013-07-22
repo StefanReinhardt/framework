@@ -29,7 +29,6 @@ void VortexConfinement2D::apply(SimObject::Ptr so, float dt)
 
 
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
-	m_dt = cd->m_p.dt;
 
 	math::V3i res = vel_x->getResolution();
 	res = math::V3i(res.x-1,res.y,res.z);
@@ -96,7 +95,7 @@ void VortexConfinement2D::apply(SimObject::Ptr so, float dt)
 				if(mag_nX > 0.00001f)
 				{
 					ny = nX_y / mag_nX;
-					vel_x->lvalue(i,j,k) +=	-	ny * ( vorticity->lvalue(i,j,k) + vorticity->lvalue(i-1,j,k) ) * 0.5f * m_strenght * m_dt;
+					vel_x->lvalue(i,j,k) +=	-	ny * ( vorticity->lvalue(i,j,k) + vorticity->lvalue(i-1,j,k) ) * 0.5f * m_strenght * dt;
 				}
 
 
@@ -111,7 +110,7 @@ void VortexConfinement2D::apply(SimObject::Ptr so, float dt)
 				if(mag_nY > 0.00001f)
 				{
 					nx = nY_x / mag_nY;
-					vel_y->lvalue(i,j,k) +=		nx * ( vorticity->lvalue(i,j,k) + vorticity->lvalue(i,j-1,k) ) * 0.5f * m_strenght * m_dt;
+					vel_y->lvalue(i,j,k) +=		nx * ( vorticity->lvalue(i,j,k) + vorticity->lvalue(i,j-1,k) ) * 0.5f * m_strenght * dt;
 				}
 */
 
@@ -136,8 +135,8 @@ void VortexConfinement2D::apply(SimObject::Ptr so, float dt)
 			{
 				if( !m_onCloudOnly || cd->getSubData<ScalarField>("qc")->lvalue(i,j,k)>0.000001f)
 				{
-					vel_x->lvalue(i,j,k) +=		0.5*(vortForce_x->lvalue(i,j,k) + vortForce_x->lvalue(i-1,j,k) ) * m_strenght * m_dt;
-					vel_y->lvalue(i,j,k) +=		0.5*(vortForce_y->lvalue(i,j,k) + vortForce_y->lvalue(i,j-1,k) ) * m_strenght * m_dt;
+					vel_x->lvalue(i,j,k) +=		0.5*(vortForce_x->lvalue(i,j,k) + vortForce_x->lvalue(i-1,j,k) ) * m_strenght * dt;
+					vel_y->lvalue(i,j,k) +=		0.5*(vortForce_y->lvalue(i,j,k) + vortForce_y->lvalue(i,j-1,k) ) * m_strenght * dt;
 
 				}
 			}

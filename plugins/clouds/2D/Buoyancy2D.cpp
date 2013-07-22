@@ -16,7 +16,6 @@ void Buoyancy2D::apply(SimObject::Ptr so, float dt)
 	timer.start();
 
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
-	m_dt = cd->m_p.dt;
 
 	math::Vec3i res = cd->getResolution();
 
@@ -42,7 +41,7 @@ void Buoyancy2D::apply(SimObject::Ptr so, float dt)
 			avpt = cd->m_tLut[j] * pow( cd->m_p0/cd->m_pLut[j], 0.286 ) * (1 + 0.61f * qv->lvalue(i,j,k) );
 			vpt = pt->lvalue(i,j,k) * ( 1 + 0.61f *  qv->lvalue(i,j,k) );
 
-			buoyForce->lvalue(i,j,k) = m_dt * m_buoyancy *( ( (vpt-avpt) / avpt ) - cd->m_gravity * qc->lvalue(i,j,k) );
+			buoyForce->lvalue(i,j,k) = dt * m_buoyancy *( ( (vpt-avpt) / avpt ) - cd->m_gravity * qc->lvalue(i,j,k) );
 		}
 
 	for (int i=1; i<res.x-1; i++)
