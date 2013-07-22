@@ -7,6 +7,7 @@ Buoyancy2D::Buoyancy2D()
 {
 	m_dt =                1.0f;
 	m_buoyancy =          0.80f;	// Strength
+	m_gravity =           9.81f;	// Strength
 }
 
 
@@ -41,7 +42,7 @@ void Buoyancy2D::apply(SimObject::Ptr so, float dt)
 			avpt = cd->m_tLut[j] * pow( cd->m_p0/cd->m_pLut[j], 0.286 ) * (1 + 0.61f * qv->lvalue(i,j,k) );
 			vpt = pt->lvalue(i,j,k) * ( 1 + 0.61f *  qv->lvalue(i,j,k) );
 
-			buoyForce->lvalue(i,j,k) = dt * m_buoyancy *( ( (vpt-avpt) / avpt ) - cd->m_gravity * qc->lvalue(i,j,k) );
+			buoyForce->lvalue(i,j,k) = dt * m_buoyancy *( ( (vpt-avpt) / avpt ) - m_gravity * qc->lvalue(i,j,k) );
 		}
 
 	for (int i=1; i<res.x-1; i++)
@@ -59,6 +60,11 @@ void Buoyancy2D::setStrenght(float buoyancy)
 {
 	m_buoyancy = buoyancy;
 }
+void Buoyancy2D::setGravity(float gravity)
+{
+	m_gravity = gravity;
+}
+
 
 
 void Buoyancy2D::store( QJsonObject &o, QJsonDocument &doc )
@@ -66,6 +72,7 @@ void Buoyancy2D::store( QJsonObject &o, QJsonDocument &doc )
 	Operator::store( o, doc );
 
 	o.insert( "buoyancyStrength", m_buoyancy );
+	o.insert( "gravityStrength", m_gravity );
 }
 
 void Buoyancy2D::load( QJsonObject &o )
@@ -73,4 +80,5 @@ void Buoyancy2D::load( QJsonObject &o )
 	Operator::load( o );
 
 	m_buoyancy = o["buoyancyStrength"].toDouble();
+	m_gravity =  o["gravityStrength"].toDouble();
 }

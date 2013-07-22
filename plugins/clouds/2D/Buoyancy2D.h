@@ -13,11 +13,13 @@ public:
 	virtual void                        apply( SimObject::Ptr so, float dt )override;
 
 	void                                setStrenght(float buoyancy);
+	void                                setGravity(float gravity);
 
 private:
 	core::Timer                          timer;
 	float                                m_dt;
 	float                                m_buoyancy;
+	float                                m_gravity;
 
 	// overloads from Data
 	virtual void                         store( QJsonObject &o, QJsonDocument &doc );

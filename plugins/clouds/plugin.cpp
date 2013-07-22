@@ -63,6 +63,8 @@ core::Graph::Ptr clouds_graph2D()
 	Solver::Ptr solver = std::dynamic_pointer_cast<Solver>(graph->createNode("Solver", "solver"));
 	core::GraphNode::Ptr cloudExport = graph->createNode("ExportClouds", "export");
 
+	solver->setTimeStrech(24.0f); // stretches 1 step to 1 second
+
 
 	//********** ADVECT FIELDS
 
@@ -90,6 +92,7 @@ core::Graph::Ptr clouds_graph2D()
 	VortexConfinement2D::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement2D>(solver->createOperator("VortexConfinement2D", "add curls back in"));
 	vortConf->setField("velocity");
 	vortConf->setStrenght(0.111111f);
+	vortConf->setOnCloudOnly(false);
 
 	//********** ADD FORCES
 	// buoyancy and vort Conf should have same vel input field.
@@ -109,23 +112,32 @@ core::Graph::Ptr clouds_graph2D()
 
 	// Add Velocity Source
 	AddHeatSource2D::Ptr velInput = std::dynamic_pointer_cast<AddHeatSource2D>(solver->createOperator( "AddHeatSource2D", "add Velocity input" ));
-	velInput->setAnimationSpeed(0.05f);
-	velInput->setContrast(0.80f);
+	velInput->setAnimationSpeed(0.1f);
+	velInput->setContrast(1.20f);
 	velInput->setEmitterSize(0.1333333f);
-	velInput->setFrequence(10.0f);
-	velInput->setStrenght(2.6f);
+	velInput->setFrequence(400.0f);
+	velInput->setStrenght(6.6f);
 	velInput->setOffset(0.4f);
 	velInput->setVelEmission(true);
 
 
 	AddHeatSource2D::Ptr heatInput =  std::dynamic_pointer_cast<AddHeatSource2D>(solver->createOperator( "AddHeatSource2D", "add Heat input" ));
-	heatInput->setAnimationSpeed(0.1f);
-	heatInput->setContrast(1.0f);
+	heatInput->setAnimationSpeed(0.5f);
+	heatInput->setContrast(3.0f);
 	heatInput->setEmitterSize(0.1333333f);
-	heatInput->setFrequence(30.0f);
+	heatInput->setFrequence(500.0f);
 	heatInput->setStrenght(100.6f);
 	heatInput->setOffset(0.40f);
 	heatInput->setPtEmission(true);
+
+	AddHeatSource2D::Ptr vaporInput =  std::dynamic_pointer_cast<AddHeatSource2D>(solver->createOperator( "AddHeatSource2D", "add Heat input" ));
+	vaporInput->setAnimationSpeed(0.1f);
+	vaporInput->setContrast(0.80f);
+	vaporInput->setEmitterSize(0.1333333f);
+	vaporInput->setFrequence(400.0f);
+	vaporInput->setStrenght(0.01f);
+	vaporInput->setOffset(0.40f);
+	vaporInput->setQvEmission(true);
 
 
 /*

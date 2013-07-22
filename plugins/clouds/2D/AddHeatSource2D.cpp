@@ -81,14 +81,14 @@ void AddHeatSource2D::apply(SimObject::Ptr so, float dt)
 			random = abs(math::max(-1.0f,math::min(1.0f, m_offset + m_contrast*( noise.perlinNoise_3D(wPos.x,wPos.y,t) ) ) ) );
 
 			if(m_emitPt)
-				pt->lvalue(i,j,k) += 0.01f * m_strenght * random * dt;
+				pt->lvalue(i,j,k) += 0.01f * m_strenght * random;
 
 			if(m_emitQv)
-				qv->lvalue(i,1,k) = qv->lvalue(i,0,k) + (m_strenght * random) * dt;
+				qv->lvalue(i,1,k) = qv->lvalue(i,0,k) + (m_strenght * random);
 				//qv->lvalue(i,1,k) = qv->lvalue(i,0,k) * (1.10f + (0.20f * random));
 
 			if(m_emitVel)
-				vel_y->lvalue(i,j+1,k) = m_strenght * random * dt;
+				vel_y->lvalue(i,j+1,k) = m_strenght * random;
 				//vel_y->lvalue(i,j+1,k) = 2.6f * random;
 		}
 
@@ -158,7 +158,7 @@ void AddHeatSource2D::store( QJsonObject &o, QJsonDocument &doc )
 	o.insert( "emitterSize", m_emitterSize);
 	o.insert( "contrast", m_contrast);
 	o.insert( "animationSpeed", m_animationSpeed);
-	o.insert( "temperature", m_strenght);
+	o.insert( "strenght", m_strenght);
 	o.insert( "offset", m_offset);
 	o.insert( "emitQv", m_emitQv);
 	o.insert( "emitPt", m_emitPt);
@@ -179,7 +179,7 @@ void AddHeatSource2D::load( QJsonObject &o )
 	m_emitterSize =       o["emitterSize"].toDouble();
 	m_contrast =          o["contrast"].toDouble();
 	m_animationSpeed =    o["animationSpeed"].toDouble();
-	m_strenght =          o["temperature"].toDouble();
+	m_strenght =          o["strenght"].toDouble();
 	m_offset =            o["offset"].toDouble();
 	m_emitQv =            o["emitQv"].toBool();
 	m_emitPt =            o["emitPt"].toBool();

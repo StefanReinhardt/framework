@@ -22,7 +22,7 @@ CreateClouds::CreateClouds() : core::GraphNode()
 
 	m_p.t0 =          300.0f;		// temp on ground in Kelvin
 	m_p.wind =        0.00f;
-	m_p.res =  math::Vec3i(160,160,1);
+	m_p.res =  math::Vec3i(200,200,1);
 
 	//scale = (m_p.maxAlt-m_p.minAlt)/m_p.res.y;
 	//math::Vec3f size = math::Vec3f(scale*m_p.res.x, scale*m_p.res.y, scale*m_p.res.z);
@@ -52,6 +52,7 @@ void CreateClouds::store( QJsonObject &o, QJsonDocument &doc )
 	// clouddata user parameters
 	o.insert("timestep", m_p.dt);
 	o.insert("maxAltitude", m_p.maxAlt);
+	o.insert("minAltitude", m_p.minAlt);
 	o.insert("tempreatureLapseRate", m_p.tlr);
 	o.insert("groundTemperature", m_p.t0);
 	o.insert("humidity", m_p.hum);
@@ -68,6 +69,7 @@ void CreateClouds::load( QJsonObject &o )
 
 	m_p.dt=           o.value("timestep").toDouble();
 	m_p.maxAlt=       o.value("maxAltitude").toDouble();
+	m_p.minAlt=       o.value("minAltitude").toDouble();
 	m_p.tlr=          o.value("tempreatureLapseRate" ).toDouble();
 	m_p.t0=           o.value("groundTemperature").toDouble();
 	m_p.hum=          o.value("humidity" ).toDouble();

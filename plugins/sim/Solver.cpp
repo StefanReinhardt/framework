@@ -70,7 +70,10 @@ Operator::Ptr Solver::createOperator( const QString &type, const QString &descri
 	return op;
 }
 
-
+void Solver::setTimeStrech(float timeStretch)
+{
+	m_timeStretch = timeStretch;
+}
 
 void Solver::store( QJsonObject &o, QJsonDocument &doc )
 {

@@ -18,6 +18,8 @@ public:
 	Operator::Ptr                                     createOperator( const QString &type, const QString &description );
 	void                                              addOperator( Operator::Ptr op, const QString &description );
 
+	void                                              setTimeStrech(float timeStretch);
+
 
 	// GraphNode
 	virtual void                                      update(core::GraphNodeSocket *output)override;
