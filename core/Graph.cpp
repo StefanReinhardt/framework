@@ -31,7 +31,7 @@ namespace core
 				node->setObjectName(name);
 			addNode( node );
 		}else
-			qCritical() << "Graph: unable to create node " << node->metaObject()->className();
+			qCritical() << "Graph: unable to create node " << type;
 
 		return node;
 	}

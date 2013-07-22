@@ -13,7 +13,7 @@ Operator::Operator() : core::Data()
 
 }
 
-void Operator::apply( SimObject::Ptr so )
+void Operator::apply( SimObject::Ptr so, float dt )
 {
 	// nop
 }

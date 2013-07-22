@@ -10,8 +10,9 @@ public:
 	typedef std::shared_ptr<Buoyancy2D> Ptr;
 	Buoyancy2D();
 
-	virtual void apply( SimObject::Ptr so )override;
-	void                                 setStrenght(float buoyancy);
+	virtual void                        apply( SimObject::Ptr so, float dt )override;
+
+	void                                setStrenght(float buoyancy);
 
 private:
 	core::Timer                          timer;

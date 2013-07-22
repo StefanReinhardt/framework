@@ -15,7 +15,7 @@ void AddSource2D::setFields(QString field, QString source)
 }
 
 
-void AddSource2D::apply(SimObject::Ptr so)
+void AddSource2D::apply(SimObject::Ptr so, float dt)
 {
 	// TODO:
 	// - sampling with wold space transformations

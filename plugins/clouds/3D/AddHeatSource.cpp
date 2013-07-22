@@ -15,7 +15,7 @@ AddHeatSource::AddHeatSource()
 	m_tempInput =      5.0f;	// Temp input in 1/100 °C per second
 }
 
-void AddHeatSource::apply(SimObject::Ptr so)
+void AddHeatSource::apply(SimObject::Ptr so, float dt)
 {
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
 	m_dt = cd->m_p.dt;

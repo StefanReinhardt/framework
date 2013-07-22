@@ -3,6 +3,7 @@
 #include <plugins/sim/SimObject.h>
 #include <plugins/primitives/ScalarField.h>
 #include <plugins/primitives/VectorField.h>
+#include <plugins/primitives/Attribute.h>
 #include <plugins/houdini/HouGeoIO.h>
 
 #include <core/Core.h>
@@ -21,31 +22,17 @@ ExportParticles::ExportParticles() : core::GraphNode()
 void ExportParticles::update(core::GraphNodeSocket *output)
 {
 	qDebug() << "ExportParticles: update ";
-    SimObject::Ptr so = getSocket("input")->getData<SimObject>();
-    QString filename = core::expand(getSocket("file")->asString());
+	SimObject::Ptr so = getSocket("input")->getData<SimObject>();
+	QString filename = core::expand(getSocket("file")->asString());
 
 
-    // test
-    /*
-    {
-        ScalarField::Ptr test = std::make_shared<ScalarField>();
-        std::ofstream out( filename.toUtf8() , std::ios_base::out | std::ios_base::binary );
-        houdini::HouGeo::Ptr houGeo = std::make_shared<houdini::HouGeo>();
-        houGeo->addPrimitive( test );
-        houdini::HouGeoIO::xport( &out, houGeo );
-    }
-    {
-        std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
-        houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
-    }
-    */
 
-    if( so )
-    {
-        std::ofstream out( filename.toUtf8() , std::ios_base::out | std::ios_base::binary );
-        houdini::HouGeo::Ptr houGeo = std::make_shared<houdini::HouGeo>();
+	if( so )
+	{
+		std::ofstream out( filename.toUtf8() , std::ios_base::out | std::ios_base::binary );
+		houdini::HouGeo::Ptr houGeo = std::make_shared<houdini::HouGeo>();
 
-        houdini::HouGeo::HouAttribute::Ptr nameAttr = std::make_shared<houdini::HouGeo::HouAttribute>();
+		houdini::HouGeo::HouAttribute::Ptr nameAttr = std::make_shared<houdini::HouGeo::HouAttribute>();
 
 		std::vector<QString> subDataNames = so->getSubDataNames();
 
@@ -53,9 +40,32 @@ void ExportParticles::update(core::GraphNodeSocket *output)
 		{
 			QString subDataName = subDataNames[i];
 
-			//if((subDataName!="qc") && (subDataName!="qv") )
-			//	continue;
+			// Attribute?
+			if( so->getSubData<Attribute>(subDataName) )
+			{
+				// we assume all attributes attached to the simobject are meant to be pointattributes
+				Attribute::Ptr attr = so->getSubData<Attribute>(subDataName);
 
+				//TODO: ensure all attributes have the same number of elements
+
+				// P attribute in houdini is expected to have 4 components. With 3 components it becomes unstable
+				// and eventually crashes. As a workaround we promote V3f to V4f when named P
+				if( subDataName == "P" && attr->numComponents()==3 )
+				{
+					Attribute::Ptr org = attr;
+					attr = Attribute::createV4f(org->numElements());
+					for( int i=0, numElements = org->numElements();i<numElements;++i)
+					{
+						math::V3f p = org->get<math::V3f>(i);
+						attr->set<math::V4f>(i, math::V4f( p.x, p.y, p.z, 1.0f ));
+					}
+				}
+
+				// create hougeo attribute which serves as a wrapper for export
+				houdini::HouGeo::HouAttribute::Ptr houAttr = std::make_shared<houdini::HouGeo::HouAttribute>(subDataName.toStdString(), attr);
+
+				houGeo->setPointAttribute(houAttr);
+			}else
 			// ScalarField?
 			if( so->getSubData<ScalarField>(subDataName) )
 			{
@@ -71,52 +81,22 @@ void ExportParticles::update(core::GraphNodeSocket *output)
 				nameAttr->addString((subDataName+".y").toStdString());
 				houGeo->addPrimitive(so->getSubData<VectorField>(subDataName)->getScalarField(2));
 				nameAttr->addString((subDataName+".z").toStdString());
-
-				for( int j=0;j<3;++j )
-				{
-					ScalarField::Ptr f = so->getSubData<VectorField>(subDataName)->getScalarField(j);
-					math::Box3f b = f->bound();
-					qDebug() << f->getVoxelSize().x << " " << f->getVoxelSize().y << " " << f->getVoxelSize().z;
-				}
-
 			}
 		}
 
-		/*
-        ScalarField::Ptr density = so->getSubData<ScalarField>( "density" );
-        if( density )
-        {
-            // add primitive
-            houGeo->addPrimitive( density );
+		//houGeo->setPrimitiveAttribute( "name", nameAttr );
 
-            // add primitive name
-            nameAttr->addString( "density" );
-        }
-
-
-        ScalarField::Ptr volume2 = so->getSubData<ScalarField>( "volume2" );
-        if( volume2 )
-        {
-            // add primitive
-            houGeo->addPrimitive( volume2 );
-
-            // add primitive name
-            nameAttr->addString( "volume2" );
-        }
-		*/
-		houGeo->setPrimitiveAttribute( "name", nameAttr );
-
-        houdini::HouGeoIO::xport( &out, houGeo );
-    }else
-        qDebug() << "ExportClouds:: NO so! " << filename;
+		houdini::HouGeoIO::xport( &out, houGeo );
+	}else
+		qDebug() << "ExportParticles:: NO so! " << filename;
 
 
 	/*
-    if(so)
-    {
-        std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
-        houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
-    }
+	if(so)
+	{
+		std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
+		houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
+	}
 	*/
 	/*
     {

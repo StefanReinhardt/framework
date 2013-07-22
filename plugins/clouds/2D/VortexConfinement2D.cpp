@@ -10,7 +10,8 @@ VortexConfinement2D::VortexConfinement2D()
 }
 
 
-void VortexConfinement2D::apply(SimObject::Ptr so)
+
+void VortexConfinement2D::apply(SimObject::Ptr so, float dt)
 {
 	timer.start();
 

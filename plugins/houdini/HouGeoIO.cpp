@@ -144,7 +144,7 @@ namespace houdini
 	bool HouGeoIO::exportAttribute( HouGeoAdapter::Attribute::Ptr attr )
 	{
 		if( !attr )
-				return false;
+			return false;
 
 		std::string type;
 		std::string storage;

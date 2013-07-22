@@ -4,6 +4,7 @@
 
 #include <core/Core.h>
 
+#include <plugins/primitives/Attribute.h>
 #include <plugins/sim/SimObject.h>
 #include <plugins/houdini/HouGeoIO.h>
 
@@ -19,53 +20,55 @@ ImportParticles::ImportParticles() : core::GraphNode()
 
 void ImportParticles::update(core::GraphNodeSocket *output)
 {
-	qDebug() << "ImportClouds: update ";
+	qDebug() << "ImportParticles: update ";
 
 	QString filename = core::expand(getSocket("file")->asString());
 	SimObject::Ptr so = std::make_shared<SimObject>();
 
-
-	// load houdini file ================
-	std::ifstream in( filename.toUtf8(), std::ios_base::in | std::ios_base::binary );
-	houdini::HouGeo::Ptr hgeo = houdini::HouGeoIO::import( &in );
-	if( hgeo )
+	// if filename specified....
+	if( !filename.isEmpty() )
 	{
-		// we look for volume primitives by name
-		if( hgeo->hasPrimitiveAttribute("name") )
+		// load houdini file ================
+		std::ifstream in( filename.toUtf8(), std::ios_base::in | std::ios_base::binary );
+		houdini::HouGeo::Ptr hgeo = houdini::HouGeoIO::import( &in );
+		if( hgeo )
 		{
-			houdini::HouGeo::HouAttribute::Ptr primNames = std::dynamic_pointer_cast<houdini::HouGeo::HouAttribute>(hgeo->getPrimitiveAttribute("name"));
+			// iterate all point attributes
+			std::vector<std::string> attrNames;
+			hgeo->getPointAttributeNames(attrNames);
 
-			// now load each primitive and name it accordingly
-			int primIndex = 0;
-			for( auto it = primNames->strings.begin(), end = primNames->strings.end();it != end;++it, ++primIndex )
+			for( auto attrName : attrNames )
 			{
-				std::string &name = *it;
-
-				houdini::HouGeo::Primitive::Ptr prim = hgeo->getPrimitive(primIndex);
-				if(std::dynamic_pointer_cast<houdini::HouGeo::HouVolume>(prim) )
-				{
-					houdini::HouGeo::HouVolume::Ptr volprim = std::dynamic_pointer_cast<houdini::HouGeo::HouVolume>(prim);
-					// attach primitive to simdata
-					so->addSubData( QString::fromStdString(name), volprim->field );
-
-					//qDebug() << volprim->field->
-				}
+				houdini::HouGeo::HouAttribute::Ptr hattr = std::dynamic_pointer_cast<houdini::HouGeo::HouAttribute>(hgeo->getPointAttribute(attrName));
+				so->addSubData(QString::fromStdString(attrName), hattr->m_attr);
 			}
 		}
-		so->print();
-		getSocket( "output" )->setData(so);
-
-		/*
-		houdini::HouGeo::HouVolume::Ptr hgeo_vol = std::dynamic_pointer_cast<houdini::HouGeo::HouVolume>(hgeo->getPrimitive(0));
-		// attach primitives ================
-		so->addSubData( "test", hgeo_vol->field );
-		getSocket( "output" )->setData(so);
-		*/
-		/*
-		{
-			std::ofstream out( (filename+".log").toUtf8() , std::ios_base::out | std::ios_base::binary );
-			houdini::HouGeoIO::makeLog( filename.toStdString(), &out );
-		}
-		*/
 	}
+
+	int numParticles = 0;
+
+	// create default P attribute if required
+	if(!so->getSubData<Attribute>("P"))
+	{
+		numParticles = 1000;
+		Attribute::Ptr pAttr = Attribute::createV3f(numParticles);
+		so->addSubData("P", pAttr);
+
+		for( int i=0;i<numParticles;++i )
+			pAttr->set<math::V3f>( i, math::V3f(math::g_randomNumber.randomFloat(), math::g_randomNumber.randomFloat(), math::g_randomNumber.randomFloat()) );
+	}else
+		numParticles = so->getSubData<Attribute>("P")->numElements();
+
+	// initialize velocity if required
+	if( !so->getSubData<Attribute>("velocity") )
+	{
+		Attribute::Ptr velAttr = Attribute::createV3f(numParticles);
+		so->addSubData("velocity", velAttr);
+
+		for( int i=0;i<numParticles;++i )
+			velAttr->set<math::V3f>( i, math::V3f(0.0f) );
+	}
+
+	getSocket( "output" )->setData(so);
+	so->print();
 }

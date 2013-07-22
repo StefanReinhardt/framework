@@ -16,5 +16,5 @@ public:
 
 	Operator();
 
-	virtual void apply( SimObject::Ptr so );
+	virtual void apply( SimObject::Ptr so, float dt ); // dt in seconds
 };

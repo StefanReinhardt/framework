@@ -11,9 +11,7 @@ VortexConfinement::VortexConfinement()
 
 
 
-
-
-void VortexConfinement::apply(SimObject::Ptr so)
+void VortexConfinement::apply(SimObject::Ptr so, float dt)
 {
 	if (vortField == 0)
 	{

@@ -9,9 +9,8 @@ public:
 	typedef std::shared_ptr<Project> Ptr;
 	Project();
 
-	virtual void apply( SimObject::Ptr so )override;
-
-	void setField(QString);
+	virtual void                       apply( SimObject::Ptr so, float dt )override;
+	void                               setField(QString);
 
 	// overloads from Data
 	virtual void                       store( QJsonObject &o, QJsonDocument &doc );

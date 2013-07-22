@@ -11,6 +11,7 @@ public:
 
 	enum ComponentType
 	{
+		INVALID = 0,
 		SINT32 = 1,
 		REAL32 = 2,
 		REAL64 = 3
@@ -29,6 +30,8 @@ public:
 	void*                                    rawPointer();
 	template<typename T> unsigned int        appendElement( const T &value ); // assumes sizeof(T) == m_elementSize
 	template<typename T> T&                  get( unsigned int index ); // assumes sizeof(T) == m_elementSize
+	template<typename T> void                set( unsigned int index, const T &value ); // assumes sizeof(T) == m_elementSize
+	void                                     resize(int numElements);
 
 
 	//
@@ -42,6 +45,7 @@ public:
 	static Attribute::Ptr                    createFloat();
 	static Attribute::Ptr                    createInt();
 	static int                               componentSize( ComponentType ct );
+	static ComponentType                     componentType( const QString &ct );
 
 
 private:
@@ -80,4 +84,12 @@ T& Attribute::get( unsigned int index )
 {
 	T *data = (T*)&m_data[index * m_elementSize];
 	return *data;
+}
+
+// assumes sizeof(T) == m_elementSize
+template<typename T>
+void Attribute::set( unsigned int index, const T &value )
+{
+	T *data = (T*)&m_data[index * m_elementSize];
+	*data = value;
 }

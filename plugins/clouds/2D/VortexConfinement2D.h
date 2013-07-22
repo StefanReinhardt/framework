@@ -12,7 +12,7 @@ public:
 	typedef std::shared_ptr<VortexConfinement2D> Ptr;
 	VortexConfinement2D();
 
-	virtual void                       apply( SimObject::Ptr so )override;
+	virtual void                       apply( SimObject::Ptr so, float dt )override;
 
 	void                               setField(QString);
 	void                               setStrenght(float strenght);

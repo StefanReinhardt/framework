@@ -9,7 +9,7 @@
 #include <memory>
 #include <vector>
 
-//#include "Geometry.h"
+#include <plugins/primitives/Attribute.h>
 #include <math/Math.h>
 
 #include "types.h"

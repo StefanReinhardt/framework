@@ -52,7 +52,8 @@ namespace core
 
 		// plugin management ---
 		void                                                   loadPlugins();
-		void                                                   loadPlugin(std::function<Plugin::Ptr(Core::Ptr)> entrypoint );
+		bool                                                   loadPlugin(std::function<Plugin::Ptr(Core::Ptr)> entrypoint );
+		bool                                                   canCreate( const QString &type );
 		Data::Ptr                                              createData( const QString &type );
 		void                                                   addDataFactory( DataFactory::Ptr df );
 
@@ -63,7 +64,7 @@ namespace core
 
 		// load/save ---
 		Graph::Ptr                                             load(const QString &_filename );
-		void                                                   save(const QString &filename, Graph::Ptr graph );
+		bool                                                   save(const QString &filename, Graph::Ptr graph );
 		QJsonValue                                             serialize( Data::Ptr data );
 		Data::Ptr                                              deserialize( QJsonValue obj );
 		QJsonValue                                             serialize( const QVariant &variant );
@@ -76,9 +77,11 @@ namespace core
 		QJsonObject                                            m_deserializeJsonData;
 		std::map<Data::Ptr, std::pair<int, QJsonObject> >      m_serializeMap;
 		QJsonDocument                                          m_serializeDoc;
+		bool                                                   m_serializationFailed;
 
 
 	};
 
-	Core::Ptr instance();
+	Core::Ptr                     instance();
+	bool                          loadPlugin( std::function<Plugin::Ptr(Core::Ptr)> entrypoint );
 }

@@ -129,15 +129,17 @@ namespace houdini
 		{
 			// add point attribute
 			pAttr = std::make_shared<HouAttribute>();
-			pAttr->name = "P";
+			pAttr->m_name = "P";
 			pAttr->tupleSize = 4;
-			pAttr->storage = HouAttribute::ATTR_STORAGE_FPREAL32;
-			pAttr->type = HouAttribute::ATTR_TYPE_NUMERIC;
-			setPointAttribute( "P", pAttr );
+			pAttr->m_storage = HouAttribute::ATTR_STORAGE_FPREAL32;
+			pAttr->m_type = HouAttribute::ATTR_TYPE_NUMERIC;
+			pAttr->m_attr = ::Attribute::createV4f();
+			setPointAttribute( pAttr );
 		}
 
 		math::V3f center = field->localToWorld( math::V3f(0.5f) );
-		int index = pAttr->addV4f( math::V4f(center.x, center.y, center.z, 1.0f) );
+		//int index = pAttr->addV4f( math::V4f(center.x, center.y, center.z, 1.0f) );
+		int index = pAttr->m_attr->appendElement<math::V4f>(math::V4f(center.x, center.y, center.z, 1.0f));
 
 
 		if( !m_topology )
@@ -157,43 +159,61 @@ namespace houdini
 	}
 
 
-	void HouGeo::setPointAttribute( const std::string &name, HouAttribute::Ptr attr )
+	void HouGeo::setPointAttribute( HouAttribute::Ptr attr )
 	{
-		m_pointAttributes[name] = attr;
+		m_pointAttributes[attr->getName()] = attr;
 	}
 
 	void HouGeo::setPrimitiveAttribute( const std::string &name, HouAttribute::Ptr attr )
 	{
-		attr->name = name;
+		attr->m_name = name;
 		m_primitiveAttributes[name] = attr;
 	}
 
 	// Attribute ==============================
 
-	HouGeo::HouAttribute::HouAttribute() : Attribute()
+	HouGeo::HouAttribute::HouAttribute() : Attribute(), m_type(HouGeoAdapter::Attribute::ATTR_TYPE_NUMERIC)
 	{
-		name = "unnamed";
+		m_name = "unnamed";
 		numElements = 0;
+	}
+
+	HouGeo::HouAttribute::HouAttribute( const std::string &name, ::Attribute::Ptr attr ) : Attribute(),
+		m_attr(attr), m_name(name), m_type(HouGeoAdapter::Attribute::ATTR_TYPE_NUMERIC)
+	{
+		switch( m_attr->componentType() )
+		{
+		case ::Attribute::REAL32:
+			m_storage = ATTR_STORAGE_FPREAL32;break;
+		case ::Attribute::REAL64:
+			m_storage = ATTR_STORAGE_FPREAL64;break;
+		case::Attribute::SINT32:
+			m_storage = ATTR_STORAGE_INT32;break;
+		default:
+			throw std::runtime_error("HouGeo::HouAttribute::HouAttribute - unsupported attribute type");
+		}
 	}
 
 	std::string HouGeo::HouAttribute::getName()const
 	{
-		return name;
+		return m_name;
 	}
 
 	HouGeoAdapter::Attribute::Type HouGeo::HouAttribute::getType()const
 	{
-		return type;
+		return m_type;
 	}
 
 	int HouGeo::HouAttribute::getTupleSize()const
 	{
+		if( m_attr )
+			return m_attr->numComponents();
 		return tupleSize;
 	}
 
 	HouGeoAdapter::Attribute::Storage HouGeo::HouAttribute::getStorage()const
 	{
-		return storage;
+		return m_storage;
 	}
 
 	void HouGeo::HouAttribute::getPacking( std::vector<int> &packing )const
@@ -202,17 +222,22 @@ namespace houdini
 
 	HouGeoAdapter::RawPointer::Ptr HouGeo::HouAttribute::getRawPointer()
 	{
-		if( !data.empty() )
-			return HouGeoAdapter::RawPointer::create( &data[0] );
+		if( m_attr )
+			return HouGeoAdapter::RawPointer::create( m_attr->rawPointer() );
+		//if( !data.empty() )
+		//	return HouGeoAdapter::RawPointer::create( &data[0] );
 		return HouGeoAdapter::RawPointer::create( 0 );
 	}
 
 	int HouGeo::HouAttribute::getNumElements()const
 	{
+		if( m_attr )
+			return m_attr->numElements();
 		return numElements;
 	}
 
 
+	/*
 	int HouGeo::HouAttribute::addV4f( math::V4f value )
 	{
 		// TODO: check storage
@@ -221,20 +246,21 @@ namespace houdini
 		if( tupleSize != 4 )
 			qCritical() << "tupleSize does not match!";
 
-		int elementSize = storageSize( storage )*tupleSize;
+		int elementSize = storageSize( m_storage )*tupleSize;
 		data.resize( data.size() + elementSize );
 
 		*((math::V4f *)(&data[ numElements * elementSize ])) = value;
 
 		return numElements++;
 	}
+	*/
 
 	int HouGeo::HouAttribute::addString(const std::string &value)
 	{
 		// TODO: check storage
 		// TODO: check type
 		strings.push_back(value);
-		type = ATTR_TYPE_STRING;
+		m_type = ATTR_TYPE_STRING;
 		//attr->storage = attrStorage;
 		tupleSize = 1;
 		return numElements++;
@@ -361,11 +387,17 @@ namespace houdini
 		{
 			Attribute::Storage attrStorage = Attribute::storage(attrData->get<std::string>("storage"));
 			int attrTupleSize = attrData->get<int>("size");
-			int attrComponentSize = Attribute::storageSize( attrStorage );
 
+			::Attribute::ComponentType attrComponentType = ::Attribute::componentType(QString::fromStdString(attrData->get<std::string>("storage")));
+			int attrNumComponents = attrData->get<int>("size");
+			attr->m_attr = std::make_shared<::Attribute>( attrComponentType, attrNumComponents );
+			attr->m_attr->resize(elementCount);
+			char *data = (char*)attr->m_attr->rawPointer();
+
+			int attrComponentSize = Attribute::storageSize( attrStorage );
 			int dstTupleSize = attrTupleSize;
 			int dstComponentSize = attrComponentSize;
-			attr->data.resize( elementCount*dstTupleSize*dstComponentSize );
+			//attr->data.resize( elementCount*dstTupleSize*dstComponentSize );
 
 			if( attrData->hasKey("values") )
 			{
@@ -480,7 +512,7 @@ namespace houdini
 									// get component value from current rawpagedata
 									// and copy that component to the location of that component in dense array
 									// TODO: uniform arrays!
-									rawPageData->getValue(elementIndex+component).cpyTo( (char *)&(attr->data[(destElementIndex + startComponentIndex + component)*dstComponentSize]) );
+									rawPageData->getValue(elementIndex+component).cpyTo( (char *)&(data[(destElementIndex + startComponentIndex + component)*dstComponentSize]) );
 							}
 
 
@@ -499,9 +531,9 @@ namespace houdini
 						++pageIndex;
 					}
 
-					attr->name = attrName;
-					attr->type = attrType;
-					attr->storage = attrStorage;
+					attr->m_name = attrName;
+					attr->m_type = attrType;
+					attr->m_storage = attrStorage;
 					attr->tupleSize = dstTupleSize;
 				}
 			}
@@ -520,8 +552,8 @@ namespace houdini
 				}
 				attr->numElements = numElements;
 
-				attr->name = attrName;
-				attr->type = attrType;
+				attr->m_name = attrName;
+				attr->m_type = attrType;
 				//attr->storage = attrStorage;
 				attr->tupleSize = 1;
 			}
@@ -608,16 +640,18 @@ namespace houdini
 			// TODO!!! - make this more generic - kind of hardcode
 			{
 				HouAttribute::Ptr pAttr = std::dynamic_pointer_cast<HouAttribute>( getPointAttribute("P") );
-				switch(pAttr->storage)
+				switch(pAttr->m_storage)
 				{
 				// in case of 4 component vector, w component will be ignored...
 				case Attribute::ATTR_STORAGE_FPREAL32:
 					{
-						p = *(math::V3f *)&m_pointAttributes.find("P")->second->data[ v*pAttr->tupleSize*sizeof(float) ];
+						//p = *(math::V3f *)&m_pointAttributes.find("P")->second->data[ v*pAttr->tupleSize*sizeof(float) ];
+						p = m_pointAttributes.find("P")->second->m_attr->get<math::V3f>( v );
 					}break;
 				case Attribute::ATTR_STORAGE_FPREAL64:
 					{
-						p = *(math::V3d *)&m_pointAttributes.find("P")->second->data[ v*pAttr->tupleSize*sizeof(double) ];
+						//p = *(math::V3d *)&m_pointAttributes.find("P")->second->data[ v*pAttr->tupleSize*sizeof(double) ];
+						p = m_pointAttributes.find("P")->second->m_attr->get<math::V3d>( v );
 					}break;
 				}
 			}
