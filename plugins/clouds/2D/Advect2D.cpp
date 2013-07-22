@@ -33,7 +33,7 @@ void Advect2D::apply( SimObject::Ptr so)
 	if(std::dynamic_pointer_cast<CloudData>(so))
 	{
 		CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
-		m_dt = cd->m_parms.m_dt;
+		m_dt = cd->m_p.dt;
 	}
 
 	// get field to advect

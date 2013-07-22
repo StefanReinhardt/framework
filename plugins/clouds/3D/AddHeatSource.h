@@ -16,12 +16,15 @@ public:
 	void                                setEmitterSize(float size);
 	void                                setFrequence(float frequency);
 	void                                setTemperature(float temp);
+	void                                setOffset(float offset);
+
 
 private:
+
 	float                                m_frequency;
 	float                                m_emitterSize;
 	float                                m_contrast;
-	float                                m_add;
+	float                                m_offset;
 	float                                m_dt;
 	float                                m_animationSpeed;
 	float                                m_tempInput;

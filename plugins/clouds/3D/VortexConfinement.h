@@ -15,6 +15,7 @@ public:
 
 	void                               setField(QString);
 	void                               setStrenght(float strenght);
+	void                               setOnCloudOnly(bool onCloud);
 
 
 
@@ -22,6 +23,7 @@ private:
 	//QString m_name;
 	float                               m_dt;			// Timestep
 	float                               m_strenght;
+	bool                                m_onCloudOnly;
 	QString                             vortField;
 
 	VectorField::Ptr                    vorticity;

@@ -9,7 +9,7 @@ AddHeatSource::AddHeatSource()
 	m_frequency =      15.0f;	// frequency of the input noise
 	m_contrast =       5.0f;	// contrast of the noise pattern
 	m_emitterSize =    0.50f;	// size of the ground input field (between 0.0 and 1.0)
-	m_add =            0.0f;	// uplift of the noise
+	m_offset =         0.0f;	// uplift of the noise
 	m_dt =             1.0f;	// timestep
 	m_animationSpeed = 0.05f;	// speed of the animated noise
 	m_tempInput =      5.0f;	// Temp input in 1/100 °C per second
@@ -18,7 +18,7 @@ AddHeatSource::AddHeatSource()
 void AddHeatSource::apply(SimObject::Ptr so)
 {
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
-	m_dt = cd->m_parms.m_dt;
+	m_dt = cd->m_p.dt;
 
 	ScalarField::Ptr pt = cd->getSubData<ScalarField>("pt");
 	math::V3i res = pt->getResolution();
@@ -30,7 +30,7 @@ void AddHeatSource::apply(SimObject::Ptr so)
 	math::V3f wPos;
 
 	int sizex =          int(res.x*abs(m_emitterSize-1)*0.5f);
-	int sizez =          int(res.y*abs(m_emitterSize-1)*0.5f);
+	int sizez =          int(res.z*abs(m_emitterSize-1)*0.5f);
 	math::V3i min =      math::V3i(sizex,0,sizez);
 	math::V3i max =      math::V3i(res.x-sizex, int(ceil(res.y/70.0f))+1, res.z-sizez);
 
@@ -38,10 +38,12 @@ void AddHeatSource::apply(SimObject::Ptr so)
 		for (int j=min.y; j<max.y; ++j)
 			for( int i=min.x; i<max.x; ++i )
 			{
-				wPos =   pt->voxelToWorld(math::V3f(float(i),float(j),float(k)));
-				wPos *= m_frequency;
-				random = abs(math::max(-1.0f,math::min(1.0f, m_contrast*(m_add+noise.perlinNoise_4D(wPos.x,wPos.y,wPos.z,t) ) ) ) );
-				pt->lvalue(i,j,k) += 0.01 * m_dt * m_tempInput * random;
+				// calculate world Position for resolution independent noise
+				wPos = pt->voxelToWorld(math::V3f(float(i),float(j),float(k))) * m_frequency;
+
+				// create noise value with given parameters
+				random = abs(math::max(-1.0f,math::min(1.0f, m_offset + m_contrast*( noise.perlinNoise_4D(wPos.x,wPos.y,wPos.z,t) ) ) ) );
+				pt->lvalue(i,j,k) += 0.01f * m_tempInput * random;
 			}
 }
 
@@ -70,7 +72,10 @@ void AddHeatSource::setTemperature(float temp)
 {
 	m_tempInput = temp;
 }
-
+void AddHeatSource::setOffset(float offset)
+{
+	m_offset = offset;
+}
 
 void AddHeatSource::store( QJsonObject &o, QJsonDocument &doc )
 {

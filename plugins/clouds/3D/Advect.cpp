@@ -36,7 +36,7 @@ void Advect::apply( SimObject::Ptr so)
 	if(std::dynamic_pointer_cast<CloudData>(so))
 	{
 		CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
-		m_dt = cd->m_parms.m_dt;
+		m_dt = cd->m_p.dt;
 	}
 
 	// IF Vector field is advected

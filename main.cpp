@@ -48,6 +48,7 @@ public:
 };
 
 extern core::Graph::Ptr clouds_graph2D();
+
 //extern core::Graph::Ptr grandyn_demo1();
 
 // seems like QCoreApplication::arguments() has a bug causing memory explosion...

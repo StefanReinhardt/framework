@@ -16,7 +16,7 @@ void Buoyancy2D::apply(SimObject::Ptr so)
 	timer.start();
 
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
-	m_dt = cd->m_parms.m_dt;
+	m_dt = cd->m_p.dt;
 
 	math::Vec3i res = cd->getResolution();
 

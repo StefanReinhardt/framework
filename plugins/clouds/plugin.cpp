@@ -89,13 +89,13 @@ core::Graph::Ptr clouds_graph2D()
 	// Vortex confinement
 	VortexConfinement2D::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement2D>(solver->createOperator("VortexConfinement2D", "add curls back in"));
 	vortConf->setField("velocity");
-	vortConf->setStrenght(0.0511111f);
+	vortConf->setStrenght(0.111111f);
 
 	//********** ADD FORCES
 	// buoyancy and vort Conf should have same vel input field.
 	// Buoyancy
 	Buoyancy2D::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy2D>(solver->createOperator( "Buoyancy2D", "apply buoyant Force" ));
-	buoyantForce->setStrenght(0.80f);
+	buoyantForce->setStrenght(0.990f);
 
 
 
@@ -104,15 +104,52 @@ core::Graph::Ptr clouds_graph2D()
 	WaterContinuity2D::Ptr WaterCont = std::dynamic_pointer_cast<WaterContinuity2D>(solver->createOperator( "WaterContinuity2D", "water continuity" ));
 
 
-	// Add Heat Src
+	// +++++++++++++++++
+	// sources for Cumulus Setup
+
+	// Add Velocity Source
+	AddHeatSource2D::Ptr velInput = std::dynamic_pointer_cast<AddHeatSource2D>(solver->createOperator( "AddHeatSource2D", "add Velocity input" ));
+	velInput->setAnimationSpeed(0.05f);
+	velInput->setContrast(0.80f);
+	velInput->setEmitterSize(0.1333333f);
+	velInput->setFrequence(10.0f);
+	velInput->setStrenght(2.6f);
+	velInput->setOffset(0.4f);
+	velInput->setVelEmission(true);
+
+
+	AddHeatSource2D::Ptr heatInput =  std::dynamic_pointer_cast<AddHeatSource2D>(solver->createOperator( "AddHeatSource2D", "add Heat input" ));
+	heatInput->setAnimationSpeed(0.1f);
+	heatInput->setContrast(1.0f);
+	heatInput->setEmitterSize(0.1333333f);
+	heatInput->setFrequence(30.0f);
+	heatInput->setStrenght(100.6f);
+	heatInput->setOffset(0.40f);
+	heatInput->setPtEmission(true);
+
+
+/*
+	// Add Heat Src for Side Wind
 	AddHeatSource2D::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource2D>(solver->createOperator( "AddHeatSource2D", "add heat field" ));
 	heatInput->setAnimationSpeed(0.02f);
 	heatInput->setContrast(0.80f);
-	heatInput->setEmitterSize(0.4333333f);
+	heatInput->setEmitterSize(0.80f);
 	heatInput->setFrequence(1.0f);
-	heatInput->setTemperature(20.0f);
+	heatInput->setTemperature(-0.0f);
 	heatInput->setOffset(0.4f);
+	heatInput->setQvEmission(true);
+	heatInput->setInputFace(AddHeatSource2D::LEFT);
 
+	// Add Heat Src for Side Wind
+	AddHeatSource2D::Ptr heatInputR = std::dynamic_pointer_cast<AddHeatSource2D>(solver->createOperator( "AddHeatSource2D", "add heat field" ));
+	heatInputR->setAnimationSpeed(0.02f);
+	heatInputR->setContrast(0.80f);
+	heatInputR->setEmitterSize(1.0f);
+	heatInputR->setFrequence(1.0f);
+	heatInputR->setTemperature(5.0f);
+	heatInputR->setOffset(0.4f);
+	heatInputR->setInputFace(AddHeatSource2D::RIGHT);
+*/
 	//********** PROJECT
 	// Project
 	Project2D::Ptr project = std::dynamic_pointer_cast<Project2D>(solver->createOperator( "Project2D", "projection step" ) );
@@ -182,10 +219,12 @@ core::Graph::Ptr clouds_graph3D()
 
 	// Add Heat Src
 	AddHeatSource::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource>(solver->createOperator( "AddHeatSource", "add heat field" ));
-	heatInput->setAnimationSpeed(0.05f);
-	heatInput->setContrast(5.0f);
-	heatInput->setEmitterSize(0.5333333f);
-	heatInput->setFrequence(15.0f);
+	heatInput->setAnimationSpeed(0.02f);
+	heatInput->setContrast(0.80f);
+	heatInput->setEmitterSize(0.2f);
+	heatInput->setFrequence(1.0f);
+	heatInput->setTemperature(15.0f);
+	heatInput->setOffset(0.4f);
 
 
 	// Vortex confinement

@@ -38,7 +38,7 @@ void WaterContinuity2D::apply(SimObject::Ptr so)
 			// 			L = Lapse rate in °K or °C per meter
 			//			Rd = ideal gas constant ~ 287 J/(kg K)
 
-			exner = pow(cd->m_pLut.at(j)/cd->m_p0,0.286f);
+			exner = pow(cd->m_pLut[j]/cd->m_p0,0.286f);
 
 			//p = (float) Math.pow(10*(1-(alt*tlr/t0)),(9.81/(tlr*rd)));
 			//
@@ -52,7 +52,7 @@ void WaterContinuity2D::apply(SimObject::Ptr so)
 			//
 			//compute 	qs= (380.16/p)exp((17.67*T)/(T+243.5))
 			// with T in °C and P in Pa
-			qs = (float) ( (380.16f / (cd->m_pLut.at(j)*1000) ) * exp( (17.67f * T) / (T + 243.5f) ) );
+			qs = (float) ( (380.16f / (cd->m_pLut[j]*1000) ) * exp( (17.67f * T) / (T + 243.5f) ) );
 
 			d_qv  = math::min(qs - qv->lvalue(i,j,k),qc->lvalue(i,j,k));
 

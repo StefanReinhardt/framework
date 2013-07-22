@@ -14,22 +14,24 @@ public:
 	{
 		Parameters()
 		{
-			m_dt =                       1.0f;
-			m_maxAlt =                   4000.0f;		// altitude in meter on top of sim grid
-			m_tlr =                      0.009f;		// Kelvin per 1 meter (between 0.55 and 0.99)
-			m_t0 =                       295.0f;		// temp on ground in Kelvin
-			m_hum =                      0.6f;			// humidty
-			m_wind =                     0.0f;
-			m_resolution =               math::Vec3i(50,50,1);
+			dt =                       1.0f;
+			maxAlt =                   6000.0f;		// altitude in meter on top of sim grid
+			minAlt =                   2000.0f;
+			tlr =                      0.009f;		// Kelvin per 1 meter (between 0.55 and 0.99)
+			t0 =                       295.0f;		// temp on ground in Kelvin
+			hum =                      0.6f;			// humidty
+			wind =                     0.0f;
+			res =                      math::Vec3i(50,50,1);
 		}
 
-		float                            m_dt;
-		float                            m_maxAlt;		// altitude in meter on top of sim grid
-		float                            m_tlr;			// Kelvin per 1 meter (between 0.55 and 0.99)
-		float                            m_t0;			// temp on ground in Kelvin
-		float                            m_hum;			// humidty
-		float                            m_wind;
-		math::V3i                        m_resolution;
+		float                            dt;
+		float                            maxAlt;		// altitude in meter on top of sim grid
+		float                            minAlt;		// altitude in meter on ground of sim grid
+		float                            tlr;			// Kelvin per 1 meter (between 0.55 and 0.99)
+		float                            t0;			// temp on ground in Kelvin
+		float                            hum;			// humidty
+		float                            wind;
+		math::V3i                        res;
 	};
 
 	typedef std::shared_ptr<CloudData> Ptr;
@@ -51,14 +53,14 @@ public:
 	void                                 setBounds2D(int, ScalarField::Ptr);
 
 
-	Parameters                           m_parms;
+	Parameters                           m_p;
 
-	math::V3i                            m_resolution;
+	math::V3i                            m_res;
 	float                                m_gravity;
 	float                                m_diff;			// Viscosity
 	float                                m_visc;			// Diffusionrate
-	float                                m_p0;			// ground pressure
-	float                                m_pt0;			// ground pot temp
+	float                                m_p0;				// ground pressure
+	float                                m_pt0;				// ground pot temp
 	float                                m_rd;
 	float                                m_lh;
 	float                                m_cp;

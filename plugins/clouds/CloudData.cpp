@@ -3,7 +3,7 @@
 
 CloudData::CloudData( Parameters parms ) : SimObject()
 {
-	m_parms = parms;
+	m_p = parms;
 	initialize();
 	reset();
 }
@@ -22,7 +22,7 @@ void CloudData::initialize()
 	m_diff = 0.0000f;         // diffusion
 	m_visc = 0.000000000f;    // viscosity
 
-	m_resolution = m_parms.m_resolution;
+	m_res = m_p.res;
 	//Constants
 	m_rd = 		287; 		// specific gas constant for dry air
 	m_p0 = 		100;		// pressure at sea level (kPa)
@@ -31,14 +31,14 @@ void CloudData::initialize()
 	m_cp = 		1005;		// specific heat capacity J/(kg K)
 
 	ScalarField::Ptr density = std::make_shared<ScalarField>();
-	density->resize(m_resolution);
+	density->resize(m_res);
 	density->localToWorld(math::V3f(2,2,1));
 	density->fill(0.0f);
 	density->fill(33.3f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.4f,0.6f));
 	addSubData("density", density);
 
 	VectorField::Ptr velocity = std::make_shared<VectorField>( VectorField::FACE );
-	velocity->resize(m_resolution);
+	velocity->resize(m_res);
 	//velocity->setBound( math::Box3f( math::V3f(-0.51f), math::V3f(0.51f) ) );
 	//velocity->fill( math::V3f(1.0f, 1.0f, 1.0f) );
 	addSubData("velocity", velocity);
@@ -58,15 +58,15 @@ void CloudData::initialize()
 void CloudData::reset()
 {
 	ScalarField::Ptr pt = std::make_shared<ScalarField>();
-	pt->resize(m_resolution);
+	pt->resize(m_res);
 	addSubData("pt", pt);
 
 	ScalarField::Ptr qv = std::make_shared<ScalarField>();
-	qv->resize(m_resolution);
+	qv->resize(m_res);
 	addSubData("qv", qv);
 
 	ScalarField::Ptr qc = std::make_shared<ScalarField>();
-	qc->resize(m_resolution);
+	qc->resize(m_res);
 	addSubData("qc", qc);
 
 
@@ -75,27 +75,28 @@ void CloudData::reset()
     qDebug() << "reset Cloud Data";
 
 	// Initialize absolute Temp lookup
-	//************************************************************
-	for(int y= 0; y<m_resolution.y; y++){
+	//************************************************************ 
+	for(int y= 0; y<m_res.y; y++){
 		// Ground Temp - (altitude / 100)* tempLapseRate
-		m_tLut.push_back(m_parms.m_t0 - (( (float)y/(float)m_resolution.y ) * m_parms.m_maxAlt) * m_parms.m_tlr);
+		float alt = ( (float)y / (float)m_res.y ) * (m_p.maxAlt-m_p.minAlt) + m_p.minAlt;
+		m_tLut.push_back(m_p.t0 - alt * m_p.tlr);
 	}
 
 	// Initialize absolute Pressure lookup in kPa
 	//************************************************************
-	for(int y= 0; y<m_resolution.y; y++){
-		float alt = ( (float)y / (float)m_resolution.y ) * m_parms.m_maxAlt;
-		m_pLut.push_back((float) (m_p0* pow(( 1- ( (alt*m_parms.m_tlr)/m_parms.m_t0 ) ),(m_gravity/(m_parms.m_tlr*m_rd)) )) );
+	for(int y= 0; y<m_res.y; y++){
+		float alt = ( (float)y / (float)m_res.y ) * (m_p.maxAlt-m_p.minAlt) + m_p.minAlt;
+		m_pLut.push_back((float) (m_p0* pow(( 1- ( (alt*m_p.tlr)/m_p.t0 ) ),(m_gravity/(m_p.tlr*m_rd)) )) );
 	}
 
 	// Initialize pot temp
 	//************************************************************
-	for(int k= 0; k<m_resolution.z; k++)
-		for(int i= 0; i<m_resolution.x; i++)
-			for(int j= 0; j<m_resolution.y; j++)
+	for(int k= 0; k<m_res.z; k++)
+		for(int i= 0; i<m_res.x; i++)
+			for(int j= 0; j<m_res.y; j++)
 			{
 				//					K                   kPa/kPa
-				pt->lvalue(i,j,k)= (float) (m_tLut.at(j) * ( pow( (m_p0/m_pLut.at(j)) , 0.286)));
+				pt->lvalue(i,j,k)= (float) (m_tLut[j] * ( pow( m_p0/m_pLut[j] , 0.286)));
 				//pt_old->lvalue(i,j,k) = pt->lvalue(i,j,k);
 			}
 
@@ -107,39 +108,37 @@ void CloudData::reset()
 	// Initialize Saturation vapor mixing ratio and water vapor mixing ratio
 	//************************************************************
 	//T in celsius
-	for(int k= 0; k<m_resolution.z; k++)
-		for(int i= 0; i<m_resolution.x; i++)
-			for(int j= 0; j<m_resolution.y; j++)
+	for(int k= 0; k<m_res.z; k++)
+		for(int i= 0; i<m_res.x; i++)
+			for(int j= 0; j<m_res.y; j++)
 			{
 				// temp in °C and p in Pa
 				m_qs		=		(float) (  (380/(m_pLut[j]*1000)  ) * exp( (17.67*(m_tLut[j]-273.15)) / (m_tLut[j]-273.15+243.5))) ;
-				qv->lvalue(i,j,k) = 		m_qs * m_parms.m_hum;
+				qv->lvalue(i,j,k) = 		m_qs * m_p.hum;
 			}
 
-	m_qv1 = qv->lvalue(0,m_resolution.y-1,0);
-
-	//pt->fill(305.0,math::Box3f(0.4f,0.05f,0.4f,0.60f,0.91f,0.6f));
+	m_qv1 = qv->lvalue(0,m_res.y-1,0);
 
 }
 
 float CloudData::getTimestep()
 {
-	return m_parms.m_dt;
+	return m_p.dt;
 }
 
 math::V3i CloudData::getResolution()
 {
-	return m_parms.m_resolution;
+	return m_p.res;
 }
 
 void CloudData::resize(math::V3i size)
 {
-	m_resolution = size;
+	m_res = size;
 }
 
 void CloudData::setTimestep(float timestep)
 {
-	m_parms.m_dt=timestep;
+	m_p.dt=timestep;
 }
 
 
@@ -192,10 +191,10 @@ void CloudData::setBounds(int b, ScalarField::Ptr f)
 			for( int k=0;k<res.z;++k )
 				for( int j=0;j<res.y;++j )
 				{
-					f->lvalue(0,j,k) = m_parms.m_wind;
-					f->lvalue(1,j,k) = m_parms.m_wind;
-					f->lvalue(res.x-1,j,k) =  m_parms.m_wind;
-					f->lvalue(res.x-2,j,k) =  m_parms.m_wind;
+					f->lvalue(0,j,k) = m_p.wind;
+					f->lvalue(1,j,k) = m_p.wind;
+					f->lvalue(res.x-1,j,k) =  m_p.wind;
+					f->lvalue(res.x-2,j,k) =  m_p.wind;
 				}
 
 			// bottom 	= noslip
@@ -436,12 +435,12 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 		case 1:
 			qDebug()  << "setBounds with b=1 (vel_x)";
 			// sides 	= user defined wind
-			for( int j=0;j<res.y;++j )
+			for( int j=0;j<res.y/2;++j )
 				{
-					f->lvalue(0,j,k) =  m_parms.m_wind;
-					f->lvalue(1,j,k) =  m_parms.m_wind;
-					f->lvalue(res.x-1,j,k) =  m_parms.m_wind;
-					f->lvalue(res.x-2,j,k) =  m_parms.m_wind;
+					f->lvalue(0,j,k) =			m_p.wind;
+					f->lvalue(1,j,k) =			m_p.wind;
+					f->lvalue(res.x-1,j,k) =	-m_p.wind;
+					f->lvalue(res.x-2,j,k) =	-m_p.wind;
 				}
 
 			// bottom 	= noslip
@@ -516,7 +515,7 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 			float qv=0;
 			for( int j=0;j<res.y;++j )
 			{
-				qv = m_parms.m_hum * (float) (  (380/(m_pLut[j]*1000)  ) * exp( (17.67*(m_tLut[j]-273.15)) / (m_tLut[j]-273.15+243.5))) ;
+				qv = m_p.hum * (float) (  (380/(m_pLut[j]*1000)  ) * exp( (17.67*(m_tLut[j]-273.15)) / (m_tLut[j]-273.15+243.5))) ;
 				for( int k=0;k<res.z;++k )
 				{
 					f->lvalue(0,j,k) = qv;

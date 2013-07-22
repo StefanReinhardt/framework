@@ -16,12 +16,14 @@ public:
 
 	void                               setField(QString);
 	void                               setStrenght(float strenght);
+	void                               setOnCloudOnly(bool onCloud);
 
 private:
 
 	core::Timer                        timer;
 	float                              m_strenght;
 	float                              m_dt;			// Timestep
+	bool                               m_onCloudOnly;
 	QString                            m_vortField;
 	ScalarField::Ptr                   vel_x,vel_y,vel_z;
 

@@ -6,6 +6,7 @@ VortexConfinement::VortexConfinement()
 {
 	m_dt = 1.0f;
 	m_strenght = 0.123456789f;
+	m_onCloudOnly = true;
 }
 
 
@@ -26,9 +27,11 @@ void VortexConfinement::apply(SimObject::Ptr so)
 	vel_y = so->getSubData<VectorField>(vortField)->getScalarField(1);
 	vel_z = so->getSubData<VectorField>(vortField)->getScalarField(2);
 
+	ScalarField::Ptr qc = so->getSubData<ScalarField>("qc");
+
 
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
-	m_dt = cd->m_parms.m_dt;
+	m_dt = cd->m_p.dt;
 
 	math::V3i res = vel_x->getResolution();
 	res = math::V3i(res.x-1,res.y,res.z);
@@ -109,12 +112,12 @@ void VortexConfinement::apply(SimObject::Ptr so)
 	for( int k=2;k<res.z-2;++k )
 		for( int j=2;j<res.y-2;++j )
 			for( int i=2;i<res.x-2;++i )
-			{
-
-				vel_x->lvalue(i,j,k) +=  m_dt*(force->getScalarField(0)->lvalue(i-1,j,k)+force->getScalarField(0)->lvalue(i,j,k))/2 * m_strenght;
-				vel_y->lvalue(i,j,k) +=	 m_dt*(force->getScalarField(1)->lvalue(i,j-1,k)+force->getScalarField(1)->lvalue(i,j,k))/2 * m_strenght;
-				vel_z->lvalue(i,j,k) +=	 m_dt*(force->getScalarField(2)->lvalue(i,j,k-1)+force->getScalarField(2)->lvalue(i,j,k))/2 * m_strenght;
-			}
+				if( !m_onCloudOnly || qc->lvalue(i,j,k)>0.000001f)
+				{
+					vel_x->lvalue(i,j,k) +=  m_dt*(force->getScalarField(0)->lvalue(i-1,j,k)+force->getScalarField(0)->lvalue(i,j,k))/2 * m_strenght;
+					vel_y->lvalue(i,j,k) +=	 m_dt*(force->getScalarField(1)->lvalue(i,j-1,k)+force->getScalarField(1)->lvalue(i,j,k))/2 * m_strenght;
+					vel_z->lvalue(i,j,k) +=	 m_dt*(force->getScalarField(2)->lvalue(i,j,k-1)+force->getScalarField(2)->lvalue(i,j,k))/2 * m_strenght;
+				}
 
 }
 
@@ -152,7 +155,10 @@ void VortexConfinement::setStrenght(float strenght)
 m_strenght = strenght;
 }
 
-
+void VortexConfinement::setOnCloudOnly(bool onCloud)
+{
+	m_onCloudOnly = onCloud;
+}
 
 
 // Serialize
@@ -161,6 +167,7 @@ void VortexConfinement::store( QJsonObject &o, QJsonDocument &doc )
 	Operator::store( o, doc );
 
 	o.insert( "vortField", vortField );
+	o.insert( "vortOnCloudOnly", m_onCloudOnly );
 }
 
 
@@ -169,5 +176,6 @@ void VortexConfinement::load( QJsonObject &o )
 	Operator::load( o );
 
 	vortField = o["vortField"].toString();
+	m_onCloudOnly = o["vortOnCloudOnly"].toBool();
 }
 
