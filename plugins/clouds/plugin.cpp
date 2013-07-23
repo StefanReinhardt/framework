@@ -11,6 +11,7 @@
 #include "2D/WaterContinuity2D.h"
 #include "2D/AddSource2D.h"
 #include "2D/Buoyancy2D.h"
+#include "2D/Diffuse2D.h"
 #include "2D/VortexConfinement2D.h"
 #include "2D/AddHeatSource2D.h"
 
@@ -38,6 +39,7 @@ struct CloudsPlugin : public core::Plugin
 		core->addDataFactory( core::DataFactoryT<WaterContinuity2D>::create(WaterContinuity2D::staticMetaObject.className(), "balances water vapor and condensed cloud water") );
 		core->addDataFactory( core::DataFactoryT<AddSource2D>::create(AddSource2D::staticMetaObject.className(), "adds a source to a field") );
 		core->addDataFactory( core::DataFactoryT<Buoyancy2D>::create(Buoyancy2D::staticMetaObject.className(), "adds vertical velocity depending on temperature and water") );
+		core->addDataFactory( core::DataFactoryT<Diffuse2D>::create(Diffuse2D::staticMetaObject.className(), "diffuses a given field") );
 		core->addDataFactory( core::DataFactoryT<VortexConfinement2D>::create(VortexConfinement2D::staticMetaObject.className(), "adds lost curl energy back in") );
 		core->addDataFactory( core::DataFactoryT<AddHeatSource2D>::create(AddHeatSource2D::staticMetaObject.className(), "adds temperature to pt") );
 
@@ -92,7 +94,7 @@ core::Graph::Ptr clouds_graph2D()
 	VortexConfinement2D::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement2D>(solver->createOperator("VortexConfinement2D", "add curls back in"));
 	vortConf->setField("velocity");
 	vortConf->setStrenght(0.111111f);
-	vortConf->setOnCloudOnly(false);
+	vortConf->setOnCloudOnly(true);
 
 	//********** ADD FORCES
 	// buoyancy and vort Conf should have same vel input field.
@@ -101,6 +103,13 @@ core::Graph::Ptr clouds_graph2D()
 	buoyantForce->setStrenght(0.990f);
 
 
+	Diffuse2D::Ptr diffPt = std::dynamic_pointer_cast<Diffuse2D>(solver->createOperator( "Diffuse2D", "diffuse Temperature" ));
+	diffPt->setField("pt");
+	diffPt->setDiffusion(0.000001f);
+
+	Diffuse2D::Ptr diffQv = std::dynamic_pointer_cast<Diffuse2D>(solver->createOperator( "Diffuse2D", "diffuse Temperature" ));
+	diffQv->setField("qv");
+	diffQv->setDiffusion(0.000001f);
 
 	//********** SOLVE FOR QC & QV & PT
 	// Watercontinuity
@@ -126,7 +135,7 @@ core::Graph::Ptr clouds_graph2D()
 	heatInput->setContrast(3.0f);
 	heatInput->setEmitterSize(0.1333333f);
 	heatInput->setFrequence(500.0f);
-	heatInput->setStrenght(100.6f);
+	heatInput->setStrenght(0);
 	heatInput->setOffset(0.40f);
 	heatInput->setPtEmission(true);
 
@@ -135,7 +144,7 @@ core::Graph::Ptr clouds_graph2D()
 	vaporInput->setContrast(0.80f);
 	vaporInput->setEmitterSize(0.1333333f);
 	vaporInput->setFrequence(400.0f);
-	vaporInput->setStrenght(0.01f);
+	vaporInput->setStrenght(0.00f);
 	vaporInput->setOffset(0.40f);
 	vaporInput->setQvEmission(true);
 
