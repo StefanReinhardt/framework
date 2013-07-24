@@ -30,6 +30,9 @@ void CloudData::initialize()
 	m_lh = 		2501;		// Latent heat of vaporization of water (J/kg)
 	m_cp = 		1005;		// specific heat capacity J/(kg K)
 
+
+	m_cellSize = (m_p.maxAlt-m_p.minAlt)/m_res.y;	//expansion of a cell in meter;
+
 	ScalarField::Ptr density = std::make_shared<ScalarField>();
 	density->resize(m_res);
 	density->localToWorld(math::V3f(2,2,1));
@@ -103,19 +106,23 @@ void CloudData::reset()
 
 	// Init ground pot temp
 	//************************************************************
-	m_pt0 = m_tLut[0] * pow( m_p0/m_pLut[0] , 0.286);
+	m_pt0 = pt->lvalue(0,0,0);
 
 	// Initialize Saturation vapor mixing ratio and water vapor mixing ratio
 	//************************************************************
 	//T in celsius
-	for(int k= 0; k<m_res.z; k++)
+	for(int j= 0; j<m_res.y; j++)
+	{
 		for(int i= 0; i<m_res.x; i++)
-			for(int j= 0; j<m_res.y; j++)
+			for(int k= 0; k<m_res.z; k++)
 			{
 				// temp in °C and p in Pa
 				m_qs		=		(float) (  (380/(m_pLut[j]*1000)  ) * exp( (17.67*(m_tLut[j]-273.15)) / (m_tLut[j]-273.15+243.5))) ;
 				qv->lvalue(i,j,k) = 		m_qs * m_p.hum;
+
 			}
+		m_qv0Lut.push_back(qv->lvalue(0,j,0));
+	}
 
 	m_qv1 = qv->lvalue(0,m_res.y-1,0);
 

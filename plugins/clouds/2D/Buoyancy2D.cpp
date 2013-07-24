@@ -30,8 +30,21 @@ void Buoyancy2D::apply(SimObject::Ptr so, float dt)
 	// g = 9.81 m/s²
 	// qc in g/kg
 
-	ScalarField::Ptr buoyForce = std::make_shared<ScalarField>();
-	buoyForce->resize(res);
+	ScalarField::Ptr buoyForce;
+
+
+	if(so->hasSubData("buoyancy") )
+	{
+		buoyForce = so->getSubData<ScalarField>("buoyancy");
+	}
+	else
+	{
+		buoyForce = std::make_shared<ScalarField>();
+		buoyForce->resize(res);
+		so->addSubData("buoyancy", buoyForce);
+	}
+
+
 
 	float vpt,avpt;
 
@@ -42,13 +55,13 @@ void Buoyancy2D::apply(SimObject::Ptr so, float dt)
 			avpt = cd->m_tLut[j] * pow( cd->m_p0/cd->m_pLut[j], 0.286 ) * (1 + 0.61f * qv->lvalue(i,j,k) );
 			vpt = pt->lvalue(i,j,k) * ( 1 + 0.61f *  qv->lvalue(i,j,k) );
 
-			buoyForce->lvalue(i,j,k) = dt * m_buoyancy *( ( (vpt-avpt) / avpt ) - m_gravity * qc->lvalue(i,j,k) );
+			buoyForce->lvalue(i,j,k) = dt * (m_buoyancy * ( math::max(0.0f,(vpt-avpt) / avpt )) - m_gravity * qc->lvalue(i,j,k) );
 		}
 
 	for (int i=1; i<res.x-1; i++)
 		for (int j=1; j<res.y-1; j++)
 		{
-			vel_y->lvalue(i,j,k) += (buoyForce->lvalue(i,j,k)+ buoyForce->lvalue(i,j-1,k))*0.5f;
+			vel_y->lvalue(i,j,k) += (buoyForce->lvalue(i,j,k)+ buoyForce->lvalue(i,j-1,k))*0.5f / cd->m_cellSize;
 		}
 
 	timer.stop();

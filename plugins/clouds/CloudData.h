@@ -17,7 +17,7 @@ public:
 			dt =                       1.0f;
 			maxAlt =                   6000.0f;		// altitude in meter on top of sim grid
 			minAlt =                   2000.0f;
-			tlr =                      0.009f;		// Kelvin per 1 meter (between 0.55 and 0.99)
+			tlr =                      0.009f;		// Kelvin per 1 meter (between 0.55 and 0.99) standard (wiki) 6.4K/km
 			t0 =                       295.0f;		// temp on ground in Kelvin
 			hum =                      0.6f;			// humidty
 			wind =                     0.0f;
@@ -66,11 +66,13 @@ public:
 	float                                m_cp;
 	float                                m_exner;
 	float                                m_qs;
+	float                                m_cellSize;
 
 	float                                m_qv1;
 
 	std::vector<float>                   m_tLut;			// absolute Temperature at altitude in K
 	std::vector<float>                   m_pLut;			// absolute Pressure at altitude in kPa
+	std::vector<float>                   m_qv0Lut;			// initial Vapor distribution Lookup
 
 
 };

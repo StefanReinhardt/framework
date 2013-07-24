@@ -20,13 +20,72 @@ void WaterContinuity2D::apply(SimObject::Ptr so, float dt)
 	ScalarField::Ptr pt = cd->getSubData<ScalarField>("pt");
 	ScalarField::Ptr qv = cd->getSubData<ScalarField>("qv");
 	ScalarField::Ptr qc = cd->getSubData<ScalarField>("qc");
+	ScalarField::Ptr vel_y = cd->getSubData<VectorField>("velocity")->getScalarField(1);
 	math::V3i res =cd->getResolution();
+
+
+
+
+	std::vector<float>              r, Kp, Ki;
+	std::vector<int>                htar, hc;
+	for (int i=0; i<res.x; i++)
+	{
+		htar.push_back(sin(i*0.1+30)*24+55);
+		Kp.push_back(0.004f * htar[i]/res.y );
+		Ki.push_back(0.004f * htar[i]/res.y );
+	}
+
+	int k =               0;
+
+	float ravg =        0;
+	float intSum =        0;
+	float dh =            0;
+	float Qc =            0;
+	float Svc =           0;
+	float cv =            0.004f;
+
+
+	for (int i=0; i<res.x; i++)
+	{
+		// height of clouds
+		int j=res.y-1;
+		while(qc->lvalue(i,j,k)<0.000000001 && j>0)
+			--j;
+		hc.push_back(j);
+
+		// ratio
+		r.push_back(hc[i]/htar[i]);
+		ravg += r[i];
+	}
+
+	// average of the ratios
+	ravg /= res.x;
+
 
 	float d_qv, T, qs, exner;
 
-	int k = 0;
-	for( int j=1;j<res.y-1;++j )
-		for( int i=1;i<res.x-1;++i )
+	for( int i=1;i<res.x-1;++i )
+	{
+		if(r[i]<1)
+		{
+			// add vapor if (ratio < avg_ratio)
+			if(r[i] < ravg)
+				Svc =  cv * cd->m_qv0Lut[hc[i]] ;
+
+			intSum += dt * dh;
+			dh= 1-r[i];
+			Qc = Kp[i] * dh + Ki[i] * intSum;
+
+			vel_y->lvalue(i,0,0) += Qc;
+			vel_y->lvalue(i,1,0) += Qc;
+			qv->lvalue(i,0,0) += Svc;
+			qv->lvalue(i,1,0) += Svc;
+			qv->lvalue(i,hc[i],0) += Svc;
+
+		}
+
+
+		for( int j=1;j<res.y-1;++j )
 		{
 			//alt=((float)j/(float)ssy)*maxAlt;
 
@@ -73,6 +132,7 @@ void WaterContinuity2D::apply(SimObject::Ptr so, float dt)
 
 			pt->lvalue(i,j,k) += (cd->m_lh / ( cd->m_cp * exner )) * (-d_qv);
 		}
+	}
 
 	//set Boundary values
 	cd->setBounds2D(4,so->getSubData<ScalarField>("pt"));
