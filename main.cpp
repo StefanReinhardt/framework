@@ -5,6 +5,7 @@
 #include <core/Core.h>
 
 #include <plugins/clouds/CloudRenderer.h>
+#include <plugins/clouds/Clouds.ui.h>
 
 
 
@@ -156,6 +157,7 @@ int main(int argc, char ** argv)
 			core::Graph::Ptr graph2 = clouds_graph2D();
 			core::save( "$HERE/test.json", graph2 );
 		}
+		if(1)
 		{
 			QString graphfilename = "$HERE/test.json";
 			QString nodename = "export";
@@ -175,6 +177,10 @@ int main(int argc, char ** argv)
 			{
 				CloudRenderer::Ptr cr = std::make_shared<CloudRenderer>(node->getSocket("input"));
 				app.setRenderer(cr);
+
+				// set ui
+				CloudsUI* cui = new CloudsUI(graph);
+				app.m_split1->insertWidget(1, cui);
 			}else
 				qCritical() << "unable to find node " << nodename;
 		}

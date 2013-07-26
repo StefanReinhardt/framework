@@ -6,7 +6,7 @@ Integrate2D::Integrate2D() : Operator()
 {
 }
 
-void Integrate2D::apply( SimObject::Ptr so, float dt )
+void Integrate2D::applyImpl( SimObject::Ptr so, float dt )
 {
 	float damping = 0.9f;
 	float roughness = 0.1f;

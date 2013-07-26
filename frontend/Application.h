@@ -9,6 +9,7 @@
 #include <QAction>
 #include <QMainWindow>
 #include <QTimer>
+#include <QSplitter>
 
 
 namespace frontend
@@ -26,7 +27,7 @@ namespace frontend
 
 		// rendering
 		void                            setRenderer( gl::Renderer::Ptr renderer );
-
+		QSplitter*                      m_split1;
 
 	public slots:
 		void                            render( gl::Context* context );
@@ -36,6 +37,7 @@ namespace frontend
 
 	private:
 		QMainWindow*                    m_mainWindow;
+
 		QAction*                        m_fileOpen;
 		QAction*                        m_fileSave;
 

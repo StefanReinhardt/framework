@@ -9,7 +9,7 @@ public:
 	typedef std::shared_ptr<Project> Ptr;
 	Project();
 
-	virtual void                       apply( SimObject::Ptr so, float dt )override;
+	virtual void                       applyImpl( SimObject::Ptr so, float dt )override;
 	void                               setField(QString);
 
 	// overloads from Data

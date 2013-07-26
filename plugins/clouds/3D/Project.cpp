@@ -13,7 +13,7 @@ void Project::setField(QString name)
 }
 
 
-void Project::apply( SimObject::Ptr so, float dt )
+void Project::applyImpl( SimObject::Ptr so, float dt )
 {
 	qDebug() << "Project::apply";
 

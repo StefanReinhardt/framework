@@ -10,7 +10,7 @@ public:
 	typedef std::shared_ptr<Diffuse2D>  Ptr;
 	Diffuse2D();
 
-	virtual void                       apply( SimObject::Ptr so, float dt )override;
+	virtual void                       applyImpl( SimObject::Ptr so, float dt )override;
 	void                               setField(QString);
 	void                               setDiffusion(float diff);
 

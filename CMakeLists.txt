@@ -1,6 +1,29 @@
 cmake_minimum_required(VERSION 2.8.8)
 project(cloudshop)
 
+#generates qt moc and ui sources from the list of source files which have been given as parameter
+MACRO (generateQtOutputs sources )
+        #
+        # ui output
+        #
+        set( ui_files )
+        #for each source
+        FOREACH (src ${${sources}})
+                # filter ui files
+                if(${src} MATCHES "\\.ui$")
+                        set( ui_files ${ui_files} ${src} )
+                endif(${src} MATCHES "\\.ui$")
+        ENDFOREACH (src)
+
+        # generate moc outputs
+        QT5_WRAP_UI( ui_outputs ${ui_files})
+
+        # append outputs to sources
+        set( ${sources} ${${sources}} ${ui_files} )
+
+        # put generated files into a sourcegroup called generated
+        #source_group(generated FILES ${${ui_outputs}})
+ENDMACRO (generateQtOutputs)
 
 # if its david then binaries will go to seperate bin directory one level above
 #if( $ENV{USERNAME} STREQUAL "koernedd" )
@@ -34,9 +57,9 @@ find_package(Qt5OpenGL REQUIRED)
 # sources ==========================================
 
 # specify app sources
-file(GLOB_RECURSE app_sources ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/*.h ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp )
+file(GLOB_RECURSE app_sources ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/*.h ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
 
-
+generateQtOutputs( app_sources )
 
 
 

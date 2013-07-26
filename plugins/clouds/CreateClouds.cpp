@@ -40,13 +40,9 @@ void CreateClouds::update(core::GraphNodeSocket *output)
 	// (re)set cloud data when frame==1 or no output was written yet
 	if( frame == 1 || !getSocket( "output" )->getDataWithoutUpdate<CloudData>())
 	{
-		qDebug() << "CreateClouds: RESET! ";
 		// TODO: use user values
 		CloudData::Ptr cd = std::make_shared<CloudData>(m_p);
 		getSocket( "output" )->setData(cd);
-	}else
-	{
-		qDebug() << "CreateClouds: RESET!!!!!!!!!! " << frame;
 	}
 }
 

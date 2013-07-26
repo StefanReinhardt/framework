@@ -6,7 +6,7 @@ WaterContinuity::WaterContinuity()
 {
 }
 
-void WaterContinuity::apply(SimObject::Ptr so, float dt)
+void WaterContinuity::applyImpl(SimObject::Ptr so, float dt)
 {
 
 

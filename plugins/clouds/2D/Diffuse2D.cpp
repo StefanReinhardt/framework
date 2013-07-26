@@ -10,7 +10,7 @@ Diffuse2D::Diffuse2D() : Operator()
 }
 
 
-void Diffuse2D::apply( SimObject::Ptr so, float dt )
+void Diffuse2D::applyImpl( SimObject::Ptr so, float dt )
 {
 	timer.start();
 

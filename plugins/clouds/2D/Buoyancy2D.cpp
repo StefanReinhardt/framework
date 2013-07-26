@@ -12,7 +12,7 @@ Buoyancy2D::Buoyancy2D()
 
 
 
-void Buoyancy2D::apply(SimObject::Ptr so, float dt)
+void Buoyancy2D::applyImpl(SimObject::Ptr so, float dt)
 {
 	timer.start();
 

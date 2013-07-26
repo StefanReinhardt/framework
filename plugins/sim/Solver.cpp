@@ -69,6 +69,17 @@ Operator::Ptr Solver::createOperator( const QString &type, const QString &descri
 	return op;
 }
 
+
+Operator::Ptr Solver::getOperator(const QString &description)
+{
+	for( auto it = m_operators.begin(),end = m_operators.end(); it != end; ++it )
+	{
+		if( description == it->second )
+			return it->first;
+	}
+	return Operator::Ptr();
+}
+
 void Solver::setTimeStrech(float timeStretch)
 {
 	m_timeStretch = timeStretch;

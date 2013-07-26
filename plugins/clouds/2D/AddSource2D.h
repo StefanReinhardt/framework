@@ -9,7 +9,7 @@ public:
 	typedef std::shared_ptr<AddSource2D> Ptr;
 	AddSource2D();
 
-	virtual void                       apply( SimObject::Ptr so, float dt )override;
+	virtual void                       applyImpl( SimObject::Ptr so, float dt )override;
 	void                               setFields(QString field, QString source);
 
 	// overloads from Data

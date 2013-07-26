@@ -11,7 +11,7 @@ Gravity2D::Gravity2D()
 
 
 
-void Gravity2D::apply(SimObject::Ptr so, float dt)
+void Gravity2D::applyImpl(SimObject::Ptr so, float dt)
 {
 	// gravity force vector
 	math::V3f g(0.0f, -0.91f, 0.0f);

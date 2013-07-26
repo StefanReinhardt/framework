@@ -5,13 +5,13 @@
 VortexConfinement2D::VortexConfinement2D()
 {
 		m_dt = 1.0f;
-		m_strenght = 0.123456789f;
+		m_strength = 0.123456789f;
 		m_onCloudOnly = true;
 }
 
 
 
-void VortexConfinement2D::apply(SimObject::Ptr so, float dt)
+void VortexConfinement2D::applyImpl(SimObject::Ptr so, float dt)
 {
 	timer.start();
 
@@ -135,8 +135,8 @@ void VortexConfinement2D::apply(SimObject::Ptr so, float dt)
 			{
 				if( !m_onCloudOnly || cd->getSubData<ScalarField>("qc")->lvalue(i,j,k)>0.000001f)
 				{
-					vel_x->lvalue(i,j,k) +=		0.5*(vortForce_x->lvalue(i,j,k) + vortForce_x->lvalue(i-1,j,k) ) * m_strenght * dt;
-					vel_y->lvalue(i,j,k) +=		0.5*(vortForce_y->lvalue(i,j,k) + vortForce_y->lvalue(i,j-1,k) ) * m_strenght * dt;
+					vel_x->lvalue(i,j,k) +=		0.5*(vortForce_x->lvalue(i,j,k) + vortForce_x->lvalue(i-1,j,k) ) * m_strength * dt;
+					vel_y->lvalue(i,j,k) +=		0.5*(vortForce_y->lvalue(i,j,k) + vortForce_y->lvalue(i,j-1,k) ) * m_strength * dt;
 
 				}
 			}
@@ -155,9 +155,15 @@ void VortexConfinement2D::setField(QString name)
 	m_vortField = name;
 }
 
-void VortexConfinement2D::setStrenght(float strenght)
+void VortexConfinement2D::setStrength(float strength)
 {
-	m_strenght = strenght;
+	qDebug() << "VortexConfinement2D::setStrength" << strength;
+	m_strength = strength;
+}
+
+float VortexConfinement2D::getStrength()const
+{
+	return m_strength;
 }
 
 void VortexConfinement2D::setOnCloudOnly(bool onCloud)
@@ -196,7 +202,7 @@ void VortexConfinement2D::store( QJsonObject &o, QJsonDocument &doc )
 	Operator::store( o, doc );
 
 	o.insert( "vortField", m_vortField );
-	o.insert( "vortStrenght", m_strenght );
+	o.insert( "vortStrength", m_strength );
 	o.insert( "vortOnCloudOnly", m_onCloudOnly );
 }
 
@@ -206,7 +212,7 @@ void VortexConfinement2D::load( QJsonObject &o )
 	Operator::load( o );
 
 	m_vortField = o["vortField"].toString();
-	m_strenght = o["vortStrenght"].toDouble();
+	m_strength = o["vortStrength"].toDouble();
 	m_onCloudOnly = o["vortOnCloudOnly"].toBool();
 }
 

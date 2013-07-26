@@ -17,7 +17,7 @@ void Advect::setType(QString field, QString vecField, bool periodic)
 	this->vecField = vecField;
 }
 
-void Advect::apply( SimObject::Ptr so, float dt)
+void Advect::applyImpl( SimObject::Ptr so, float dt)
 {
 
 	m_dt = dt;

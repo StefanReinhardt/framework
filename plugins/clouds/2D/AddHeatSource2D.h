@@ -17,7 +17,7 @@ public:
 		RIGHT
 	};
 
-	virtual void                        apply( SimObject::Ptr so, float dt )override;
+	virtual void                        applyImpl( SimObject::Ptr so, float dt )override;
 
 	void                                setAnimationSpeed(float speed);
 	void                                setContrast(float contrast);

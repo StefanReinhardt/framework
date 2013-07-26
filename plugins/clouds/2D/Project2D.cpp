@@ -14,7 +14,7 @@ void Project2D::setField(QString name)
 }
 
 
-void Project2D::apply( SimObject::Ptr so, float dt )
+void Project2D::applyImpl( SimObject::Ptr so, float dt )
 {
 	timer.start();
 

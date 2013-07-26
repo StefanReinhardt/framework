@@ -12,16 +12,17 @@ public:
 	typedef std::shared_ptr<VortexConfinement2D> Ptr;
 	VortexConfinement2D();
 
-	virtual void                       apply( SimObject::Ptr so, float dt )override;
+	virtual void                       applyImpl( SimObject::Ptr so, float dt )override;
 
 	void                               setField(QString);
-	void                               setStrenght(float strenght);
+	void                               setStrength(float strength);
+	float                              getStrength()const;
 	void                               setOnCloudOnly(bool onCloud);
 
 private:
 
 	core::Timer                        timer;
-	float                              m_strenght;
+	float                              m_strength;
 	float                              m_dt;			// Timestep
 	bool                               m_onCloudOnly;
 	QString                            m_vortField;

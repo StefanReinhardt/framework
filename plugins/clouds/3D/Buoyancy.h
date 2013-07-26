@@ -9,16 +9,18 @@ public:
 	typedef std::shared_ptr<Buoyancy> Ptr;
 	Buoyancy();
 
-	virtual void                        apply( SimObject::Ptr so, float dt )override;
 
 	void                                setStrenght(float buoyancy);
 
 private:
+
+	virtual void                        applyImpl( SimObject::Ptr so, float dt )override;
+	// overloads from Data
+	virtual void                        store( QJsonObject &o, QJsonDocument &doc );
+	virtual void                        load( QJsonObject &o );
+
+
 	float                                m_dt;
 	float                                m_buoyancy;
-
-	// overloads from Data
-	virtual void                       store( QJsonObject &o, QJsonDocument &doc );
-	virtual void                       load( QJsonObject &o );
 
 };
