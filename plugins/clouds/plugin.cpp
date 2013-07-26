@@ -182,6 +182,7 @@ core::Graph::Ptr clouds_graph2D()
 	cloudExport->getSocket("file")->setString("$HERE/cloud_output.$F4.bgeo");
 
 	// make connections
+	graph->addConnection( "$F", cloudCreate, "frame" );
 	graph->addConnection( cloudCreate, "output", solver, "input" );
 	graph->addConnection( "$F", solver, "frame" );
 	graph->addConnection( solver, "output", cloudExport, "input" );
@@ -268,6 +269,7 @@ core::Graph::Ptr clouds_graph3D()
 	cloudExport->getSocket("file")->setString("$HERE/cloud_output.$F4.bgeo");
 
 	// make connections
+	graph->addConnection( "$F", cloudCreate, "frame" );
 	graph->addConnection( cloudCreate, "output", solver, "input" );
 	//graph->addConnection( cloudImport, "output", solver, "input" );
 	graph->addConnection( "$F", solver, "frame" );

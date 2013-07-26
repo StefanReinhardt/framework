@@ -67,8 +67,8 @@ namespace frontend
 
 	void GLViewer::paintGL()
 	{
-		glClearColor( 1.0, 0.0, 0.0, 0.0 ); // Let OpenGL clear to black
-		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+		//glClearColor( 1.0, 0.0, 0.0, 0.0 ); // Let OpenGL clear to black
+		//glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 //		// iterate all renderers and render...
 //		for( auto renderer : m_renderer )

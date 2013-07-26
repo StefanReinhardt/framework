@@ -69,9 +69,15 @@ CloudRenderer::CloudRenderer( core::GraphNodeSocket::Ptr src ) : gl::Renderer(),
 
 void CloudRenderer::render(gl::Context* context)
 {
+	// clear screen ---
+	glClearColor( 0.1, 0.1, 0.1, 1.0 ); // Let OpenGL clear to black
+	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+	// setup viewport ---
 	Camera cam( math::degToRad(45.0f), context->getViewportAspect() );
 	context->setView( cam.m_worldToView, cam.m_viewToWorld, cam.m_viewToNDC );
 
+	// render cloud data ---
 	glDisable( GL_DEPTH_TEST );
 
 	CloudData::Ptr cd;

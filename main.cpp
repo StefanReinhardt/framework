@@ -99,19 +99,29 @@ public:
 			{
 				m_running = !m_running;
 
-				// simulation loop
-				for( int i=0;i<300;++i )
+				while( m_running && !QCoreApplication::closingDown() )
 				{
 					qDebug() << "updating frame...";
 					core::instance()->stepFrame();
 					QCoreApplication::processEvents();
 				}
 
-
 				e->accept();
 				return true;
-			} else
+			}
+			if (keyEvent->key() == Qt::Key_Backspace)
+			{
+				core::instance()->setFrame(1);
+				QCoreApplication::processEvents();
+				e->accept();
+				return true;
+			}else
 				return false;
+		}else
+		if (o == m_app->getMainWindow() && e->type() == QEvent::Close)
+		{
+			m_running = false;
+			e->ignore();
 		}
 		return false;
 
@@ -142,6 +152,10 @@ int main(int argc, char ** argv)
 		core::Graph::Ptr graph;
 
 		// temp
+		{
+			core::Graph::Ptr graph2 = clouds_graph2D();
+			core::save( "$HERE/test.json", graph2 );
+		}
 		{
 			QString graphfilename = "$HERE/test.json";
 			QString nodename = "export";

@@ -25,12 +25,11 @@ Solver::Solver() : core::GraphNode()
 
 void Solver::update(core::GraphNodeSocket *output)
 {
-    qDebug() << "Solver: update ";
 	SimObject::Ptr so = getSocket("input")->getData<SimObject>();
 	int frame = getSocket( "frame" )->asInt();
 	float fps = core::getVariable("$FPS").toDouble();
 	float dt = m_timeStretch * (1.0/fps);
-
+	qDebug() << "Solver: update frame: " << frame;
 	// Reset if frame == 1
 	if (frame==1)
 		m_frame = 1;

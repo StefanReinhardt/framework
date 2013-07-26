@@ -23,7 +23,7 @@ namespace frontend
 
 		// main window ================
 		m_mainWindow = new QMainWindow();
-		m_mainWindow->resize(800, 600);
+		m_mainWindow->resize(800, 800);
 
 		// file menu ================
 		/*
