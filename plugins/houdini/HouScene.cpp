@@ -28,7 +28,8 @@ Camera::Ptr HouScene::getCamera( const QString &name )
 Camera::Ptr HouScene::loadCamera( QJsonObject &obj )
 {
 	Camera::Ptr camera = std::make_shared<Camera>();
-	camera->setRaster( int(obj.value("resx").toDouble()), int(obj.value("resy").toDouble()) );
+	math::V2i res(int(obj.value("resx").toDouble()), int(obj.value("resy").toDouble()));
+	camera->setRaster( res.x, res.y, float(res.x)/float(res.y) );
 
 	math::M44f translation = math::M44f::TranslationMatrix(obj.value("transform.tx").toDouble(), obj.value("transform.ty").toDouble(), obj.value("transform.tz").toDouble());
 	math::M44f rotationX = math::M44f::RotationMatrixX( -math::degToRad(obj.value("transform.rx").toDouble()) );

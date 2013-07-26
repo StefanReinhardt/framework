@@ -2,6 +2,8 @@
 
 #include "GLViewer.h"
 
+#include <core/GraphNodeSocket.h>
+
 #include <QtGui>
 #include <QApplication>
 #include <QAction>
@@ -19,8 +21,15 @@ namespace frontend
 		virtual                         ~Application();
 
 		static Application*             getInstance();
+		QMainWindow*                    getMainWindow();
+
+
+		// rendering
+		void                            setRenderer( gl::Renderer::Ptr renderer );
+
 
 	public slots:
+		void                            render( gl::Context* context );
 		void                            fileOpen();
 		void                            fileSave();
 
@@ -29,6 +38,8 @@ namespace frontend
 		QMainWindow*                    m_mainWindow;
 		QAction*                        m_fileOpen;
 		QAction*                        m_fileSave;
+
+		gl::Renderer::Ptr               m_renderer;
 	};
 
 }

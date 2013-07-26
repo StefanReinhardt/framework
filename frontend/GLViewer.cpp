@@ -50,14 +50,17 @@ namespace frontend
 			qDebug() << "GLEW successfully initialized...";
 
 		m_context = gl::Context::create();
+		m_context->pushViewport( width(), height() );
+
 
 		//emit onInitializeGL();
 	}
 
 	void GLViewer::resizeGL(int w, int h)
 	{
-		// TODO:context
-		glViewport(0, 0, (GLint)w, (GLint)h);
+		m_context->popViewport();
+		m_context->pushViewport( w, h );
+
 		// QT forgets the backgroundmode when resizing
 		setAttribute(Qt::WA_OpaquePaintEvent);
 	}
@@ -67,8 +70,16 @@ namespace frontend
 		glClearColor( 1.0, 0.0, 0.0, 0.0 ); // Let OpenGL clear to black
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
+//		// iterate all renderers and render...
+//		for( auto renderer : m_renderer )
+//		{
+//			if( renderer )
+//				renderer->render();
+//		}
+		emit render( m_context.get() );
+
 		/*
-		emit onRender();
+
 
 		// render InteractionHandle
 		if( m_interactionHandler )

@@ -1,17 +1,91 @@
 #include "Geometry.h"
-#include <tuple>
 
-Geometry::Geometry( Geometry::PrimitiveType primType ) : core::Data(), m_primitiveType(primType), m_indexBufferIsDirty(true), m_numPrimitives(0)
+
+
+namespace gl
 {
-	switch( primType )
+	Geometry::Geometry() : m_indexBufferIsDirty(true)
 	{
-	default:
-	case POINT:m_numPrimitiveVertices = 1;break;
-	case LINE:m_numPrimitiveVertices = 2;break;
-	case TRIANGLE:m_numPrimitiveVertices = 3;break;
-	case QUAD:m_numPrimitiveVertices = 4;break;
-	//case POLYGON:m_numPrimitiveVertices = 0;break;
 	}
+
+
+	Geometry::Geometry( ::Geometry::Ptr geo ) : m_geo(geo), m_indexBufferIsDirty(true)
+	{
+		switch( geo->primitiveType() )
+		{
+		default:
+		case ::Geometry::POINT: m_primitiveTypeGL = GL_POINTS;break;
+		case ::Geometry::LINE: m_primitiveTypeGL = GL_LINES;break;
+		case ::Geometry::TRIANGLE: m_primitiveTypeGL = GL_TRIANGLES;break;
+		case ::Geometry::QUAD: m_primitiveTypeGL = GL_QUADS;break;
+		};
+
+		// create gl wrappers for each attribute
+		std::vector<std::string> names;
+		geo->getPointAttributeNames(names);
+		for( auto name : names )
+			m_attributes[name] = std::make_shared<Attribute>( geo->getAttr(name) );
+
+		// initialize indexbuffer
+		glGenBuffers(1, &m_indexBufferId);
+	}
+
+	Geometry::~Geometry()
+	{
+		glDeleteBuffers(1, &m_indexBufferId);
+	}
+
+	bool Geometry::hasAttr( const std::string &name )
+	{
+		std::map<std::string, Attribute::Ptr>::iterator it = m_attributes.find(name);
+		return(it != m_attributes.end());
+	}
+
+
+	Attribute::Ptr Geometry::getAttr( const std::string &name )
+	{
+		std::map<std::string, Attribute::Ptr>::iterator it = m_attributes.find(name);
+		if(it != m_attributes.end())
+			return it->second;
+		return Attribute::Ptr();
+	}
+
+	void Geometry::bindIndexBuffer()
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBufferId);
+		int numPrims = m_geo->numPrimitives();
+		if( m_indexBufferIsDirty && numPrims )
+		{
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, numPrims*m_geo->numPrimitiveVertices()*sizeof(unsigned int), m_geo->rawIndexPointer(), GL_STATIC_DRAW);
+			m_indexBufferIsDirty = false;
+		}
+	}
+
+	unsigned int Geometry::numPrimitives()
+	{
+		return m_geo->numPrimitives();
+	}
+
+
+	// Point=1; Line=2; Triangle=3; Quad=4
+	unsigned int Geometry::numPrimitiveVertices()
+	{
+		return m_geo->numPrimitiveVertices();
+	}
+
+	int Geometry::primitiveTypeGL()const
+	{
+		return m_primitiveTypeGL;
+	}
+
+}
+
+/*
+
+using namespace core;
+
+Geometry::Geometry( Geometry::PrimitiveType primType ):m_primitiveType(primType)
+{
 }
 
 
@@ -26,24 +100,13 @@ void Geometry::clear()
 	m_indexBufferIsDirty = true;
 }
 
-Attribute::Ptr Geometry::getAttr( const std::string &name )
-{
-	std::map<std::string, Attribute::Ptr>::iterator it = m_attributes.find(name);
-	if(it != m_attributes.end())
-		return it->second;
-	return Attribute::Ptr();
-}
 
 void Geometry::setAttr( const std::string &name, Attribute::Ptr attr )
 {
 	m_attributes[name] = attr;
 }
 
-bool Geometry::hasAttr( const std::string &name )
-{
-	std::map<std::string, Attribute::Ptr>::iterator it = m_attributes.find(name);
-	return(it != m_attributes.end());
-}
+
 
 void Geometry::removeAttr( const std::string &name )
 {
@@ -124,63 +187,11 @@ unsigned int Geometry::addQuad( unsigned int vId0, unsigned int vId1, unsigned i
 
 
 //
-// convinience creators ----
+// convinience creators
 //
-
-// TODO: make into grid
-Geometry::Ptr createQuad( Geometry::PrimitiveType primType )
+Geometry::Ptr Geometry::addCube( Geometry::Ptr result, const math::BoundingBox3f &bound, Geometry::PrimitiveType primType )
 {
-	Geometry::Ptr result = std::make_shared<Geometry>(primType);
-
-	// unique points
-	std::vector<math::Vec3f> pos;
-	pos.push_back( math::Vec3f(-1.0f,-1.0f,-3.0f) );
-	pos.push_back( math::Vec3f(1.0f,-1.0f,-3.0f) );
-	pos.push_back( math::Vec3f(1.0f,1.0f,-3.0f) );
-	pos.push_back( math::Vec3f(-1.0f,1.0f,-3.0f) );
-
-	if( primType == Geometry::QUAD )
-	{
-		// quads
-		std::vector< std::tuple<int, int, int, int> > quads;
-		quads.push_back( std::make_tuple(3, 2, 1, 0) );
-
-		// split per face (because we have uv shells)
-		Attribute::Ptr positions = Attribute::createV3f();
-		Attribute::Ptr uv = Attribute::createV2f();
-
-		for( std::vector< std::tuple<int, int, int, int> >::iterator it = quads.begin(); it != quads.end(); ++it )
-		{
-			std::tuple<int, int, int, int> &quad = *it;
-			int i0, i1, i2, i3;
-
-			i0 = positions->appendElement( pos[std::get<0>(quad)] );
-			uv->appendElement( math::Vec2f(0.0f, 1.0f) );
-			i1 = positions->appendElement( pos[std::get<1>(quad)] );
-			uv->appendElement( math::Vec2f(1.0f, 1.0f) );
-			i2 = positions->appendElement( pos[std::get<2>(quad)] );
-			uv->appendElement( math::Vec2f(1.0f, 0.0f) );
-			i3 = positions->appendElement( pos[std::get<3>(quad)] );
-			uv->appendElement( math::Vec2f(0.0f, 0.0f) );
-
-			result->addQuad(i0, i1, i2, i3);
-		}
-
-		result->setAttr( "P", positions);
-		result->setAttr( "UV", uv);
-	}else
-	if( primType == Geometry::LINE )
-	{
-	}
-
-	return result;
-}
-
-
-Geometry::Ptr createBox( const math::BoundingBox3f &bound, Geometry::PrimitiveType primType )
-{
-	Geometry::Ptr result = std::make_shared<Geometry>(primType);
-
+	result->setPrimitiveType(primType);
 	// unique points
 	std::vector<math::Vec3f> pos;
 	pos.push_back( math::Vec3f(bound.minPoint.x,bound.minPoint.y,bound.maxPoint.z) );
@@ -205,8 +216,8 @@ Geometry::Ptr createBox( const math::BoundingBox3f &bound, Geometry::PrimitiveTy
 		quads.push_back( std::make_tuple(4, 7, 3, 0) );
 
 		// split per face (because we have uv shells)
-		Attribute::Ptr positions = Attribute::createV3f();
-		Attribute::Ptr uv = Attribute::createV2f();
+		Attribute::Ptr positions = Attribute::createVec3f();
+		Attribute::Ptr uv = Attribute::createVec2f();
 
 
 		for( std::vector< std::tuple<int, int, int, int> >::iterator it = quads.begin(); it != quads.end(); ++it )
@@ -231,29 +242,28 @@ Geometry::Ptr createBox( const math::BoundingBox3f &bound, Geometry::PrimitiveTy
 	}else
 	if( primType == Geometry::LINE )
 	{
-		/*
-		// points
-		AttributePtr positions = Attribute::createVec3f();
-		for( std::vector<math::Vec3f>::iterator it = pos.begin(), end=pos.end(); it != end; ++it)
-			positions->appendElement( *it );
-		result->setAttr( "P", positions);
-		//lines
-		result->addLine( 0, 1 );
-		result->addLine( 1, 2 );
-		result->addLine( 2, 3 );
-		result->addLine( 3, 0 );
+//		// points
+//		AttributePtr positions = Attribute::createVec3f();
+//		for( std::vector<math::Vec3f>::iterator it = pos.begin(), end=pos.end(); it != end; ++it)
+//			positions->appendElement( *it );
+//		result->setAttr( "P", positions);
+//		//lines
+//		result->addLine( 0, 1 );
+//		result->addLine( 1, 2 );
+//		result->addLine( 2, 3 );
+//		result->addLine( 3, 0 );
 
-		result->addLine( 4, 5 );
-		result->addLine( 5, 6 );
-		result->addLine( 6, 7 );
-		result->addLine( 7, 4 );
+//		result->addLine( 4, 5 );
+//		result->addLine( 5, 6 );
+//		result->addLine( 6, 7 );
+//		result->addLine( 7, 4 );
 
-		result->addLine( 0, 4 );
-		result->addLine( 1, 5 );
-		result->addLine( 2, 6 );
-		result->addLine( 3, 7 );
-		*/
+//		result->addLine( 0, 4 );
+//		result->addLine( 1, 5 );
+//		result->addLine( 2, 6 );
+//		result->addLine( 3, 7 );
 	}
 
 	return result;
 }
+*/

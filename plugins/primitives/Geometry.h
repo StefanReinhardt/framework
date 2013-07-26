@@ -58,4 +58,5 @@ private:
 };
 
 // temp - convinience stuff should go somewhere else
+Geometry::Ptr createQuad( Geometry::PrimitiveType primType = Geometry::QUAD );
 Geometry::Ptr createBox( const math::BoundingBox3f &bound = math::BoundingBox3f(math::Vec3f(-0.5f), math::Vec3f(0.5f)), Geometry::PrimitiveType primType = Geometry::QUAD );

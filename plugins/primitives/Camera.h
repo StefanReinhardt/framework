@@ -11,9 +11,10 @@ public:
 	typedef std::shared_ptr<Camera> Ptr;
 
 	Camera();
+	Camera(float fov, float aspect, float znear=0.1f, float zfar=1000.0f );
 
 	math::Ray3f                 generateRay( const math::V2f &rsP ) const;
-	void                        setRaster( int width, int height );
+	void                        setRaster( int width, int height, float aspect );
 	void                        setViewToWorld( math::M44f &viewToWorld );
 	void                        setProjection( math::M44f &viewToNDC );
 

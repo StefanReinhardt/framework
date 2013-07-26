@@ -4,6 +4,8 @@
 
 #include <core/Core.h>
 
+#include <plugins/clouds/CloudRenderer.h>
+
 
 
 void logger(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -79,6 +81,49 @@ void loadPlugins()
 	core::loadPlugin(getPlugin_grandyn);
 }
 
+class SimulationLoop : public QObject
+{
+	//Q_OBJECT
+public:
+	SimulationLoop( frontend::Application* app ) : QObject(), m_app(app), m_running(false)
+	{
+	}
+
+	bool eventFilter(QObject * o, QEvent * e )
+	{
+		if (o == m_app->getMainWindow() && e->type() == QEvent::KeyPress)
+		{
+			QKeyEvent *keyEvent = static_cast<QKeyEvent *>(e);
+
+			if (keyEvent->key() == Qt::Key_Space)
+			{
+				m_running = !m_running;
+
+				// simulation loop
+				for( int i=0;i<300;++i )
+				{
+					qDebug() << "updating frame...";
+					core::instance()->stepFrame();
+					QCoreApplication::processEvents();
+				}
+
+
+				e->accept();
+				return true;
+			} else
+				return false;
+		}
+		return false;
+
+	}
+
+private:
+	frontend::Application *m_app;
+	bool m_running;
+};
+
+
+
 int main(int argc, char ** argv)
 {
 	QStringList args = arguments(argc, argv);
@@ -93,6 +138,36 @@ int main(int argc, char ** argv)
 		app.setOrganizationName("app");
 		app.setApplicationName("app");
 		loadPlugins();
+
+		core::Graph::Ptr graph;
+
+		// temp
+		{
+			QString graphfilename = "$HERE/test.json";
+			QString nodename = "export";
+
+			// load graph
+			graph = core::load( graphfilename );
+
+			if( !graph )
+				return -1;
+
+			graph->print();
+
+			// find node to render
+			core::GraphNode::Ptr node = graph->getNode( nodename );
+
+			if( node )
+			{
+				CloudRenderer::Ptr cr = std::make_shared<CloudRenderer>(node->getSocket("input"));
+				app.setRenderer(cr);
+			}else
+				qCritical() << "unable to find node " << nodename;
+		}
+
+		SimulationLoop simLoop(&app);
+		app.installEventFilter( &simLoop );
+
 		return app.exec();
 	}else
 	{
@@ -116,7 +191,7 @@ int main(int argc, char ** argv)
 		// deserialize and execute local graph if no arguments are given
 		QString graphfilename = "$HERE/test.json";
 		QString nodename = "export";
-		int numFrames = 6000;
+		int numFrames = 300;
 
 
 		//arguments:

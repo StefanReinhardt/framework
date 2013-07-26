@@ -31,7 +31,20 @@ Camera::Camera() : core::Data()
 	m_zfar  = 1000.0f;
 	m_fov   = math::degToRad(45.0f);
 
-	setRaster( 1, 1 );
+	setRaster( 1, 1, 1.0f );
+
+	m_viewToNDC = math::projectionMatrix( m_fov, m_aspect, m_znear, m_zfar );
+	m_NDCToView = m_viewToNDC.inverted();
+
+	m_worldToView = math::Matrix44f::Identity();
+	m_viewToWorld = m_worldToView.inverted();
+
+	m_rasterToView = m_rasterToNDC*m_NDCToView;
+}
+
+Camera::Camera( float fov, float aspect, float znear, float zfar ) : core::Data(), m_fov(fov), m_aspect(aspect), m_zfar(zfar), m_znear(znear)
+{
+	setRaster( 1, 1, aspect );
 
 	m_viewToNDC = math::projectionMatrix( m_fov, m_aspect, m_znear, m_zfar );
 	m_NDCToView = m_viewToNDC.inverted();
@@ -60,12 +73,12 @@ math::Ray3f Camera::generateRay( const math::V2f &_rsP ) const
 }
 
 
-void Camera::setRaster( int width, int height )
+void Camera::setRaster( int width, int height, float aspect )
 {
 	m_width = width;
 	m_height = height;
 
-	m_aspect = float(width)/float(height);
+	m_aspect = aspect;
 
 	float screen[4];
 	screen[0] = -m_aspect;

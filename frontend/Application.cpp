@@ -49,6 +49,8 @@ namespace frontend
 
 		// GLViewer ================
 		GLViewer *glv = new GLViewer(m_mainWindow);
+		connect(glv, SIGNAL( render(gl::Context*) ), this, SLOT(render(gl::Context*)) );
+		connect(core::instance().get(), SIGNAL( frameChanged(int) ), glv, SLOT(update()) );
 
 		m_mainWindow->setCentralWidget( glv );
 
@@ -61,10 +63,30 @@ namespace frontend
 		core::shutdown();
 	}
 
+	QMainWindow* Application::getMainWindow()
+	{
+		return m_mainWindow;
+	}
+
+	void Application::setRenderer( gl::Renderer::Ptr renderer )
+	{
+		m_renderer = renderer;
+	}
+
+	void Application::render( gl::Context* context )
+	{
+		if( m_renderer)
+		{
+			m_renderer->render(context);
+		}
+	}
+
 	Application* Application::getInstance()
 	{
 		return (Application*)instance();
 	}
+
+
 
 
 	void Application::fileOpen()

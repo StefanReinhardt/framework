@@ -9,6 +9,7 @@
 
 class CloudData  : public SimObject
 {
+	Q_OBJECT
 public:
 	struct Parameters
 	{
