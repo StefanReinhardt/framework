@@ -7,7 +7,8 @@
 
 CreateClouds::CreateClouds() : core::GraphNode()
 {
-    addOutputSocket( "output" );
+	addOutputSocket( "output" );
+	addInputSocket( "frame" );
 
 
 	m_p.dt =          1.00f;
@@ -31,17 +32,18 @@ CreateClouds::CreateClouds() : core::GraphNode()
 
 void CreateClouds::update(core::GraphNodeSocket *output)
 {
-    qDebug() << "CreateClouds: update ";
+	qDebug() << "CreateClouds: update ";
 
-	// TODO: use user values
+	// get current frame
+	int frame = getSocket( "frame" )->asInt();
 
-	CloudData::Ptr cd = std::make_shared<CloudData>(m_p);
-	//CloudDataBoundLayer::Ptr cd = std::make_shared<CloudDataBoundLayer>();
-
-
-
-	cd->print();
-	getSocket( "output" )->setData(cd);
+	// (re)set cloud data when frame==1 or no output was written yet
+	if( frame == 1 || !getSocket( "output" )->getDataWithoutUpdate<CloudData>())
+	{
+		// TODO: use user values
+		CloudData::Ptr cd = std::make_shared<CloudData>(m_p);
+		getSocket( "output" )->setData(cd);
+	}
 }
 
 

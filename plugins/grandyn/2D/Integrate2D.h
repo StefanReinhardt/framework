@@ -10,6 +10,6 @@ public:
 	typedef std::shared_ptr<Integrate2D> Ptr;
 	Integrate2D();
 
-	virtual void                        apply( SimObject::Ptr so, float dt )override;
+	virtual void                        applyImpl( SimObject::Ptr so, float dt )override;
 };
 

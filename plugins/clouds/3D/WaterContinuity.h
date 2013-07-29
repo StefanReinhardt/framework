@@ -9,5 +9,5 @@ public:
 	typedef std::shared_ptr<WaterContinuity> Ptr;
 	WaterContinuity();
 
-	virtual void                         apply( SimObject::Ptr so, float dt )override;
+	virtual void                         applyImpl( SimObject::Ptr so, float dt )override;
 };

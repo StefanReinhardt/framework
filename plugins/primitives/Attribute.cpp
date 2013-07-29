@@ -23,6 +23,11 @@ int Attribute::numComponents()const
 	return m_numComponents;
 }
 
+int Attribute::elementSize()const
+{
+	return m_elementSize;
+}
+
 Attribute::ComponentType Attribute::componentType()const
 {
 	return m_componentType;
@@ -99,9 +104,11 @@ Attribute::Ptr Attribute::createV2f( int numElements )
 	return attr;
 }
 
-Attribute::Ptr Attribute::createFloat()
+Attribute::Ptr Attribute::createFloat(int numElements)
 {
-	return std::make_shared<Attribute>( Attribute::REAL32, 1 );
+	Attribute::Ptr attr = std::make_shared<Attribute>( Attribute::REAL32, 1 );
+	attr->resize(numElements);
+	return attr;
 }
 
 Attribute::Ptr Attribute::createInt()

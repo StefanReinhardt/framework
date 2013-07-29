@@ -25,6 +25,7 @@ public:
 	void                                     clear();
 	int                                      numElements()const;
 	int                                      numComponents()const;
+	int                                      elementSize()const; // size of one element in byte
 	ComponentType                            componentType()const;
 	const void*                              rawPointer()const;
 	void*                                    rawPointer();
@@ -42,7 +43,7 @@ public:
 	static Attribute::Ptr                    createV4f( int numElements = 0 );
 	static Attribute::Ptr                    createV3f( int numElements = 0 );
 	static Attribute::Ptr                    createV2f( int numElements = 0 );
-	static Attribute::Ptr                    createFloat();
+	static Attribute::Ptr                    createFloat(int numElements = 0);
 	static Attribute::Ptr                    createInt();
 	static int                               componentSize( ComponentType ct );
 	static ComponentType                     componentType( const QString &ct );

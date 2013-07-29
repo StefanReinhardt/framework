@@ -3,11 +3,10 @@
 
 #include <memory>
 #include <stack>
-/*
-
 #include "Attribute.h"
-#include "Shader.h"
 #include "Geometry.h"
+#include "Shader.h"
+/*
 #include "Camera.h"
 #include "Texture.h"
 */
@@ -55,8 +54,9 @@ namespace gl
 		// transform info
 		CameraPtr                                                                                       camera();
 		void                                                                       setCamera( CameraPtr camera );
-		void setView( const math::Matrix44f &view, const math::Matrix44f &viewinv, const math::Matrix44f &proj ); // convinience function for updating transformState from view matrices
-
+*/
+		void                                                      setView( const math::M44f &view, const math::M44f &viewInv, const math::M44f &proj ); // convinience function for updating transformState from view matrices
+/*
 		void                                                setModelMatrix( const math::Matrix44f &modelMatrix );
 		void                                                  setViewMatrix( const math::Matrix44f &viewMatrix );
 		void                                                                               setProjectionMatrix();
@@ -69,59 +69,62 @@ namespace gl
 		void                                                       getTransformState( TransformState &ts ) const;
 		void                                                       setTransformState( const TransformState &ts );
 
-		void                                                 pushViewport( int width, int height, FBO *fbo = 0 ); // used by fbos
-		ViewportState                                                                              popViewport();
-		int                                                                              getViewportWidth()const;
-		int                                                                             getViewportHeight()const;
+		*/
+		void                                    pushViewport( int width, int height/*, FBO *fbo = 0*/ ); // used by fbos
+		ViewportState                           popViewport();
+		int                                     getViewportWidth()const;
+		int                                     getViewportHeight()const;
+		float                                   getViewportAspect()const;
 
-		//
-		// global uniform manangement
-		//
-		void                                         setUniform( const std::string &name, AttributePtr uniform );
-		AttributePtr                                                       getUniform( const std::string &name );
-		std::map<std::string, AttributePtr>                                                     m_globalUniforms;
+		// global uniform manangement ----
+		void                                    setUniform( const std::string &name, Attribute::Ptr uniform );
+		Attribute::Ptr                          getUniform( const std::string &name );
 
 
-		//
-		// rendering
-		//
-		void                                                         render( Geometry::Ptr geo, ShaderPtr shader );
-		void                           render( Geometry::Ptr geo, ShaderPtr shader, const math::Matrix44f &xform );
-		void                                                                    renderScreen( ShaderPtr shader );
-		void                                 renderScreen( Texture2dPtr texture );
+		// rendering ----
+		void                                    render( Geometry::Ptr geo, Shader::Ptr shader );
+		void                                    render( Geometry::Ptr geo, Shader::Ptr shader, const math::Matrix44f &xform );
+		void                                    renderScreen( Shader::Ptr shader );
+		//void                                    renderScreen( /*Texture2d::Ptr texture*/ );
+		void                                    bind( Shader::Ptr shader, Geometry::Ptr geo = Geometry::Ptr() );
+		void                                    unbind( Shader::Ptr shader, Geometry::Ptr geo = Geometry::Ptr() );
+		/*
+
 		void                                 renderScreenVFip( Texture2dPtr texture );
 
-		void                                           bind( ShaderPtr shader, Geometry::Ptr geo = Geometry::Ptr() );
-		void                                         unbind( ShaderPtr shader, Geometry::Ptr geo = Geometry::Ptr() );
 
-		//
-		// some standard resources
-		//
-		Geometry::Ptr                        m_screenQuad;
-		Geometry::Ptr                        m_screenQuadVFlipped;
-		ShaderPtr                            m_simpleTextureShaderScreen;
-		ShaderPtr                            m_simpleTextureShader;
-		ShaderPtr                            m_constantShader;
 */
 	private:
-		TransformState                                            m_currentTransformState;
+		TransformState                          m_currentTransformState;
 
+
+		Attribute::Ptr                          m_mvmAttr; // model view matrix (world to eye)
+		Attribute::Ptr                          m_mvpmAttr; // model view projection matrix (world to screen)
+		Attribute::Ptr                          m_mmAttr; // model matrix attribute
+		Attribute::Ptr                          m_vmAttr; // view matrix (camera to world) attribute
+		Attribute::Ptr                          m_pmAttr; // projection matrix attribute
+		Attribute::Ptr                          m_vminvAttr; // view matrix inverse (camera to world)
+		Attribute::Ptr                          m_mvminvtAttr; // model view matrix inverse transpose (model view matrix without scaling/shearing) used to transform vectors
+
+		std::map<std::string, Attribute::Ptr>   m_globalUniforms;
+		std::stack< ViewportState >             m_viewportStack;
 /*
-		AttributePtr                                                                                   m_mvmAttr; // model view matrix (world to eye)
-		AttributePtr                                                                                  m_mvpmAttr; // model view projection matrix (world to screen)
-		AttributePtr                                                                                    m_mmAttr; // model matrix attribute
-		AttributePtr                                                                                    m_vmAttr; // view matrix (camera to world) attribute
-		AttributePtr                                                                                    m_pmAttr; // projection matrix attribute
-		AttributePtr                                                                                 m_vminvAttr; // view matrix inverse (camera to world)
-		AttributePtr                                                                               m_mvminvtAttr; // model view matrix inverse transpose (model view matrix without scaling/shearing) used to transform vectors
-
 		CameraPtr                                                                                       m_camera;
 
-		std::stack< ViewportState >                                                              m_viewportStack;
+
 
 		// time =========================
 		float                                                                                             m_time;
 */
+
+		// standard resources ----
+		Geometry::Ptr                           m_screenQuad;
+		/*
+		Geometry::Ptr                           m_screenQuadVFlipped;
+		Shader::Ptr                             m_simpleTextureShaderScreen;
+		Shader::Ptr                             m_simpleTextureShader;
+		Shader::Ptr                             m_constantShader;
+		*/
 	};
 
 	Context::Ptr                                                  currentContext(); // returns current context

@@ -17,6 +17,8 @@ public:
 
 	Operator::Ptr                                     createOperator( const QString &type, const QString &description );
 	void                                              addOperator( Operator::Ptr op, const QString &description );
+	Operator::Ptr                                     getOperator(const QString &description);
+	template <typename T> std::shared_ptr<T>          getOperator(const QString &description);
 
 	void                                              setTimeStrech(float timeStretch);
 
@@ -33,3 +35,10 @@ private:
 	int                                               m_frame;
 	float                                             m_timeStretch;
 };
+
+
+template <typename T>
+std::shared_ptr<T> Solver::getOperator(const QString &description)
+{
+	return std::dynamic_pointer_cast<T>( getOperator(description) );
+}

@@ -93,9 +93,9 @@ core::Graph::Ptr clouds_graph2D()
 	advectVelocity->setType("velocity", "velocity", false);
 /*
 	// Vortex confinement
-	VortexConfinement2D::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement2D>(solver->createOperator("VortexConfinement2D", "add curls back in"));
+	VortexConfinement2D::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement2D>(solver->createOperator("VortexConfinement2D", "vortex confinement"));
 	vortConf->setField("velocity");
-	vortConf->setStrenght(0.03111111f);
+	vortConf->setStrength(0.03111111f);
 	vortConf->setOnCloudOnly(false);
 */
 
@@ -191,6 +191,7 @@ core::Graph::Ptr clouds_graph2D()
 	cloudExport->getSocket("file")->setString("$HERE/cloud_output.$F4.bgeo");
 
 	// make connections
+	graph->addConnection( "$F", cloudCreate, "frame" );
 	graph->addConnection( cloudCreate, "output", solver, "input" );
 	graph->addConnection( "$F", solver, "frame" );
 	graph->addConnection( solver, "output", cloudExport, "input" );
@@ -277,6 +278,7 @@ core::Graph::Ptr clouds_graph3D()
 	cloudExport->getSocket("file")->setString("$HERE/cloud_output.$F4.bgeo");
 
 	// make connections
+	graph->addConnection( "$F", cloudCreate, "frame" );
 	graph->addConnection( cloudCreate, "output", solver, "input" );
 	//graph->addConnection( cloudImport, "output", solver, "input" );
 	graph->addConnection( "$F", solver, "frame" );

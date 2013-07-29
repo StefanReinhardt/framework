@@ -2,6 +2,7 @@
 
 #include <plugins/gl/glew/gl.h>
 #include <plugins/gl/Context.h>
+#include <plugins/gl/Renderer.h>
 /*
 #include "gltools/gl.h"
 #include "gltools/misc.h"
@@ -22,16 +23,9 @@ namespace frontend
 
 		GLViewer( QWidget *parent = 0 );
 		virtual                         ~GLViewer();
-	/*
-		void                            setInteractionHandler( InteractionHandler::Ptr handler );
-		void                            setAlternativeInteractionHandler( InteractionHandler::Ptr handler );
 
-	public slots:
 	signals:
-		void onInitializeGL();
-		void onShutdownGL();
-		void onRender();
-	*/
+		void                            render( gl::Context* context );
 	protected:
 
 		virtual void                    initializeGL()override;

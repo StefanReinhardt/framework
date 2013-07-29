@@ -22,7 +22,7 @@ AddHeatSource2D::AddHeatSource2D()
 }
 
 
-void AddHeatSource2D::apply(SimObject::Ptr so, float dt)
+void AddHeatSource2D::applyImpl(SimObject::Ptr so, float dt)
 {
 	timer.start();
 

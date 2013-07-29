@@ -134,10 +134,10 @@ namespace core
 	// updates this socket from remote socket
 	void GraphNodeSocket::updateFrom( GraphNodeSocket *src )
 	{
-		qDebug() << "updating graphnodesocket " << objectName() << " from " << src->objectName();
+		//qDebug() << "updating graphnodesocket " << objectName() << " from " << src->objectName();
 		// TODO:switch(socketType)
 		// case Data:
-		switch( m_type )
+		switch( src->m_type )
 		{
 		case DATA:
 			this->m_data = src->getData();break;

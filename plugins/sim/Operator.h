@@ -16,5 +16,12 @@ public:
 
 	Operator();
 
-	virtual void apply( SimObject::Ptr so, float dt ); // dt in seconds
+	void                            apply( SimObject::Ptr so, float dt ); // dt in seconds
+	void                            setEnabled( bool enabled );
+	bool                            isEnabled()const;
+
+protected:
+	virtual void                    applyImpl( SimObject::Ptr so, float dt ); // dt in seconds
+private:
+	bool                            m_enabled;
 };

@@ -145,6 +145,8 @@ namespace core
 	{
 		setVariable( "$F", QVariant(frame) );
 		setVariable( "$F4", QVariant(QString("%1").arg((int)frame, 4, 10, QChar('0'))) );
+
+		emit frameChanged( frame );
 	}
 
 

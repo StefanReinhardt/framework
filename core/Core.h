@@ -44,8 +44,9 @@ namespace core
 
 
 	// Core ===========================
-	class Core // public QObject
+	class Core : public QObject
 	{
+		Q_OBJECT
 	public:
 		typedef std::shared_ptr<Core> Ptr;
 		Core();
@@ -69,6 +70,8 @@ namespace core
 		Data::Ptr                                              deserialize( QJsonValue obj );
 		QJsonValue                                             serialize( const QVariant &variant );
 		void                                                   deserialize(QJsonValue value, QVariant &variant );
+	signals:
+		void                                                   frameChanged(int frame);
 	private:
 		std::vector<Plugin::Ptr>                               m_plugins;
 		std::map<QString, DataFactory::Ptr>                    m_factories;

@@ -12,6 +12,7 @@ namespace gl
 		return g_currentContext;
 	}
 
+
 	Context::Context()
 	{
 		/*
@@ -27,6 +28,7 @@ namespace gl
 //#ifdef OPERATORS_DATA_PATH
 //		pathRegister( "ops_data", base::Path( OPERATORS_DATA_PATH ) );
 //#endif
+*/
 
 		//
 		// setup transform stuff
@@ -38,37 +40,34 @@ namespace gl
 		m_currentTransformState.modelViewMatrix = math::Matrix44f::Identity();
 
 		// projection matrix
-		m_pmAttr = Attribute::createMat44();
+		m_pmAttr = Attribute::createM44f();
 		m_pmAttr->appendElement( math::Matrix44f::Identity() );
 
 		// view projection matrix
-		m_mvpmAttr = Attribute::createMat44();
+		m_mvpmAttr = Attribute::createM44f();
 		m_mvpmAttr->appendElement( math::Matrix44f::Identity() );
 
 		// model view matrix
-		m_mvmAttr = Attribute::createMat44();
+		m_mvmAttr = Attribute::createM44f();
 		m_mvmAttr->appendElement( math::Matrix44f::Identity() );
 
 		// model view matrix inverse transpose
-		m_mvminvtAttr = Attribute::createMat33();
+		m_mvminvtAttr = Attribute::createM33f();
 		m_mvminvtAttr->appendElement( math::Matrix33f::Identity() );
 
-		m_mmAttr = Attribute::createMat44();
+		m_mmAttr = Attribute::createM44f();
 		m_mmAttr->appendElement( math::Matrix44f::Identity() );
 
 
-		m_vmAttr = Attribute::createMat44();
+		m_vmAttr = Attribute::createM44f();
 		m_vmAttr->appendElement( math::Matrix44f::Identity() );
 
 		// view matrix inverse (camera transform)
-		m_vminvAttr = Attribute::createMat44();
+		m_vminvAttr = Attribute::createM44f();
 		m_vminvAttr->appendElement( math::Matrix44f::Identity() );
 
 
-
-		//
-		// register predefined globals
-		//
+		// register predefined globals ----
 		m_globalUniforms.insert( std::make_pair( "mvpm", m_mvpmAttr ) );
 		m_globalUniforms.insert( std::make_pair( "mvm", m_mvmAttr ) );
 		m_globalUniforms.insert( std::make_pair( "mvminvt", m_mvminvtAttr ) );
@@ -78,13 +77,11 @@ namespace gl
 		m_globalUniforms.insert( std::make_pair( "pm", m_pmAttr ) );
 
 
-		//
-		// initialize standard resources ====================
-		//
-		m_screenQuad = geo_quad( Geometry::TRIANGLE );
-		m_screenQuadVFlipped = geo_quad( Geometry::TRIANGLE );
-		gfx::apply_transform(m_screenQuadVFlipped, math::M44f::ScaleMatrix( 1.0f, -1.0f, 1.0f ));
-
+		// initialize standard resources ----
+		m_screenQuad = std::make_shared<Geometry>( createQuad() );
+		//m_screenQuadVFlipped = geo_quad( Geometry::TRIANGLE );
+		//gfx::apply_transform(m_screenQuadVFlipped, math::M44f::ScaleMatrix( 1.0f, -1.0f, 1.0f ));
+		/*
 		// we initialize mvpm uniform to identity. we can do this here because currently m_simpleTextureShader is only used for
 		// screenquad rendering
 		m_simpleTextureShader = Shader::create().attachPSFromFile("$APPDATA/glsl/simpleTexture.ps.glsl").attachPSFromFile("$APPDATA/glsl/simpleTexture.vs.glsl");
@@ -109,39 +106,127 @@ namespace gl
 		return c;
 	}
 
-/*
 
-	// sets current context
-	void Context::setCurrentContext( ContextPtr context )
+	void Context::setUniform( const std::string &name, Attribute::Ptr uniform )
 	{
-		m_currentContext = context;
+		m_globalUniforms[name] = uniform;
 	}
 
-	// sets time
-	void Context::setTime( float time )
+	Attribute::Ptr Context::getUniform( const std::string &name )
 	{
-		m_time = time;
-	}
-
-	// returns current time
-	float Context::time()
-	{
-		return m_time;
+		std::map<std::string, Attribute::Ptr>::iterator it = m_globalUniforms.find( name );
+		if(it != m_globalUniforms.end())
+			return it->second;
+		return Attribute::Ptr();
 	}
 
 
-
-	void Context::setCamera( CameraPtr camera )
+	void Context::render( Geometry::Ptr geo, Shader::Ptr shader, const math::Matrix44f &xform )
 	{
-		m_camera = camera;
-		if(m_camera)
-			setView( camera->m_viewMatrix, camera->m_transform, camera->m_projectionMatrix );
+		//TransformState ts;
+		//getTransformState(ts);
+		//setModelMatrix(xform);
+		render( geo, shader );
+		//setTransformState(ts);
 	}
 
-	CameraPtr Context::camera()
+	void Context::renderScreen( Shader::Ptr shader )
 	{
-		return m_camera;
+		render( m_screenQuad, shader );
 	}
+
+
+	void Context::render( Geometry::Ptr geo, Shader::Ptr shader )
+	{
+		bind(shader, geo);
+
+		// render primitives
+		geo->bindIndexBuffer();
+		glDrawElements(geo->primitiveTypeGL(), geo->numPrimitives()*geo->numPrimitiveVertices(), GL_UNSIGNED_INT, 0);
+
+		unbind( shader, geo );
+	}
+
+
+	void Context::bind( Shader::Ptr shader, Geometry::Ptr geo )
+	{
+		if(shader && shader->isOk())
+		{
+			// used for assigning texture units to sampler uniform attributes
+			//Attribute::g_nextTextureUnit = 0;
+
+			glUseProgram(shader->m_glProgram);
+
+			if(geo)
+				// iterate all active attributes and bind attributes from geometry
+				for( std::map<std::string, int>::iterator it = shader->m_activeAttributes.begin(); it != shader->m_activeAttributes.end(); ++it )
+				{
+					const std::string &name = it->first;
+					int attrIndex = it->second;
+					// getAttr and bind(with index)
+					if (geo->hasAttr(name))
+						geo->getAttr(name)->bindAsAttribute(attrIndex);
+				}
+
+
+			// iterate all active uniforms
+			for( auto it = shader->m_activeUniforms.begin(), end = shader->m_activeUniforms.end(); it != end; ++it )
+			{
+				const std::string &name = it->first;
+				int uniformIndex = it->second;
+				/*
+				// if geometry has uniform attached
+				if(0)
+				{
+					// use it
+					// iterate all uniforms of the geometry
+					//for( int j=0; j<m_uniforms.size(); ++j )
+					//{
+					//	char *t1 = (char *)shader->m_activeUniformNames.m_data[i];
+					//	char *t2 = (char *)m_uniformNames.m_data[j];
+					//	if( !strcmp( (char *)shader->m_activeUniformNames.m_data[i], m_uniformNames.m_data[j] ) )
+					//		getUniform(j)->bindAsUniform( shader->m_activeUniforms.m_data[i] );
+					//}
+				}else
+				*/
+				// otherwise look if the shader has it
+				if( shader->hasUniform(name) )
+				{
+					shader->getUniform(name)->bindAsUniform(uniformIndex);
+				}else
+				// otherwise look in the globals to see if we can take it from there
+				{
+					std::map<std::string, Attribute::Ptr>::iterator it = m_globalUniforms.find( name );
+
+					if( it != m_globalUniforms.end() )
+						it->second->bindAsUniform(uniformIndex);
+				}
+			}
+		}
+	}
+
+	void Context::unbind( Shader::Ptr shader, Geometry::Ptr geo )
+	{
+		if(shader && shader->isOk())
+		{
+			/*
+			if(geo)
+				// iterate all active attributes and unbind attributes
+				for( std::map<std::string, int>::iterator it = shader->m_activeAttributes.begin(); it != shader->m_activeAttributes.end(); ++it )
+				{
+					const std::string &name = it->first;
+					int attrIndex = it->second;
+					// getAttr and bind(with index)
+					if (geo->hasAttr(name))
+						geo->getAttr(name)->unbindAsAttribute(attrIndex);
+				}
+			*/
+
+			// disable shader
+			glUseProgram(0);
+		}
+	}
+
 
 	void Context::setView( const math::Matrix44f &view, const math::Matrix44f &viewInv, const math::Matrix44f &proj )
 	{
@@ -182,6 +267,77 @@ namespace gl
 
 		m_mvminvtAttr->set( 0, m_currentTransformState.modelViewInverseTranspose );
 	}
+
+
+
+	// used by fbos
+	void Context::pushViewport( int width, int height/*, FBO *fbo*/ )
+	{
+		ViewportState vs;
+		vs.width = width;
+		vs.height = height;
+		//vs.fbo = fbo;
+		m_viewportStack.push( vs );
+		glPushAttrib(GL_VIEWPORT_BIT);
+		glViewport(0,0,width, height);
+	}
+	Context::ViewportState Context::popViewport()
+	{
+		m_viewportStack.pop();
+		glPopAttrib();
+		if( m_viewportStack.empty() )
+			return Context::ViewportState();
+		return m_viewportStack.top();
+	}
+	int Context::getViewportWidth()const
+	{
+		return m_viewportStack.top().width;
+	}
+	int Context::getViewportHeight()const
+	{
+		return m_viewportStack.top().height;
+	}
+	float Context::getViewportAspect()const
+	{
+		const ViewportState &vs = m_viewportStack.top();
+		return float(vs.width)/float(vs.height);
+	}
+
+/*
+
+	// sets current context
+	void Context::setCurrentContext( ContextPtr context )
+	{
+		m_currentContext = context;
+	}
+
+	// sets time
+	void Context::setTime( float time )
+	{
+		m_time = time;
+	}
+
+	// returns current time
+	float Context::time()
+	{
+		return m_time;
+	}
+
+
+
+	void Context::setCamera( CameraPtr camera )
+	{
+		m_camera = camera;
+		if(m_camera)
+			setView( camera->m_viewMatrix, camera->m_transform, camera->m_projectionMatrix );
+	}
+
+	CameraPtr Context::camera()
+	{
+		return m_camera;
+	}
+
+
 
 
 	void Context::setModelMatrix( const math::Matrix44f &modelMatrix )
@@ -286,46 +442,6 @@ namespace gl
 		m_mvminvtAttr->set( 0, m_currentTransformState.modelViewInverseTranspose );
 	}
 
-	// used by fbos
-	void Context::pushViewport( int width, int height, FBO *fbo )
-	{
-		ViewportState vs;
-		vs.width = width;
-		vs.height = height;
-		vs.fbo = fbo;
-		m_viewportStack.push( vs );
-		glPushAttrib(GL_VIEWPORT_BIT);
-		glViewport(0,0,width, height);
-	}
-
-	Context::ViewportState Context::popViewport()
-	{
-		m_viewportStack.pop();
-		glPopAttrib();
-		return m_viewportStack.top();
-	}
-
-	int Context::getViewportWidth()const
-	{
-		return m_viewportStack.top().width;
-	}
-	int Context::getViewportHeight()const
-	{
-		return m_viewportStack.top().height;
-	}
-
-	void Context::setUniform( const std::string &name, AttributePtr uniform )
-	{
-		m_globalUniforms[name] = uniform;
-	}
-
-	AttributePtr Context::getUniform( const std::string &name )
-	{
-		std::map<std::string, AttributePtr>::iterator it = m_globalUniforms.find( name );
-		if(it != m_globalUniforms.end())
-			return it->second;
-		return AttributePtr();
-	}
 
 
 
@@ -333,105 +449,14 @@ namespace gl
 
 
 
-	void Context::render( Geometry::Ptr geo, ShaderPtr shader )
-	{
-		bind(shader, geo);
-
-		// render primitives
-		geo->bindIndexBuffer();
-		glDrawElements(geo->m_primitiveType, geo->numPrimitives()*geo->numPrimitiveVertices(), GL_UNSIGNED_INT, 0);
-
-		unbind( shader, geo );
-	}
-
-	void Context::render( Geometry::Ptr geo, ShaderPtr shader, const math::Matrix44f &xform )
-	{
-		TransformState ts;
-		getTransformState(ts);
-		setModelMatrix(xform);
-		render( geo, shader );
-		setTransformState(ts);
-	}
 
 
-	void Context::bind( ShaderPtr shader, Geometry::Ptr geo )
-	{
-		if(shader && shader->isOk())
-		{
-			// used for assigning texture units to sampler uniform attributes
-			Attribute::g_nextTextureUnit = 0;
 
-			glUseProgram(shader->m_glProgram);
 
-			if(geo)
-				// iterate all active attributes and bind attributes from geometry
-				for( std::map<std::string, int>::iterator it = shader->m_activeAttributes.begin(); it != shader->m_activeAttributes.end(); ++it )
-				{
-					const std::string &name = it->first;
-					int attrIndex = it->second;
-					// getAttr and bind(with index)
-					if (geo->hasAttr(name))
-						geo->getAttr(name)->bindAsAttribute(attrIndex);
-				}
 
-			// iterate all active uniforms
-			for( std::map<std::string, int>::iterator it = shader->m_activeUniforms.begin(); it != shader->m_activeUniforms.end(); ++it )
-			{
-				const std::string &name = it->first;
-				int uniformIndex = it->second;
-				// if geometry has uniform attached
-				if(0)
-				{
-					// use it
-					// iterate all uniforms of the geometry
-					//for( int j=0; j<m_uniforms.size(); ++j )
-					//{
-					//	char *t1 = (char *)shader->m_activeUniformNames.m_data[i];
-					//	char *t2 = (char *)m_uniformNames.m_data[j];
-					//	if( !strcmp( (char *)shader->m_activeUniformNames.m_data[i], m_uniformNames.m_data[j] ) )
-					//		getUniform(j)->bindAsUniform( shader->m_activeUniforms.m_data[i] );
-					//}
-				}else
-				// otherwise look if the shader has it
-				if( shader->hasUniform(name) )
-				{
-					shader->getUniform(name)->bindAsUniform(uniformIndex);
-				}else
-				// otherwise look in the globals to see if we can take it from there
-				{
-					std::map<std::string, AttributePtr>::iterator it = m_globalUniforms.find( name );
 
-					if( it != m_globalUniforms.end() )
-						it->second->bindAsUniform(uniformIndex);
-				}
-			}
-		}
-	}
 
-	void Context::unbind( ShaderPtr shader, Geometry::Ptr geo )
-	{
-		if(shader && shader->isOk())
-		{
-			if(geo)
-				// iterate all active attributes and unbind attributes
-				for( std::map<std::string, int>::iterator it = shader->m_activeAttributes.begin(); it != shader->m_activeAttributes.end(); ++it )
-				{
-					const std::string &name = it->first;
-					int attrIndex = it->second;
-					// getAttr and bind(with index)
-					if (geo->hasAttr(name))
-						geo->getAttr(name)->unbindAsAttribute(attrIndex);
-				}
 
-			// disable shader
-			glUseProgram(0);
-		}
-	}
-
-	void Context::renderScreen( ShaderPtr shader )
-	{
-		render( m_screenQuad, shader );
-	}
 
 	void Context::renderScreen( Texture2dPtr texture )
 	{

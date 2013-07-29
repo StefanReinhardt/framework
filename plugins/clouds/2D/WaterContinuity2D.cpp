@@ -6,7 +6,7 @@ WaterContinuity2D::WaterContinuity2D()
 {
 }
 
-void WaterContinuity2D::apply(SimObject::Ptr so, float dt)
+void WaterContinuity2D::applyImpl(SimObject::Ptr so, float dt)
 {
 
 	timer.start();

@@ -1,8 +1,17 @@
 #include "Geometry.h"
 #include <tuple>
 
-Geometry::Geometry( Geometry::PrimitiveType primType ) : core::Data(), m_primitiveType(primType)
+Geometry::Geometry( Geometry::PrimitiveType primType ) : core::Data(), m_primitiveType(primType), m_indexBufferIsDirty(true), m_numPrimitives(0)
 {
+	switch( primType )
+	{
+	default:
+	case POINT:m_numPrimitiveVertices = 1;break;
+	case LINE:m_numPrimitiveVertices = 2;break;
+	case TRIANGLE:m_numPrimitiveVertices = 3;break;
+	case QUAD:m_numPrimitiveVertices = 4;break;
+	//case POLYGON:m_numPrimitiveVertices = 0;break;
+	}
 }
 
 
@@ -115,8 +124,59 @@ unsigned int Geometry::addQuad( unsigned int vId0, unsigned int vId1, unsigned i
 
 
 //
-// convinience creators
+// convinience creators ----
 //
+
+// TODO: make into grid
+Geometry::Ptr createQuad( Geometry::PrimitiveType primType )
+{
+	Geometry::Ptr result = std::make_shared<Geometry>(primType);
+
+	// unique points
+	std::vector<math::Vec3f> pos;
+	pos.push_back( math::Vec3f(-1.0f,-1.0f,-3.0f) );
+	pos.push_back( math::Vec3f(1.0f,-1.0f,-3.0f) );
+	pos.push_back( math::Vec3f(1.0f,1.0f,-3.0f) );
+	pos.push_back( math::Vec3f(-1.0f,1.0f,-3.0f) );
+
+	if( primType == Geometry::QUAD )
+	{
+		// quads
+		std::vector< std::tuple<int, int, int, int> > quads;
+		quads.push_back( std::make_tuple(3, 2, 1, 0) );
+
+		// split per face (because we have uv shells)
+		Attribute::Ptr positions = Attribute::createV3f();
+		Attribute::Ptr uv = Attribute::createV2f();
+
+		for( std::vector< std::tuple<int, int, int, int> >::iterator it = quads.begin(); it != quads.end(); ++it )
+		{
+			std::tuple<int, int, int, int> &quad = *it;
+			int i0, i1, i2, i3;
+
+			i0 = positions->appendElement( pos[std::get<0>(quad)] );
+			uv->appendElement( math::Vec2f(0.0f, 1.0f) );
+			i1 = positions->appendElement( pos[std::get<1>(quad)] );
+			uv->appendElement( math::Vec2f(1.0f, 1.0f) );
+			i2 = positions->appendElement( pos[std::get<2>(quad)] );
+			uv->appendElement( math::Vec2f(1.0f, 0.0f) );
+			i3 = positions->appendElement( pos[std::get<3>(quad)] );
+			uv->appendElement( math::Vec2f(0.0f, 0.0f) );
+
+			result->addQuad(i0, i1, i2, i3);
+		}
+
+		result->setAttr( "P", positions);
+		result->setAttr( "UV", uv);
+	}else
+	if( primType == Geometry::LINE )
+	{
+	}
+
+	return result;
+}
+
+
 Geometry::Ptr createBox( const math::BoundingBox3f &bound, Geometry::PrimitiveType primType )
 {
 	Geometry::Ptr result = std::make_shared<Geometry>(primType);

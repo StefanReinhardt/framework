@@ -9,6 +9,6 @@ public:
 	typedef std::shared_ptr<Gravity2D> Ptr;
 
 	Gravity2D();
-	virtual void                         apply( SimObject::Ptr so, float dt )override;
+	virtual void                         applyImpl( SimObject::Ptr so, float dt )override;
 };
 

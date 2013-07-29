@@ -63,7 +63,7 @@ namespace core
 	// makes all output slots dirty
 	void GraphNode::makeDirty()
 	{
-		qDebug() << "GraphNode::makeDirty";
+		qDebug() << "GraphNode::makeDirty (" << this->metaObject()->className() << ")";
 		for( auto it = m_sockets.begin(), end = m_sockets.end(); it != end; ++it )
 		{
 			GraphNodeSocket::Ptr socket = it->second;

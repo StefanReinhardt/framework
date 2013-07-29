@@ -11,7 +11,7 @@ public:
 	typedef std::shared_ptr<WaterContinuity2D> Ptr;
 	WaterContinuity2D();
 
-	virtual void                         apply( SimObject::Ptr so, float dt )override;
+	virtual void                         applyImpl( SimObject::Ptr so, float dt )override;
 	core::Timer                          timer;
 
 	// overloads from Data

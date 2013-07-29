@@ -4,6 +4,7 @@
 #include <QSplitter>
 #include <QTreeView>
 #include <QMenuBar>
+#include <QFrame>
 
 
 #include <iostream>
@@ -44,13 +45,25 @@ namespace frontend
 
 
 		// splitter ---
-		//QSplitter *split1 = new QSplitter();
+		m_split1 = new QSplitter(Qt::Horizontal);
 
 
-		// GLViewer ================
-		GLViewer *glv = new GLViewer(m_mainWindow);
+		// GLViewer ---
+		GLViewer *glv = new GLViewer(m_split1);
+		connect(glv, SIGNAL( render(gl::Context*) ), this, SLOT(render(gl::Context*)) );
+		connect(core::instance().get(), SIGNAL( frameChanged(int) ), glv, SLOT(update()) );
 
-		m_mainWindow->setCentralWidget( glv );
+
+		QFrame *editor1 = new QFrame;
+
+		m_split1->addWidget(editor1);
+
+		QList<int> sizes;
+		sizes.push_back(750);
+		sizes.push_back(50);
+		m_split1->setSizes(sizes);
+
+		m_mainWindow->setCentralWidget( m_split1 );
 
 		m_mainWindow->show();
 	}
@@ -61,10 +74,30 @@ namespace frontend
 		core::shutdown();
 	}
 
+	QMainWindow* Application::getMainWindow()
+	{
+		return m_mainWindow;
+	}
+
+	void Application::setRenderer( gl::Renderer::Ptr renderer )
+	{
+		m_renderer = renderer;
+	}
+
+	void Application::render( gl::Context* context )
+	{
+		if( m_renderer)
+		{
+			m_renderer->render(context);
+		}
+	}
+
 	Application* Application::getInstance()
 	{
 		return (Application*)instance();
 	}
+
+
 
 
 	void Application::fileOpen()

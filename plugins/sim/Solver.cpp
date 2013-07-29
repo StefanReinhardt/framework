@@ -25,12 +25,11 @@ Solver::Solver() : core::GraphNode()
 
 void Solver::update(core::GraphNodeSocket *output)
 {
-    qDebug() << "Solver: update ";
 	SimObject::Ptr so = getSocket("input")->getData<SimObject>();
 	int frame = getSocket( "frame" )->asInt();
 	float fps = core::getVariable("$FPS").toDouble();
 	float dt = m_timeStretch * (1.0/fps);
-
+	qDebug() << "Solver: update frame: " << frame;
 	// Reset if frame == 1
 	if (frame==1)
 		m_frame = 1;
@@ -68,6 +67,17 @@ Operator::Ptr Solver::createOperator( const QString &type, const QString &descri
 		qCritical() << "Solver: unable to create operator " << op->metaObject()->className();
 
 	return op;
+}
+
+
+Operator::Ptr Solver::getOperator(const QString &description)
+{
+	for( auto it = m_operators.begin(),end = m_operators.end(); it != end; ++it )
+	{
+		if( description == it->second )
+			return it->first;
+	}
+	return Operator::Ptr();
 }
 
 void Solver::setTimeStrech(float timeStretch)
