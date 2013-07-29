@@ -14,6 +14,7 @@
 #include "2D/Diffuse2D.h"
 #include "2D/VortexConfinement2D.h"
 #include "2D/AddHeatSource2D.h"
+#include "2D/CloudControl2D.h"
 
 #include "3D/Advect.h"
 #include "3D/Project.h"
@@ -42,6 +43,7 @@ struct CloudsPlugin : public core::Plugin
 		core->addDataFactory( core::DataFactoryT<Diffuse2D>::create(Diffuse2D::staticMetaObject.className(), "diffuses a given field") );
 		core->addDataFactory( core::DataFactoryT<VortexConfinement2D>::create(VortexConfinement2D::staticMetaObject.className(), "adds lost curl energy back in") );
 		core->addDataFactory( core::DataFactoryT<AddHeatSource2D>::create(AddHeatSource2D::staticMetaObject.className(), "adds temperature to pt") );
+		core->addDataFactory( core::DataFactoryT<CloudControl2D>::create(CloudControl2D::staticMetaObject.className(), "cloud target morph") );
 
 		// 3D
 		core->addDataFactory( core::DataFactoryT<Advect>::create(Advect::staticMetaObject.className(),"advects name identified field in 3d given a name identified velocity ") );
@@ -65,14 +67,14 @@ core::Graph::Ptr clouds_graph2D()
 	Solver::Ptr solver = std::dynamic_pointer_cast<Solver>(graph->createNode("Solver", "solver"));
 	core::GraphNode::Ptr cloudExport = graph->createNode("ExportClouds", "export");
 
-	solver->setTimeStrech(24.0f); // stretches 1 step to 1 second
+	solver->setTimeStrech(48.0f); // stretches 1 step to 1 second
 
 
 	//********** ADVECT FIELDS
 
 	// Advect Density
 	Advect2D::Ptr advectDensity = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect density" ));
-	advectDensity->setType("density", "velocity", false);
+	advectDensity->setType("density", "velocity", true);
 
 	// Advect qv
 	Advect2D::Ptr advectQv = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect qv" ));
@@ -89,28 +91,35 @@ core::Graph::Ptr clouds_graph2D()
 	// Advect Velocity
 	Advect2D::Ptr advectVelocity = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect velocity" ));
 	advectVelocity->setType("velocity", "velocity", false);
-
+/*
 	// Vortex confinement
 	VortexConfinement2D::Ptr vortConf = std::dynamic_pointer_cast<VortexConfinement2D>(solver->createOperator("VortexConfinement2D", "add curls back in"));
 	vortConf->setField("velocity");
 	vortConf->setStrenght(0.03111111f);
 	vortConf->setOnCloudOnly(false);
+*/
+
+	// Cloud Control
+//	CloudControl2D::Ptr CloudCtrl = std::dynamic_pointer_cast<CloudControl2D>(solver->createOperator( "CloudControl2D", "target morph"));
 
 	//********** ADD FORCES
 	// buoyancy and vort Conf should have same vel input field.
 	// Buoyancy
 	Buoyancy2D::Ptr buoyantForce = std::dynamic_pointer_cast<Buoyancy2D>(solver->createOperator( "Buoyancy2D", "apply buoyant Force" ));
-	buoyantForce->setStrenght(1.0f);
+	buoyantForce->setStrenght(0.90f);
 
 /*
 	Diffuse2D::Ptr diffPt = std::dynamic_pointer_cast<Diffuse2D>(solver->createOperator( "Diffuse2D", "diffuse Temperature" ));
 	diffPt->setField("pt");
-	diffPt->setDiffusion(0.000001f);
+	diffPt->setDiffusion(0.00001f);			//0.00001f little to much
 
 	Diffuse2D::Ptr diffQv = std::dynamic_pointer_cast<Diffuse2D>(solver->createOperator( "Diffuse2D", "diffuse Temperature" ));
 	diffQv->setField("qv");
-	diffQv->setDiffusion(0.000001f);
+	diffQv->setDiffusion(0.00001f);
+
 */
+
+
 	//********** SOLVE FOR QC & QV & PT
 	// Watercontinuity
 	WaterContinuity2D::Ptr WaterCont = std::dynamic_pointer_cast<WaterContinuity2D>(solver->createOperator( "WaterContinuity2D", "water continuity" ));
@@ -125,30 +134,30 @@ core::Graph::Ptr clouds_graph2D()
 	velInput->setContrast(1.20f);
 	velInput->setEmitterSize(0.2333333f);
 	velInput->setFrequence(300.0f);
-	velInput->setStrenght(3.6f);
+	velInput->setStrenght(70.01f);		// meter per sec
 	velInput->setOffset(0.0f);
 	velInput->setVelEmission(true);
 
-
+*/
 	AddHeatSource2D::Ptr heatInput =  std::dynamic_pointer_cast<AddHeatSource2D>(solver->createOperator( "AddHeatSource2D", "add Heat input" ));
-	heatInput->setAnimationSpeed(0.5f);
-	heatInput->setContrast(3.0f);
-	heatInput->setEmitterSize(0.1333333f);
+	heatInput->setAnimationSpeed(0.05f);
+	heatInput->setContrast(0.70f);
+	heatInput->setEmitterSize(0.5333333f);
 	heatInput->setFrequence(500.0f);
-	heatInput->setStrenght(0);
-	heatInput->setOffset(0.40f);
+	heatInput->setStrenght(10.0f);
+	heatInput->setOffset(2.00f);
 	heatInput->setPtEmission(true);
+
 
 	AddHeatSource2D::Ptr vaporInput =  std::dynamic_pointer_cast<AddHeatSource2D>(solver->createOperator( "AddHeatSource2D", "add Heat input" ));
 	vaporInput->setAnimationSpeed(0.1f);
 	vaporInput->setContrast(0.80f);
-	vaporInput->setEmitterSize(0.1333333f);
+	vaporInput->setEmitterSize(0.5333333f);
 	vaporInput->setFrequence(400.0f);
-	vaporInput->setStrenght(0.001f);
-	vaporInput->setOffset(0.40f);
+	vaporInput->setStrenght(0.0015f);
+	vaporInput->setOffset(2.80f);
 	vaporInput->setQvEmission(true);
 
-*/
 /*
 	// Add Heat Src for Side Wind
 	AddHeatSource2D::Ptr heatInput = std::dynamic_pointer_cast<AddHeatSource2D>(solver->createOperator( "AddHeatSource2D", "add heat field" ));

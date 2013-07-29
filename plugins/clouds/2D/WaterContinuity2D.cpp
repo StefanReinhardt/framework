@@ -26,65 +26,13 @@ void WaterContinuity2D::apply(SimObject::Ptr so, float dt)
 
 
 
-	std::vector<float>              r, Kp, Ki;
-	std::vector<int>                htar, hc;
-	for (int i=0; i<res.x; i++)
-	{
-		htar.push_back(sin(i*0.1+30)*24+55);
-		Kp.push_back(0.004f * htar[i]/res.y );
-		Ki.push_back(0.004f * htar[i]/res.y );
-	}
-
 	int k =               0;
-
-	float ravg =        0;
-	float intSum =        0;
-	float dh =            0;
-	float Qc =            0;
-	float Svc =           0;
-	float cv =            0.004f;
-
-
-	for (int i=0; i<res.x; i++)
-	{
-		// height of clouds
-		int j=res.y-1;
-		while(qc->lvalue(i,j,k)<0.000000001 && j>0)
-			--j;
-		hc.push_back(j);
-
-		// ratio
-		r.push_back(hc[i]/htar[i]);
-		ravg += r[i];
-	}
-
-	// average of the ratios
-	ravg /= res.x;
 
 
 	float d_qv, T, qs, exner;
 
 	for( int i=1;i<res.x-1;++i )
 	{
-		if(r[i]<1)
-		{
-			// add vapor if (ratio < avg_ratio)
-			if(r[i] < ravg)
-				Svc =  cv * cd->m_qv0Lut[hc[i]] ;
-
-			intSum += dt * dh;
-			dh= 1-r[i];
-			Qc = Kp[i] * dh + Ki[i] * intSum;
-
-			vel_y->lvalue(i,0,0) += Qc;
-			vel_y->lvalue(i,1,0) += Qc;
-			qv->lvalue(i,0,0) += Svc;
-			qv->lvalue(i,1,0) += Svc;
-			qv->lvalue(i,hc[i],0) += Svc;
-
-		}
-
-
 		for( int j=1;j<res.y-1;++j )
 		{
 			//alt=((float)j/(float)ssy)*maxAlt;
@@ -122,7 +70,7 @@ void WaterContinuity2D::apply(SimObject::Ptr so, float dt)
 			// Due to condensation latent energy is released in form of heat. -> change in pot temp
 			// update potential Temperature ( Thermodynamics Equation )
 			// delta p = L/(cp*PI)*(delta C)
-			// L  = constant for latent heat released    	2501 J/kg
+			// L  = constant for latent heat released    	2501 kJ/kg
 			// cp = specific heat capacity of dry air 		1005 J/(kg K)
 			// C  = condensation rate = condensation per evaporation
 			//	  = - min(qvs-qv, qc)  siehe waterCont = d_qv

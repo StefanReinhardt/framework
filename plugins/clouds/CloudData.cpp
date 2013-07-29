@@ -27,8 +27,8 @@ void CloudData::initialize()
 	m_rd = 		287; 		// specific gas constant for dry air
 	m_p0 = 		100;		// pressure at sea level (kPa)
 	m_gravity = 9.81f;		// gravitational acceleration (m/s²)
-	m_lh = 		2501;		// Latent heat of vaporization of water (J/kg)
-	m_cp = 		1005;		// specific heat capacity J/(kg K)
+	m_lh = 		2501000;	// Latent heat of vaporization of water 2501(kJ/kg)		2501000(J/kg)
+	m_cp = 		1005;		// specific heat capacity 1005 J/(kg K)
 
 
 	m_cellSize = (m_p.maxAlt-m_p.minAlt)/m_res.y;	//expansion of a cell in meter;
@@ -47,13 +47,14 @@ void CloudData::initialize()
 	addSubData("velocity", velocity);
 
 	velocity->getScalarField(0)->fill(0.0f);
-	velocity->getScalarField(0)->fill(0.0f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.4f,0.6f));
+	velocity->getScalarField(0)->fill(0.0f,math::Box3f(0.2f,0.1f,0.4f,0.8f,0.4f,0.6f));
 
 	velocity->getScalarField(1)->fill(0.0f);
 	velocity->getScalarField(1)->fill(0.0f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.4f,0.6f));
 
 	velocity->getScalarField(2)->fill(0.0f);
 	velocity->getScalarField(2)->fill(0.0f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.4f,0.6f));
+
 }
 
 
@@ -125,6 +126,70 @@ void CloudData::reset()
 	}
 
 	m_qv1 = qv->lvalue(0,m_res.y-1,0);
+
+
+
+	// Initialize Cloud Control Data
+	//************************************************************
+
+	m_cv =                     0.001f;
+	m_kp =                     0.06f;
+	m_ki =                     0.15f;
+
+	ScalarField::Ptr geoPot = std::make_shared<ScalarField>();
+	geoPot->resize(m_res);
+	addSubData( "geoPot", geoPot );
+
+	// initialize ground gain fields
+	for (int i=0; i<m_res.x; i++)
+	{
+		m_hc.push_back(0.0f);
+		m_htar.push_back(math::max(0.0f, float(sin(i*0.05+30))) * 33 + 55);
+		m_Kp.push_back(m_kp * m_htar[i]/m_res.y );
+		m_Ki.push_back(m_ki * m_htar[i]/m_res.y );
+	}
+
+	// geometric Potential field
+	for( int k=0;k<m_res.z; ++k )
+		for( int j=0;j<m_res.y; ++j )
+			for( int i=0;i<m_res.x; ++i )
+				{
+					if(j<m_htar[i])
+						geoPot->lvalue(i,j,k) = 1.0f;
+					else
+						geoPot->lvalue(i,j,k) = 0;
+				}
+
+	// Blur the geometric pot field
+	float a = 0.1f * m_res.x * m_res.y;
+
+	for( int steps =0; steps<5; ++steps )
+		for( int k=0; k<m_res.z; ++k )
+			for( int j=1;j<m_res.y-1;++j )
+				for( int i=0;i<m_res.x-0;++i )
+				{
+					geoPot->lvalue(i,j,k) =  ( geoPot->lvalue(i,j,k)+
+																		a*( geoPot->lvalue(i-1,j,k) + geoPot->lvalue(i+1,j,k) +
+																			geoPot->lvalue(i,j-1,k) + geoPot->lvalue(i,j+1,k) ))
+																																/ (1+4*a);
+
+				}
+	for( int j=0;j<m_res.y;++j )
+	{
+		geoPot->lvalue(0,j,0) = geoPot->lvalue(1,j,0);
+		geoPot->lvalue(m_res.x-1,j,0) = geoPot->lvalue(m_res.x-2,j,0);
+	}
+	ScalarField::Ptr geoPotForce = std::make_shared<ScalarField>();
+	geoPotForce->resize(m_res);
+	addSubData( "geoPotForce", geoPotForce );
+
+	// multiply matrix on
+	for( int k=0; k<m_res.z; ++k )
+		for( int j=2;j<m_res.y-2;++j )
+			for( int i=2;i<m_res.x-2;++i )
+			{
+				geoPotForce->lvalue(i,j,k) =( geoPot->lvalue(i,j,k) - geoPot->lvalue(i-1,j,k) ); // staggered x force
+			}
 
 }
 
@@ -444,6 +509,7 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 			// sides 	= user defined wind
 			for( int j=0;j<res.y/2;++j )
 				{
+
 					f->lvalue(0,j,k) =			m_p.wind;
 					f->lvalue(1,j,k) =			m_p.wind;
 					f->lvalue(res.x-1,j,k) =	-m_p.wind;

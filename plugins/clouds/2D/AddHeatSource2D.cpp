@@ -88,7 +88,7 @@ void AddHeatSource2D::apply(SimObject::Ptr so, float dt)
 				//qv->lvalue(i,1,k) = qv->lvalue(i,0,k) * (1.10f + (0.20f * random));
 
 			if(m_emitVel)
-				vel_y->lvalue(i,j+1,k) = m_strenght * random;
+				vel_y->lvalue(i,j+1,k) = (m_strenght / cd->m_cellSize) * random;
 				//vel_y->lvalue(i,j+1,k) = 2.6f * random;
 		}
 

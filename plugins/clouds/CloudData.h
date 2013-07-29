@@ -74,6 +74,11 @@ public:
 	std::vector<float>                   m_pLut;			// absolute Pressure at altitude in kPa
 	std::vector<float>                   m_qv0Lut;			// initial Vapor distribution Lookup
 
+	// Cloud Control Parms
+	std::vector<float>                   m_Kp, m_Ki;
+	std::vector<int>                     m_htar, m_hc;
+	float                                m_kp, m_ki, m_cv;
+
 
 };
 

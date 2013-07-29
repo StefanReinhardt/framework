@@ -22,6 +22,7 @@ private:
 
 	core::Timer                        timer;
 
+	bool                               m_periodic;
 	float                              dt;
 	QString                            projectionField;
 };
