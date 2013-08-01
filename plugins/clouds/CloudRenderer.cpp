@@ -62,8 +62,6 @@ CloudRenderer::CloudRenderer( core::GraphNodeSocket::Ptr src ) : gl::Renderer(),
 
 	m_visualizer = std::make_shared<gl::Visualizer>();
 	m_visualizer->geometry( std::make_shared<gl::Geometry>( createQuad() ), m_shader );
-
-
 }
 
 

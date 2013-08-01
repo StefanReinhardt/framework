@@ -211,7 +211,7 @@ int main(int argc, char ** argv)
 		// deserialize and execute local graph if no arguments are given
 		QString graphfilename = "$HERE/test.json";
 		QString nodename = "export";
-		int numFrames = 300;
+		int numFrames = 6000;
 
 
 		//arguments:

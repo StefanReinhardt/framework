@@ -6,7 +6,7 @@ CloudControl2D::CloudControl2D()
 {
 }
 
-void CloudControl2D::apply(SimObject::Ptr so, float dt)
+void CloudControl2D::applyImpl(SimObject::Ptr so, float dt)
 {
 
 	timer.start();

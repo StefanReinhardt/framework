@@ -2,6 +2,7 @@
 #include <plugins/clouds/CloudData.h>
 #include <math.h>
 
+
 WaterContinuity2D::WaterContinuity2D()
 {
 }
@@ -23,6 +24,19 @@ void WaterContinuity2D::applyImpl(SimObject::Ptr so, float dt)
 	ScalarField::Ptr vel_y = cd->getSubData<VectorField>("velocity")->getScalarField(1);
 	math::V3i res =cd->getResolution();
 
+
+	ScalarField::Ptr test;
+
+	if(so->hasSubData("test") )
+	{
+		test = so->getSubData<ScalarField>( "test" );
+	}
+	else
+	{
+		test = std::make_shared<ScalarField>();
+		test->resize(res);
+		so->addSubData( "test", test );
+	}
 
 
 
@@ -57,20 +71,22 @@ void WaterContinuity2D::applyImpl(SimObject::Ptr so, float dt)
 			// conversion from Kelvin to Celsius
 			T -= 273.15f;
 			//
-			//compute 	qs= (380.16/p)exp((17.67*T)/(T+243.5))
+			//compute 	qs= (380.16/p)exp((17.67*T)/(T+243.5)) in kg/kg
 			// with T in °C and P in Pa
+
 			qs = (float) ( (380.16f / (cd->m_pLut[j]*1000) ) * exp( (17.67f * T) / (T + 243.5f) ) );
+
 
 			d_qv  = math::min(qs - qv->lvalue(i,j,k),qc->lvalue(i,j,k));
 
-			qv->lvalue(i,j,k) = qv->lvalue(i,j,k) + d_qv;
-			qc->lvalue(i,j,k) = qc->lvalue(i,j,k) - d_qv;
+			qv->lvalue(i,j,k) = qv->lvalue(i,j,k) + d_qv;		// evaporisation if d_qv positiv and
+			qc->lvalue(i,j,k) = qc->lvalue(i,j,k) - d_qv;		// condensation if d_qv negative
 
 			// Update the potential temperature according to condesation
 			// Due to condensation latent energy is released in form of heat. -> change in pot temp
 			// update potential Temperature ( Thermodynamics Equation )
 			// delta p = L/(cp*PI)*(delta C)
-			// L  = constant for latent heat released    	2501 kJ/kg
+			// L  = constant for latent heat released    	2501 kJ/kg  = 2501000 J/kg
 			// cp = specific heat capacity of dry air 		1005 J/(kg K)
 			// C  = condensation rate = condensation per evaporation
 			//	  = - min(qvs-qv, qc)  siehe waterCont = d_qv
@@ -78,10 +94,64 @@ void WaterContinuity2D::applyImpl(SimObject::Ptr so, float dt)
 			//_______________L_____/___cp___*________PI___________*____________C_________________________________
 			T += 273.15f;
 
+			// ToDo: Flickering when stronger LH
+			//       remove 0.5!?
+			test->lvalue(i,j,k) =  (cd->m_lh / ( cd->m_cp * exner )) * (-d_qv);
+
+			//vel_y->lvalue(i,j,k)+= 10.f* math::max(0.0f,-d_qv);
 			pt->lvalue(i,j,k) += (cd->m_lh / ( cd->m_cp * exner )) * (-d_qv);
+
 		}
 	}
 
+
+/*
+	for( int i=1;i<res.x-1;++i )
+	{
+		for( int j=1;j<res.y-1;++j )
+		{
+			exner = pow(cd->m_pLut[j]/cd->m_p0,0.286f);
+			T = pt->lvalue(i,j,k)*exner -  273.15f; // in Celsius
+
+			//---------------------------------------- Budget Equations
+			qs = QVS(T,cd->m_pLut[j]);
+			d_qv  = math::min(qs - qv->lvalue(i,j,k),qc->lvalue(i,j,k));
+
+			float qv_p = qv->lvalue(i,j,k) + d_qv;								// provisional vapor update
+			float qc_p = qc->lvalue(i,j,k) - d_qv;								// provisional cloudwater update
+			float T_p = pt->lvalue(i,j,k) + (cd->m_lh / cd->m_cp) * (-d_qv);	// provisional Temperature update
+
+			//---------------------------------------- Cloud Conservative values (total amount of water and energy)
+			float qT = qv_p + qc_p;												// total amount of water
+			float Th = T_p + (cd->m_lh / cd->m_cp) * (-d_qv);					// enthalpy relatet Temperature
+
+			//---------------------------------------- Adjust provisional values
+			float T_pl = T_p - (LHV / CP) * qc_p;								// preliminary temperature T*
+			float qs_pl = QVS(T_pl,cd->m_pLut[j]);								// preliminary saturation qs*
+
+			// if subsaturated or just saturated (no cloud)
+			if(qT <= qs_pl)
+			{
+				pt->lvalue(i,j,k) = (T_pl+273.15)/exner;						// by exner to convert from Temp to potTemp
+				qv->lvalue(i,j,k) = qT;
+				qc->lvalue(i,j,k) = 0.0f;
+			}
+
+			// if saturated (clouds visible)
+			else
+			{
+				// TODO: NEWTON ITERATION
+				// solve for T_v+1
+				//NewtonSolve(T_v) = Th - LHV/CP * ( QVS(T_v,cd->m_pLut[j]) - T_v *()   )
+
+				//pt->lvalue(i,j,k) = T_p/exner;									// by exner to convert from Temp to potTemp
+				//qv->lvalue(i,j,k) = qv_p;
+				//qc->lvalue(i,j,k) = qc_p;
+			}
+
+		}
+	}
+*/
 	//set Boundary values
 	cd->setBounds2D(4,so->getSubData<ScalarField>("pt"));
 	cd->setBounds2D(5,so->getSubData<ScalarField>("qv"));

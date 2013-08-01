@@ -12,7 +12,7 @@ public:
 	CloudControl2D();
 	CloudControl2D(SimObject::Ptr so);
 
-	virtual void                         apply( SimObject::Ptr so, float dt )override;
+	virtual void                         applyImpl( SimObject::Ptr so, float dt )override;
 	core::Timer                          timer;
 
 	// overloads from Data

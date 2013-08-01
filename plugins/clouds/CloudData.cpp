@@ -24,11 +24,11 @@ void CloudData::initialize()
 
 	m_res = m_p.res;
 	//Constants
-	m_rd = 		287; 		// specific gas constant for dry air
-	m_p0 = 		100;		// pressure at sea level (kPa)
+	m_rd = 		287; 		// specific gas constant for dry air ( J/[kg K] )
+	m_p0 = 		101.325;	// standard pressure at sea level (kPa)
 	m_gravity = 9.81f;		// gravitational acceleration (m/s²)
 	m_lh = 		2501000;	// Latent heat of vaporization of water 2501(kJ/kg)		2501000(J/kg)
-	m_cp = 		1005;		// specific heat capacity 1005 J/(kg K)
+	m_cp = 		1003.5;		// specific heat capacity 1003.5 J/(kg K)
 
 
 	m_cellSize = (m_p.maxAlt-m_p.minAlt)/m_res.y;	//expansion of a cell in meter;
@@ -117,7 +117,7 @@ void CloudData::reset()
 		for(int i= 0; i<m_res.x; i++)
 			for(int k= 0; k<m_res.z; k++)
 			{
-				// temp in °C and p in Pa
+				// temp in °C and p in Pa  m_qs in kg/kg
 				m_qs		=		(float) (  (380/(m_pLut[j]*1000)  ) * exp( (17.67*(m_tLut[j]-273.15)) / (m_tLut[j]-273.15+243.5))) ;
 				qv->lvalue(i,j,k) = 		m_qs * m_p.hum;
 

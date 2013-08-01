@@ -7,6 +7,15 @@
 #include <plugins/primitives/VectorField.h>
 
 
+#define CP			1003.5f		// specific heat capacity 1003.5 J/(kg K)
+#define LHV			2501000.0f	// Latent heat of vaporization of water 2501(kJ/kg)		2501000(J/kg)
+#define RD			287.058f	// specific gas constant for dry air	J /kg /K
+#define RV			491.5f		// specific gas constant for vapor		J /kg /K
+#define PVS(t)		( 610.78f * exp( 17.27f * (t-273.16f)/(t-35.86f) ) )		// Pressure at saturation
+#define QVS(t,p)	( (RD/RV) * (PVS(t) /( p-(1-RD/RV)*PVS(t) ) ) )				// saturation mixing ratio
+
+
+
 class CloudData  : public SimObject
 {
 	Q_OBJECT
