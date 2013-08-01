@@ -15,6 +15,7 @@
 #include "2D/VortexConfinement2D.h"
 #include "2D/AddHeatSource2D.h"
 #include "2D/CloudControl2D.h"
+#include "2D/Balloon.h"
 
 #include "3D/Advect.h"
 #include "3D/Project.h"
@@ -44,6 +45,7 @@ struct CloudsPlugin : public core::Plugin
 		core->addDataFactory( core::DataFactoryT<VortexConfinement2D>::create(VortexConfinement2D::staticMetaObject.className(), "adds lost curl energy back in") );
 		core->addDataFactory( core::DataFactoryT<AddHeatSource2D>::create(AddHeatSource2D::staticMetaObject.className(), "adds temperature to pt") );
 		core->addDataFactory( core::DataFactoryT<CloudControl2D>::create(CloudControl2D::staticMetaObject.className(), "cloud target morph") );
+		core->addDataFactory( core::DataFactoryT<Balloon>::create(Balloon::staticMetaObject.className(), "tracks data") );
 
 		// 3D
 		core->addDataFactory( core::DataFactoryT<Advect>::create(Advect::staticMetaObject.className(),"advects name identified field in 3d given a name identified velocity ") );
@@ -71,6 +73,10 @@ core::Graph::Ptr clouds_graph2D()
 
 
 	//********** ADVECT FIELDS
+
+	// Balloon
+	Balloon::Ptr ballon1 = std::dynamic_pointer_cast<Balloon>(solver->createOperator( "Balloon", "testBalloon" ));
+
 
 	// Advect Density
 	Advect2D::Ptr advectDensity = std::dynamic_pointer_cast<Advect2D>(solver->createOperator( "Advect2D", "advect density" ));
