@@ -42,7 +42,7 @@ struct Geometry : public core::Data
 	unsigned int                                 numPrimitives();
 	unsigned int                                 numPrimitiveVertices(); // Point=1; Line=2; Triangle=3; Quad=4
 	const unsigned char*                         rawIndexPointer()const;
-	unsigned int                                 addPoint( unsigned int vId );
+	unsigned int                                 addPoint( unsigned int vertex );
 	unsigned int                                 addLine( unsigned int vId0, unsigned int vId1 );
 	unsigned int                                 addTriangle( unsigned int vId0, unsigned int vId1, unsigned int vId2 );
 	unsigned int                                 addQuad( unsigned int vId0, unsigned int vId1, unsigned int vId2, unsigned int vId3 );
@@ -58,5 +58,6 @@ private:
 };
 
 // temp - convinience stuff should go somewhere else
+Geometry::Ptr createPoints( const std::vector<math::V3f> &points = std::vector<math::V3f>() );
 Geometry::Ptr createQuad( Geometry::PrimitiveType primType = Geometry::QUAD );
 Geometry::Ptr createBox( const math::BoundingBox3f &bound = math::BoundingBox3f(math::Vec3f(-0.5f), math::Vec3f(0.5f)), Geometry::PrimitiveType primType = Geometry::QUAD );
