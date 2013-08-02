@@ -89,6 +89,9 @@ public:
 	std::vector<int>                     m_htar, m_hc;
 	float                                m_kp, m_ki, m_cv;
 
+	// used for additional information - may be moved to core::Data if it proves usefull
+	QVariantMap                          m_info;
+
 
 };
 
