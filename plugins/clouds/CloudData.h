@@ -90,6 +90,14 @@ public:
 	float                                m_kp, m_ki, m_cv;
 
 
+
+	float                                absPressure(float alt);
+	float                                absTemp(float alt);
+	float                                potTemp(float absT, float absP);
+	float                                potTempToTemp(float pt, float absP);
+	float                                qvs(float t, float p);
+	float                                pvs(float t);
+
 };
 
 #endif // CLOUDDATA_H

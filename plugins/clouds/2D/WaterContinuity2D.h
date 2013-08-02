@@ -14,6 +14,7 @@ public:
 	virtual void                         applyImpl( SimObject::Ptr so, float dt )override;
 	core::Timer                          timer;
 
+	bool                                 m_qsCorrection;
 	// overloads from Data
 	//virtual void                       store( QJsonObject &o, QJsonDocument &doc );
 	//virtual void                       load( QJsonObject &o );

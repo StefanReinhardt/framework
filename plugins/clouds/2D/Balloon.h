@@ -12,6 +12,8 @@ public:
 
 	virtual void                       applyImpl( SimObject::Ptr so, float dt )override;
 
+	void                              setPosition(float x, float y);
+	void                              setReleaseFrame(int release);
 
 
 private:
@@ -19,7 +21,7 @@ private:
 	int                                m_release;
 
 	// overloads from Data
-	//virtual void                       store( QJsonObject &o, QJsonDocument &doc );
-	//virtual void                       load( QJsonObject &o );
+	virtual void                       store( QJsonObject &o, QJsonDocument &doc );
+	virtual void                       load( QJsonObject &o );
 
 };

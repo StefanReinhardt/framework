@@ -14,27 +14,17 @@ Balloon::Balloon()
 void Balloon::applyImpl( SimObject::Ptr so, float dt )
 {
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
-
-
-
 	m_posx = cd->getResolution().x*0.5f;
 	m_posy = 2.0f;
-
 
 	// advect
 	if(core::getVariable("$F").toInt()>m_release)
 	{
-		m_posx = m_posx - dt * so->getSubData<VectorField>("velocity")->getScalarField(0)->evaluate(math::V3f(m_posx,m_posy,0));
-		m_posy = m_posy - dt * so->getSubData<VectorField>("velocity")->getScalarField(1)->evaluate(math::V3f(m_posx,m_posy,0));
+		m_posx = m_posx + dt * so->getSubData<VectorField>("velocity")->getScalarField(0)->evaluate(math::V3f(m_posx,m_posy,0));
+		m_posy = m_posy + dt * so->getSubData<VectorField>("velocity")->getScalarField(1)->evaluate(math::V3f(m_posx,m_posy,0));
 	}
 
-
 	// write data
-
-
-
-
-
 	fstream f;
 
 	ScalarField::Ptr pt = cd->getSubData<ScalarField>("pt");
@@ -69,9 +59,36 @@ void Balloon::applyImpl( SimObject::Ptr so, float dt )
 	f.open("pos_y", std::ios_base::app | std::ios_base::out);
 	f << core::getVariable("$F").toInt() << " " << m_posy << endl;
 	f.close();
-
-
 }
 
 
+void Balloon::setPosition(float x, float y)
+{
+	m_posx = x;
+	m_posy = y;
+}
+
+void Balloon::setReleaseFrame(int release)
+{
+	m_release = release;
+}
+
+
+void Balloon::store( QJsonObject &o, QJsonDocument &doc )
+{
+	Operator::store( o, doc );
+
+	o.insert( "m_posx", m_posx );
+	o.insert( "m_posy", m_posy);
+	o.insert( "m_release", m_release);
+}
+
+void Balloon::load( QJsonObject &o )
+{
+	Operator::load( o );
+
+	m_posx = o["m_posx"].toDouble();
+	m_posy = o["m_posy"].toDouble();
+	m_release = int(o["m_release"].toDouble());
+}
 

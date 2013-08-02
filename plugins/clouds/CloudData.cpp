@@ -12,7 +12,6 @@ CloudData::CloudData() : SimObject()
 {
 	initialize();
 	reset();
-
 }
 
 
@@ -25,10 +24,10 @@ void CloudData::initialize()
 	m_res = m_p.res;
 	//Constants
 	m_rd = 		287; 		// specific gas constant for dry air ( J/[kg K] )
-	m_p0 = 		101.325;	// standard pressure at sea level (kPa)
+	m_p0 = 		101325.0f;	// standard pressure at sea level (Pa)
 	m_gravity = 9.81f;		// gravitational acceleration (m/s²)
 	m_lh = 		2501000;	// Latent heat of vaporization of water 2501(kJ/kg)		2501000(J/kg)
-	m_cp = 		1003.5;		// specific heat capacity 1003.5 J/(kg K)
+	m_cp = 		1003.5;		// specific heat capacity 1003.5 J/(kg K) dry air
 
 
 	m_cellSize = (m_p.maxAlt-m_p.minAlt)/m_res.y;	//expansion of a cell in meter;
@@ -78,57 +77,40 @@ void CloudData::reset()
 
     qDebug() << "reset Cloud Data";
 
-	// Initialize absolute Temp lookup
+	// Initialize
 	//************************************************************ 
-	for(int y= 0; y<m_res.y; y++){
-		// Ground Temp - (altitude / 100)* tempLapseRate
-		float alt = ( (float)y / (float)m_res.y ) * (m_p.maxAlt-m_p.minAlt) + m_p.minAlt;
-		m_tLut.push_back(m_p.t0 - alt * m_p.tlr);
-	}
 
-	// Initialize absolute Pressure lookup in kPa
-	//************************************************************
+	// absolute Temp lookup and absolute Pressure lookup in Pa with Barometric Formula
 	for(int y= 0; y<m_res.y; y++){
 		float alt = ( (float)y / (float)m_res.y ) * (m_p.maxAlt-m_p.minAlt) + m_p.minAlt;
-		m_pLut.push_back((float) (m_p0* pow(( 1- ( (alt*m_p.tlr)/m_p.t0 ) ),(m_gravity/(m_p.tlr*m_rd)) )) );
+		m_tLut.push_back( absTemp(alt) );
+		m_pLut.push_back( absPressure(alt) );
 	}
 
-	// Initialize pot temp
-	//************************************************************
+
+	// potential temp		=(abs Temp * exner)
 	for(int k= 0; k<m_res.z; k++)
 		for(int i= 0; i<m_res.x; i++)
 			for(int j= 0; j<m_res.y; j++)
 			{
-				//					K                   kPa/kPa
-				pt->lvalue(i,j,k)= (float) (m_tLut[j] * ( pow( m_p0/m_pLut[j] , 0.286)));
-				//pt_old->lvalue(i,j,k) = pt->lvalue(i,j,k);
+				pt->lvalue(i,j,k)= potTemp(m_tLut[j], m_pLut[j] );
 			}
-
-
-	// Init ground pot temp
-	//************************************************************
 	m_pt0 = pt->lvalue(0,0,0);
 
-	// Initialize Saturation vapor mixing ratio and water vapor mixing ratio
-	//************************************************************
-	//T in celsius
+
+	//Saturation vapor mixing ratio and water vapor mixing ratio
 	for(int j= 0; j<m_res.y; j++)
 	{
 		for(int i= 0; i<m_res.x; i++)
 			for(int k= 0; k<m_res.z; k++)
-			{
-				// temp in °C and p in Pa  m_qs in kg/kg
-				m_qs		=		(float) (  (380/(m_pLut[j]*1000)  ) * exp( (17.67*(m_tLut[j]-273.15)) / (m_tLut[j]-273.15+243.5))) ;
-				qv->lvalue(i,j,k) = 		m_qs * m_p.hum;
+				qv->lvalue(i,j,k) = 		qvs(m_tLut[j], m_pLut[j]) * m_p.hum;
 
-			}
 		m_qv0Lut.push_back(qv->lvalue(0,j,0));
 	}
-
 	m_qv1 = qv->lvalue(0,m_res.y-1,0);
 
 
-
+	//************************************************************
 	// Initialize Cloud Control Data
 	//************************************************************
 
@@ -191,6 +173,10 @@ void CloudData::reset()
 				geoPotForce->lvalue(i,j,k) =( geoPot->lvalue(i,j,k) - geoPot->lvalue(i-1,j,k) ); // staggered x force
 			}
 
+
+	//************************************************************
+	// END -  Initialize Cloud Control Data
+	//************************************************************
 }
 
 float CloudData::getTimestep()
@@ -509,7 +495,6 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 			// sides 	= user defined wind
 			for( int j=0;j<res.y/2;++j )
 				{
-
 					f->lvalue(0,j,k) =			m_p.wind;
 					f->lvalue(1,j,k) =			m_p.wind;
 					f->lvalue(res.x-1,j,k) =	-m_p.wind;
@@ -545,10 +530,6 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 				{
 					f->lvalue(i,0,k) = 0;
 					f->lvalue(i,1,k) = 0;
-					//if(i>30 && i<70){
-					//	f->lvalue(i,0,k) = 0.1;
-					//	f->lvalue(i,1,k) = 0.1;
-					//}
 					f->lvalue(i,res.y-1,k) = 0;
 					f->lvalue(i,res.y-2,k) = 0;
 				}
@@ -566,8 +547,8 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 			for( int k=0;k<res.z;++k )
 				for( int j=0;j<res.y;++j )
 				{
-					f->lvalue(0,j,k) = m_tLut.at(j)*pow(100/m_pLut.at(j), 0.286);
-					f->lvalue(res.x-1,j,k) = m_tLut.at(j)*pow(100/m_pLut.at(j), 0.286);
+					f->lvalue(0,j,k) = (float) (m_tLut[j] * ( pow( m_p0/m_pLut[j] , 0.286)));
+					f->lvalue(res.x-1,j,k) = f->lvalue(0,j,k);
 				}
 
 			// bottom 	= noslip
@@ -575,20 +556,20 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 			for( int k=0;k<res.z;++k )
 				for( int i=0;i<res.x;++i )
 				{
-					f->lvalue(i,0,k) = m_tLut.at(0)*pow(100/m_pLut.at(0), 0.286);
-					f->lvalue(i,res.y-1,k) = m_tLut.at(res.y-1)*pow(100/m_pLut.at(res.y-1), 0.286);
+					f->lvalue(i,0,k) = potTemp(m_tLut[0], m_pLut[0]);
+					f->lvalue(i,res.y-1,k) = potTemp(m_tLut[res.y-1], m_pLut[res.y-1]);
 				}
 			break;
 
-
+		// ___________________________________
+		// Water Vapor
 		case 5:
 		{
 			qDebug()  << "setBounds with b=5 (qv)";
 			// sides = periodic
-			float qv=0;
 			for( int j=0;j<res.y;++j )
 			{
-				qv = m_p.hum * (float) (  (380/(m_pLut[j]*1000)  ) * exp( (17.67*(m_tLut[j]-273.15)) / (m_tLut[j]-273.15+243.5))) ;
+				float qv= qvs(m_tLut[j], m_pLut[j]) * m_p.hum;
 				for( int k=0;k<res.z;++k )
 				{
 					f->lvalue(0,j,k) = qv;
@@ -613,7 +594,8 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 		}
 			break;
 
-
+		// ___________________________________
+		// Cloud Water
 		case 6:
 			qDebug()  << "setBounds with b=5 (qc)";
 			// sides = 0
@@ -637,11 +619,50 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 			qCritical() << "wrong Boundary settings. b="<<b;
 			break;
 	}
-		// set corner values
-		f->lvalue(0,0,0)=( f->lvalue(1,0,0) + f->lvalue(0,1,0) )/2;
-		f->lvalue(res.x-1,0,0)=( f->lvalue(res.x-2,0,0) + f->lvalue(res.x-1,1,0) )/2;
-		f->lvalue(0,res.y-1,0)=( f->lvalue(1,res.y-1,0) + f->lvalue(0,res.y-2,0) )/2;
-		f->lvalue(res.x-1,res.y-1,0)=( f->lvalue(res.x-2,res.y-1,0) + f->lvalue(res.x-1,res.y-2,0) )/2;
+
+	// ___________________________________
+	// set corner values
+	f->lvalue(0,0,0)=( f->lvalue(1,0,0) + f->lvalue(0,1,0) )/2;
+	f->lvalue(res.x-1,0,0)=( f->lvalue(res.x-2,0,0) + f->lvalue(res.x-1,1,0) )/2;
+	f->lvalue(0,res.y-1,0)=( f->lvalue(1,res.y-1,0) + f->lvalue(0,res.y-2,0) )/2;
+	f->lvalue(res.x-1,res.y-1,0)=( f->lvalue(res.x-2,res.y-1,0) + f->lvalue(res.x-1,res.y-2,0) )/2;
 
 
+}
+
+
+float CloudData::absPressure(float alt)
+{
+	return  m_p0* pow(( 1- ( (alt*m_p.tlr)/m_p.t0 ) ),(m_gravity/(m_p.tlr*m_rd)) ) ;
+}
+
+float CloudData::absTemp(float alt)
+{
+	return m_p.t0 - alt * m_p.tlr;
+}
+
+float CloudData::potTemp(float absT, float absP)
+{
+	return (float) (absT * ( pow( m_p0/absP , 0.286)));
+}
+
+float CloudData::potTempToTemp(float pt, float absP)
+{
+	return pt*pow(absP/m_p0,0.286f);
+}
+
+float CloudData::qvs(float t, float p)
+{
+	// t in K | p in Pa |  qs in kg/kg
+
+	// old
+	//return (float) (  (380/p) * exp( (17.67*(t-273.15)) / (t-273.15+243.5))) ;
+
+	// new
+	return (RD/RV) * (pvs(t) /( p-(1-RD/RV)*pvs(t) ) ); 				// saturation mixing ratio
+}
+
+float CloudData::pvs(float t)
+{
+	return  610.78f * exp( 17.27f * (t-273.16f)/(t-35.86f) );		// Pressure at saturation
 }
