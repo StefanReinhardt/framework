@@ -17,7 +17,7 @@ public:
 
 
 private:
-	float                              m_posy, m_posx;
+	math::V3f                          m_vsP; // balloon position in voxelspace
 	int                                m_release;
 
 	// overloads from Data

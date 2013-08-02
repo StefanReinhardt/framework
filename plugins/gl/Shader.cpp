@@ -535,8 +535,8 @@ namespace gl
 			"out vec4 color;\n"
 			"void main()\n"
 			"{\n"
-			"\t//color = vec4( cd, 1.0 );\n"
-			"\tcolor = vec4( 0.3, 0.1, 0.5, 1.0 );\n"
+			"\tcolor = vec4( cd, 1.0 );\n"
+			"\t//color = vec4( 0.3, 0.1, 0.5, 1.0 );\n"
 			"}\n";
 
 		std::stringstream ps_src;

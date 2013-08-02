@@ -88,9 +88,9 @@ const unsigned char* Geometry::rawIndexPointer()const
 	return (const unsigned char*)(&m_indexBuffer[0]);
 }
 
-unsigned int Geometry::addPoint( unsigned int vId )
+unsigned int Geometry::addPoint( unsigned int vertex )
 {
-	m_indexBuffer.push_back(vId);
+	m_indexBuffer.push_back(vertex);
 	m_indexBufferIsDirty = true;
 	return m_numPrimitives++;
 }
@@ -126,6 +126,19 @@ unsigned int Geometry::addQuad( unsigned int vId0, unsigned int vId1, unsigned i
 //
 // convinience creators ----
 //
+Geometry::Ptr createPoints( const std::vector<math::V3f> &points )
+{
+	Geometry::Ptr result = std::make_shared<Geometry>();
+
+	Attribute::Ptr pAttr = Attribute::createV3f();
+	result->setAttr("P", pAttr);
+
+	for( auto it = points.begin(), end = points.end();it!=end;++it)
+		result->addPoint(pAttr->appendElement<math::V3f>( *it ));
+
+
+	return result;
+}
 
 // TODO: make into grid
 Geometry::Ptr createQuad( Geometry::PrimitiveType primType )
@@ -134,10 +147,10 @@ Geometry::Ptr createQuad( Geometry::PrimitiveType primType )
 
 	// unique points
 	std::vector<math::Vec3f> pos;
-	pos.push_back( math::Vec3f(-1.0f,-1.0f,-3.0f) );
-	pos.push_back( math::Vec3f(1.0f,-1.0f,-3.0f) );
-	pos.push_back( math::Vec3f(1.0f,1.0f,-3.0f) );
-	pos.push_back( math::Vec3f(-1.0f,1.0f,-3.0f) );
+	pos.push_back( math::Vec3f(-0.5f,-0.5f,0.0f) );
+	pos.push_back( math::Vec3f(0.5f,-0.5f,0.0f) );
+	pos.push_back( math::Vec3f(0.5f,0.5f,0.0f) );
+	pos.push_back( math::Vec3f(-0.5f,0.5f,0.0f) );
 
 	if( primType == Geometry::QUAD )
 	{

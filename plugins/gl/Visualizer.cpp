@@ -22,14 +22,33 @@ namespace gl
 		{
 			Primitive &p = *(*it);
 
-			p.preRender();
-
 			if( p.m_visible )
 			{
 				p.preRender();
 				p.render( context );
 			}
 		}
+	}
+
+	void Visualizer::setPrimitiveName( Primitive::Ptr prim, const std::string &name )
+	{
+		m_primitiveIds[name] = prim;
+	}
+
+	Visualizer::Primitive::Ptr Visualizer::getPrimitive( const std::string &name )
+	{
+		std::map<std::string, Primitive::Ptr>::iterator it = m_primitiveIds.find(name);
+		if( it != m_primitiveIds.end() )
+			return it->second;
+		return Visualizer::Primitive::Ptr();
+	}
+
+	bool Visualizer::hasPrimitive( const std::string &name )
+	{
+		std::map<std::string, Primitive::Ptr>::iterator it = m_primitiveIds.find(name);
+		if( it != m_primitiveIds.end() )
+			return true;
+		return false;
 	}
 
 	// PRIMITIVE =====================================
@@ -47,8 +66,8 @@ namespace gl
 
 	void Visualizer::Primitive::render( Context* context )
 	{
-		//context->render( m_geo, m_shader, m_xform );
-		context->render(std::make_shared<gl::Geometry>( createQuad() ), m_shader);
+		context->render( m_geo, m_shader, m_xform );
+		//context->render(std::make_shared<gl::Geometry>( createQuad() ), m_shader);
 
 	}
 
@@ -99,22 +118,63 @@ namespace gl
 	}
 
 
-	/*
-	Visualizer::PrimitivePtr Visualizer::getPrimitive( const std::string &id )
+	// Points =====================================
+
+	Visualizer::Points::Points() : Primitive()
 	{
-		std::map<std::string, PrimitivePtr>::iterator it = m_primitiveIds.find(id);
-		if( it != m_primitiveIds.end() )
-			return it->second;
-		return Visualizer::PrimitivePtr();
+		m_pointSize = 4.0f;
 	}
 
-	bool Visualizer::hasPrimitive( const std::string &key )
+	Visualizer::Points::Ptr Visualizer::points()
 	{
-		std::map<std::string, PrimitivePtr>::iterator it = m_primitiveIds.find(key);
-		if( it != m_primitiveIds.end() )
-			return true;
-		return false;
+		Visualizer::Points::Ptr l = std::make_shared<Visualizer::Points>();
+
+		gl::Geometry::Ptr geo = std::make_shared<gl::Geometry>(createPoints());
+		geo->setAttr( "Cd", gl::Attribute::createV3f());
+
+		l->m_geo = geo;
+		l->m_shader = m_defaultShader;
+		m_primitives.push_back(l);
+
+		return l;
 	}
+
+
+	unsigned int Visualizer::Points::add( const math::V3f &p, const math::V3f &color )
+	{
+		unsigned int i = m_geo->getAttr("P")->appendElement<math::Vec3f>(p);
+		m_geo->getAttr("Cd")->appendElement<math::Vec3f>(color);
+		return m_geo->addPoint(i);
+	}
+
+	void Visualizer::Points::setPosition( int i, const math::V3f &pos )
+	{
+		m_geo->getAttr("P")->set<math::Vec3f>( i, pos);
+	}
+
+	void Visualizer::Points::setColor( int i, const math::V3f &color )
+	{
+		m_geo->getAttr("Cd")->set<math::Vec3f>( i, color);
+	}
+
+	void Visualizer::Points::clear()
+	{
+		m_geo->clear();
+	}
+
+	void Visualizer::Points::setPointSize( float size )
+	{
+		m_pointSize = size;
+	}
+
+	void Visualizer::Points::preRender()
+	{
+		glPointSize( m_pointSize );
+	}
+
+
+	/*
+
 
 	Visualizer::PrimitivePtr Visualizer::primitive( const std::string &key )
 	{
@@ -284,67 +344,6 @@ namespace gl
 		m_geo->clear();
 	}
 
-	// Points =====================================
-
-	Visualizer::Points::Points() : Primitive()
-	{
-		m_pointSize = 4.0f;
-	}
-
-	Visualizer::PointsPtr Visualizer::points()
-	{
-		Visualizer::PointsPtr l = std::make_shared<Visualizer::Points>();
-
-		gfx::Geometry::Ptr geo = gfx::Geometry::createPointGeometry();
-		geo->setAttr( "Cd", gfx::Attribute::createVec3f());
-
-		l->m_geo = geo;
-		l->m_shader = m_defaultShader;
-		//l->m_pointSprites = true;
-
-		m_primitives.push_back(l);
-
-		return l;
-	}
-
-	Visualizer::PointsPtr Visualizer::points( const std::string &id)
-	{
-		PrimitivePtr prim = getPrimitive( id );
-		if( prim && std::dynamic_pointer_cast<Points>(prim) )
-			return std::dynamic_pointer_cast<Points>(prim);
-		PointsPtr l = points();
-		if( !id.empty() )
-			m_primitiveIds[id] = l;
-		return l;
-	}
-
-
-	unsigned int Visualizer::Points::add( const math::V3f &p )
-	{
-		unsigned int i = m_geo->getAttr("P")->appendElement<math::Vec3f>(p);
-		m_geo->getAttr("Cd")->appendElement<math::Vec3f>(math::Vec3f(1.0f, 1.0f, 1.0f));
-		return m_geo->addPoint(i);
-	}
-
-	void Visualizer::Points::setColor( int i, const math::V3f &color )
-	{
-		m_geo->getAttr("Cd")->set<math::Vec3f>( i, color);
-	}
-
-	void Visualizer::Points::clear()
-	{
-		m_geo->clear();
-	}
-
-	void Visualizer::Points::setPointSize( float size )
-	{
-		m_pointSize = size;
-	}
-
-	void Visualizer::Points::preRender()
-	{
-		glPointSize( m_pointSize );
-	}
 
 
 	// Circle =====================================

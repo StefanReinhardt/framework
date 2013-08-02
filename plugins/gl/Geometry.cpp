@@ -50,6 +50,22 @@ namespace gl
 		return Attribute::Ptr();
 	}
 
+	void Geometry::setAttr( const std::string &name, Attribute::Ptr attr )
+	{
+		m_attributes[name] = attr;
+		m_geo->setAttr(name, attr->getWrapped() );
+	}
+
+	// removes all attributes and primitives
+	void Geometry::clear()
+	{
+		for( std::map< std::string, Attribute::Ptr >::iterator it = m_attributes.begin(); it != m_attributes.end(); ++it )
+			it->second->clear();
+		m_geo->clear();
+		m_indexBufferIsDirty = true;
+	}
+
+
 	void Geometry::bindIndexBuffer()
 	{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBufferId);
@@ -78,6 +94,17 @@ namespace gl
 		return m_primitiveTypeGL;
 	}
 
+
+
+	unsigned int Geometry::addPoint( unsigned int vertex )
+	{
+		m_indexBufferIsDirty = true;
+		return m_geo->addPoint(vertex);
+	}
+
+
+
+
 }
 
 /*
@@ -89,16 +116,6 @@ Geometry::Geometry( Geometry::PrimitiveType primType ):m_primitiveType(primType)
 }
 
 
-// removes all attributes and primitives
-void Geometry::clear()
-{
-	for( std::map< std::string, Attribute::Ptr >::iterator it = m_attributes.begin(); it != m_attributes.end(); ++it )
-		it->second->clear();
-
-	m_indexBuffer.clear();
-	m_numPrimitives = 0;
-	m_indexBufferIsDirty = true;
-}
 
 
 void Geometry::setAttr( const std::string &name, Attribute::Ptr attr )
@@ -151,12 +168,7 @@ const unsigned char* Geometry::rawIndexPointer()const
 	return (const unsigned char*)(&m_indexBuffer[0]);
 }
 
-unsigned int Geometry::addPoint( unsigned int vId )
-{
-	m_indexBuffer.push_back(vId);
-	m_indexBufferIsDirty = true;
-	return m_numPrimitives++;
-}
+
 
 unsigned int Geometry::addLine( unsigned int vId0, unsigned int vId1 )
 {

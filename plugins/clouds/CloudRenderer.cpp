@@ -61,18 +61,27 @@ CloudRenderer::CloudRenderer( core::GraphNodeSocket::Ptr src ) : gl::Renderer(),
 	m_camera = std::make_shared<Camera>();
 
 	m_visualizer = std::make_shared<gl::Visualizer>();
-	m_visualizer->geometry( std::make_shared<gl::Geometry>( createQuad() ), m_shader );
+	m_visualizer->setPrimitiveName( m_visualizer->geometry( std::make_shared<gl::Geometry>( createQuad() ), m_shader ), "qc");
+
+
+	/*
+	gl::Visualizer::Points::Ptr points = m_visualizer->points();
+	m_visualizer->setPrimitiveName( points, "test");
+	points->add( math::V3f(0.0f, 0.0f, -1.0f), math::V3f(1.0f, 0.0f, 0.0f) );
+	points->setPointSize(10.0f);
+	*/
 }
 
 
 void CloudRenderer::render(gl::Context* context)
 {
 	// clear screen ---
-	glClearColor( 0.1, 0.1, 0.1, 1.0 ); // Let OpenGL clear to black
+	glClearColor( 0.1f, 0.1f, 0.1f, 1.0f ); // Let OpenGL clear to black
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 	// setup viewport ---
 	Camera cam( math::degToRad(45.0f), context->getViewportAspect() );
+	cam.setViewToWorld( math::M44f::TranslationMatrix(0.0f, 0.0f, 1.8f) );
 	context->setView( cam.m_worldToView, cam.m_viewToWorld, cam.m_viewToNDC );
 
 	// render cloud data ---
@@ -88,23 +97,39 @@ void CloudRenderer::render(gl::Context* context)
 		qDebug() << "RENDERING CLOUDS! - got CD";
 		math::V3i res = cd->getResolution();
 
-		//cd->getSubData<ScalarField>("qv")->fill( 1.0f );
-		//m_tex_qc->uploadFloat32( res.x, res.y, cd->getSubData<ScalarField>("qt")->getRawPointer() );
-
-		/*
-		float* pixels = (float*) malloc( res.x*res.y*sizeof(float) );
-		float *ptr = pixels;
-		for( int j=0;j<res.y;++j )
-			for( int i=0;i<res.x;++i, ++ptr )
-			{
-				ptr[0] = i/float(res.x);
-				//ptr[0] = 1.0f;
-			}
-		memcpy( cd->getSubData<ScalarField>("qv")->getRawPointer(), pixels, res.x*res.y*sizeof(float) );
-		free(pixels);
-		*/
-
+		// render quad with qc ---
 		m_tex_qc->uploadFloat32( res.x, res.y, cd->getSubData<ScalarField>("qc")->getRawPointer() );
+
+		// render balloon ---
+		if( cd->m_info.contains("balloon_x") )
+		{
+			float b_qv, b_qc, b_pt;
+
+			// get balloon position in local space
+			math::V3f b_vsP( cd->m_info["balloon_x"].toFloat(), cd->m_info["balloon_y"].toFloat(), 0.5f );
+			qDebug() << "!!!!!!!!!!!!!! " << b_vsP.x << " " << b_vsP.y << " " << b_vsP.z;
+			math::V3f b_lsP = cd->getSubData<ScalarField>("qc")->voxelToLocal(b_vsP);
+			qDebug() << "!!!!!!!!!!!!!! " << b_lsP.x << " " << b_lsP.y << " " << b_lsP.z;
+			math::V3f b_P = b_lsP - math::V3f(0.5f, 0.5f, 0.0f);
+			b_P.z = 0.0f;
+			qDebug() << "!!!!!!!!!!!!!! " << b_P.x << " " << b_P.y << " " << b_P.z;
+			gl::Visualizer::Points::Ptr points = std::dynamic_pointer_cast<gl::Visualizer::Points>(m_visualizer->getPrimitive("balloon"));
+			if( !points )
+			{
+
+				points = m_visualizer->points();
+				m_visualizer->setPrimitiveName( points, "balloon");
+				points->add( math::V3f(0.0f, 0.0f, -1.0f), math::V3f(1.0f, 0.0f, 0.0f) );
+				points->setPointSize(10.0f);
+			}
+
+			//points->setPosition(0, math::V3f(0.0f, -0.5f, 0.0f));
+			points->setPosition(0, b_P);
+			//points->setPosition(0, math::V3f(.5f, 0.5f, 0.0f));
+			//qDebug() << "!!!!!!!!!!!!!! " << b_lsP.x << " " << b_lsP.y << " " << b_lsP.z;
+		}
+		//m_visualizer->getPrimitive("qc")->hide();
+
 		m_visualizer->render(context);
 	}
 

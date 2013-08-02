@@ -30,7 +30,7 @@ void CloudsUI::onVCToggled( bool checked )
 
 void CloudsUI::onVCStrengthChanged( int value )
 {
-	float t = (float)value/(float)(ui.vcStrengthSlider->maximum() - ui.vcStrengthSlider->minimum());
+	float t = (float)value/(float)(ui.vcStrengthSlider->maximum() - ui.vcStrengthSlider->minimum())*0.1;
 	m_graph->getNode<Solver>("solver")->getOperator<VortexConfinement2D>( "vortex confinement" )->setStrength( t );
 	makeDirty();
 }

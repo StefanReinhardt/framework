@@ -32,8 +32,8 @@ namespace gl
 
 		Geometry( PrimitiveType primType = POINT );
 
-		void                                         clear(); // removes all attributes and primitives
 		*/
+		void                                         clear(); // removes all attributes and primitives
 
 		// opengl ---
 		void                                         bindIndexBuffer();
@@ -41,7 +41,7 @@ namespace gl
 
 		// (Point-)Attribute management ---
 		Attribute::Ptr                               getAttr( const std::string &name );
-		//void                                         setAttr( const std::string &name, core::Attribute::Ptr attr );
+		void                                         setAttr( const std::string &name, Attribute::Ptr attr );
 		bool                                         hasAttr( const std::string &name );
 		//void                                         removeAttr( const std::string &name );
 		//void                                         getPointAttributeNames( std::vector<std::string> &names )const;
@@ -50,6 +50,7 @@ namespace gl
 		// primitive management ---
 		unsigned int                                 numPrimitives();
 		unsigned int                                 numPrimitiveVertices(); // Point=1; Line=2; Triangle=3; Quad=4
+		unsigned int                                 addPoint( unsigned int vertex );
 		/*
 		//
 
@@ -59,7 +60,6 @@ namespace gl
 		unsigned int                                 numPrimitives();
 		unsigned int                                 numPrimitiveVertices(); // Point=1; Line=2; Triangle=3; Quad=4
 		const unsigned char*                         rawIndexPointer()const;
-		unsigned int                                 addPoint( unsigned int vId );
 		unsigned int                                 addLine( unsigned int vId0, unsigned int vId1 );
 		unsigned int                                 addTriangle( unsigned int vId0, unsigned int vId1, unsigned int vId2 );
 		unsigned int                                 addQuad( unsigned int vId0, unsigned int vId1, unsigned int vId2, unsigned int vId3 );
@@ -70,7 +70,7 @@ namespace gl
 
 */
 	private:
-		std::map< std::string, Attribute::Ptr >            m_attributes; //gl attributes
+		std::map< std::string, Attribute::Ptr >      m_attributes; //gl attributes
 		/*
 
 		std::vector<unsigned int>                    m_indexBuffer;
@@ -78,10 +78,10 @@ namespace gl
 		unsigned int                                 m_numPrimitives;
 		unsigned int                                 m_numPrimitiveVertices; // Point=1; Line=2; Triangle=3; Quad=4; polygon:*
 		*/
-		::Geometry::Ptr                                    m_geo;
-		unsigned int                                       m_indexBufferId;
-		bool                                               m_indexBufferIsDirty;
-		int                                                m_primitiveTypeGL;
+		::Geometry::Ptr                              m_geo;
+		unsigned int                                 m_indexBufferId;
+		bool                                         m_indexBufferIsDirty;
+		int                                          m_primitiveTypeGL;
 	};
 
 

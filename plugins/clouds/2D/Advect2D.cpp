@@ -31,12 +31,6 @@ void Advect2D::applyImpl( SimObject::Ptr so, float dt)
 
 	qDebug() << "Advect2D::apply";
 
-	// set Timestep
-	if(std::dynamic_pointer_cast<CloudData>(so))
-	{
-		CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
-	}
-
 	// get field to advect
 	Data::Ptr f = so->getSubData<Data>(advectionField);
 	VectorField::Ptr f_v = so->getSubData<VectorField>(vecField);

@@ -1,7 +1,8 @@
 // Advection
 //
-// * advects a Scalar or a 3DVector field along a 3DVector field.
+// * advects a Scalar or a 3DVector field along a 3DVector field in voxelspace.
 // * with setType we can set those fields and define, whether the bounds are periodic or not.
+// * the vectorfield along which to advect gives the advection speed in voxelspace
 //
 
 

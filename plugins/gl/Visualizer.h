@@ -43,6 +43,20 @@ namespace gl
 			bool                                  m_pointSprites;
 			bool                                  m_visible;
 		};
+
+		struct Points : public Primitive
+		{
+			typedef std::shared_ptr<Points> Ptr;
+			Points();
+			unsigned int                          add( const math::V3f &p, const math::V3f &color = math::Vec3f(1.0f, 1.0f, 1.0f) );
+			void                                  setPosition( int i, const math::V3f &pos );
+			void                                  setColor( int i, const math::V3f &color );
+			void                                  clear();
+			void                                  setPointSize( float size );
+		protected:
+			virtual void                          preRender();
+			float                                 m_pointSize;
+		};
 		/*
 		BASE_DECL_SMARTPTR_STRUCT(Point);
 		struct Point : public Primitive
@@ -76,18 +90,7 @@ namespace gl
 			void                                                  clear();
 		};
 
-		BASE_DECL_SMARTPTR_STRUCT(Points);
-		struct Points : public Primitive
-		{
-			Points();
-			unsigned int                        add( const math::V3f &p );
-			void                setColor( int i, const math::V3f &color );
-			void                                                  clear();
-			void                               setPointSize( float size );
-		protected:
-			virtual void                                      preRender();
-			float                                             m_pointSize;
-		};
+
 
 		BASE_DECL_SMARTPTR_STRUCT(Circle);
 		struct Circle : public Primitive
@@ -246,20 +249,22 @@ namespace gl
 		void                                             render( Context* context );
 
 		// primitves ---
+		Primitive::Ptr                                   getPrimitive( const std::string &name );
+		bool                                             hasPrimitive( const std::string &name );
+		void                                             setPrimitiveName( Primitive::Ptr prim, const std::string &name );
+
 		Primitive::Ptr                                   geometry( Geometry::Ptr geo, Shader::Ptr shader = Shader::Ptr() );
+		Points::Ptr                                      points();
+
 
 
 	/*
-		PrimitivePtr                                                                   getPrimitive( const std::string &key );
-		bool                                                                           hasPrimitive( const std::string &key );
 		PrimitivePtr                                                                      primitive( const std::string &key );
-
 
 		PointPtr                                                                           point( float x, float y, float z );
 		PointPtr                                                                              point( const math::Vec3f &pos );
 		LinePtr                                                          line( const math::Vec3f &p1, const math::Vec3f &p2 );
 		PointsPtr                                                                                                    points();
-		PointsPtr                                                                              points( const std::string &id);
 		LinesPtr                                                                                                      lines();
 		LinesPtr                                                                                lines( const std::string &id);
 		CirclePtr                                                                                           circle( float r );
