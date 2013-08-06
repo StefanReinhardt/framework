@@ -12,12 +12,12 @@ public:
 
 	virtual void                       applyImpl( SimObject::Ptr so, float dt )override;
 
-	void                              setPosition(float x, float y);
+	void                              setPosition(float x, float y, float z);
 	void                              setReleaseFrame(int release);
 
 
 private:
-	float                              m_posy, m_posx;
+	math::V3f                          m_vsP; // balloon position in voxelspace
 	int                                m_release;
 
 	// overloads from Data

@@ -38,6 +38,7 @@ struct Field
 	math::V3f                               localToWorld( const math::V3f &lsP )const; // converts given localspace position to worldspace
 	math::V3f                               worldToVoxel( const math::V3f &wsP )const; // converts given worldspace position to voxelspace
 	math::V3f                               voxelToWorld( const math::V3f &vsP )const; // converts given voxelspace position to worldspace
+	math::V3f                               voxelToLocal( const math::V3f &vsP )const; // converts given voxelspace position to localspace
 
 	T                                                                *getRawPointer();
 	const T                                                     *getRawPointer()const;
@@ -305,6 +306,13 @@ template<typename T>
 math::V3f Field<T>::localToWorld( const math::V3f &lsP )const
 {
 	return lsP * m_localToWorld;
+}
+
+// converts given voxelspace position to localspace
+template<typename T>
+math::V3f Field<T>::voxelToLocal( const math::V3f &vsP )const
+{
+	return vsP * math::M44f::ScaleMatrix( 1.0f/float(m_resolution.x), 1.0f/float(m_resolution.y), 1.0f/float(m_resolution.z) );
 }
 
 // returns bounding box in worldspace

@@ -24,9 +24,8 @@ namespace gl
 
 
 		// wrapper functions
-		/*
+		::Attribute::Ptr                         getWrapped();
 		void                                     clear();
-		*/
 		int                                      numElements()const;
 		/*
 		int                                      numComponents()const;

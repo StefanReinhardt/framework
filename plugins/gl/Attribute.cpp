@@ -42,6 +42,16 @@ namespace gl
 		glDeleteBuffers(1, &m_bufferId);
 	}
 
+	::Attribute::Ptr Attribute::getWrapped()
+	{
+		return m_attr;
+	}
+
+	void Attribute::clear()
+	{
+		m_isDirty = true;
+		m_attr->clear();
+	}
 	int Attribute::numElements()const
 	{
 		return m_attr->numElements();
@@ -162,12 +172,7 @@ namespace gl
 		return &m_data[0];
 	}
 
-	void Attribute::clear()
-	{
-		m_data.clear();
-		m_numElements = 0;
-		m_isDirty = true;
-	}
+
 
 
 
