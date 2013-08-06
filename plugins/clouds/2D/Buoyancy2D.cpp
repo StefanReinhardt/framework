@@ -55,7 +55,7 @@ void Buoyancy2D::applyImpl(SimObject::Ptr so, float dt)
 			avpt = cd->m_tLut[j] * pow( cd->m_p0/cd->m_pLut[j], 0.286 ) * (1 + 0.61f * qv->lvalue(i,j,k) );
 			vpt = pt->lvalue(i,j,k) * ( 1 + 0.61f *  qv->lvalue(i,j,k) );
 
-			buoyForce->lvalue(i,j,k) = dt * (m_buoyancy * ( math::max(0.0f,(vpt-avpt) / avpt )) - 0.66f*m_gravity * qc->lvalue(i,j,k) );
+			buoyForce->lvalue(i,j,k) = dt * (m_buoyancy * ( math::max(0.0f,(vpt-avpt) / avpt )) - 0.08f*m_gravity * qc->lvalue(i,j,k) );
 		}
 
 	for (int i=1; i<res.x-1; i++)

@@ -138,7 +138,7 @@ private:
 int main(int argc, char ** argv)
 {
 	QStringList args = arguments(argc, argv);
-	bool standalone = true;
+	bool standalone = false;
 
 	qInstallMessageHandler(logger);
 

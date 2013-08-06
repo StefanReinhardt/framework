@@ -69,7 +69,7 @@ core::Graph::Ptr clouds_graph2D()
 	Solver::Ptr solver = std::dynamic_pointer_cast<Solver>(graph->createNode("Solver", "solver"));
 	core::GraphNode::Ptr cloudExport = graph->createNode("ExportClouds", "export");
 
-	solver->setTimeStrech(96.0f); // stretches 1 step to 1 second
+	solver->setTimeStrech(24.0f); // stretches 1 step to 1 second
 
 
 	//********** ADVECT FIELDS
@@ -149,7 +149,7 @@ core::Graph::Ptr clouds_graph2D()
 	heatInput->setContrast(2.00f);
 	heatInput->setEmitterSize(0.2333333f);
 	heatInput->setFrequence(100.0f);
-	heatInput->setStrenght(25.0f);
+	heatInput->setStrenght(45.0f);
 	heatInput->setOffset(0.50f);
 	heatInput->setPtEmission(true);
 
@@ -159,7 +159,7 @@ core::Graph::Ptr clouds_graph2D()
 	vaporInput->setContrast(1.00f);
 	vaporInput->setEmitterSize(0.2333333f);
 	vaporInput->setFrequence(100.0f);
-	vaporInput->setStrenght(0.0015f);
+	vaporInput->setStrenght(0.0035f);
 	vaporInput->setOffset(2.0f);
 	vaporInput->setQvEmission(true);
 
