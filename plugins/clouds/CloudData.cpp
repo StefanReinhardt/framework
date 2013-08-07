@@ -49,7 +49,7 @@ void CloudData::initialize()
 	velocity->getScalarField(0)->fill(0.0f,math::Box3f(0.2f,0.1f,0.4f,0.8f,0.4f,0.6f));
 
 	velocity->getScalarField(1)->fill(0.0f);
-	velocity->getScalarField(1)->fill(0.0f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.4f,0.6f));
+	velocity->getScalarField(1)->fill(0.50f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.4f,0.6f));
 
 	velocity->getScalarField(2)->fill(0.0f);
 	velocity->getScalarField(2)->fill(0.0f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.4f,0.6f));
@@ -477,14 +477,14 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 			qDebug()  << "setBounds with b=0 (Neumann) res = "<< res.x;
 			for( int j=0;j<res.y;++j )
 				{
-					f->lvalue(0,j,k)= f->lvalue(1,j,k);
-					f->lvalue(res.x-1,j,k)= f->lvalue(res.x-2,j,k);
+					f->lvalue(0,j,k)=			f->lvalue(1,j,k);
+					f->lvalue(res.x-1,j,k)=		f->lvalue(res.x-2,j,k);
 				}
 
 			for( int i=0;i<res.x;++i )
 				{
-					f->lvalue(i,0,k)= f->lvalue(i,1,k);
-					f->lvalue(i,res.y-1,k) = f->lvalue(i,res.y-2,k);
+					f->lvalue(i,0,k)=			f->lvalue(i,1,k);
+					f->lvalue(i,res.y-1,k) =	f->lvalue(i,res.y-2,k);
 				}
 			break;
 
@@ -493,12 +493,12 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 		case 1:
 			qDebug()  << "setBounds with b=1 (vel_x)";
 			// sides 	= user defined wind
-			for( int j=0;j<res.y/2;++j )
+			for( int j=0;j<res.y;++j )
 				{
-					f->lvalue(0,j,k) =			m_p.wind;
-					f->lvalue(1,j,k) =			m_p.wind;
-					f->lvalue(res.x-1,j,k) =	-m_p.wind;
-					f->lvalue(res.x-2,j,k) =	-m_p.wind;
+					f->lvalue(0,j,k) =			0;
+					f->lvalue(1,j,k) =			0;
+					f->lvalue(res.x-1,j,k) =	0;
+					f->lvalue(res.x-2,j,k) =	0;
 				}
 
 			// bottom 	= noslip
@@ -506,8 +506,8 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 			//for( int k=0;k<res.z;++k )
 				for( int i=0;i<res.x;++i )
 				{
-					f->lvalue(i,0,k)=-f->lvalue(i,1,k);
-					f->lvalue(i,res.y-1,k)=f->lvalue(i,res.y-2,k);
+					f->lvalue(i,0,k)=			- f->lvalue(i,1,k);
+					f->lvalue(i,res.y-1,k)=		0.0f;//f->lvalue(i,res.y-2,k);
 				}
 			break;
 
@@ -519,8 +519,8 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 			//for( int k=0;k<res.z;++k )
 				for( int j=0;j<res.y;++j )
 				{
-					f->lvalue(0,j,k)= -f->lvalue(1,j,k);
-					f->lvalue(res.x-1,j,k)= -f->lvalue(res.x-2,j,k);
+					f->lvalue(0,j,k)=			-f->lvalue(1,j,k);
+					f->lvalue(res.x-1,j,k)=		-f->lvalue(res.x-2,j,k);
 				}
 
 			// bottom 	= noslip
@@ -528,10 +528,10 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 			//for( int k=0;k<res.z;++k )
 				for( int i=0;i<res.x;++i )
 				{
-					f->lvalue(i,0,k) = 0;
-					f->lvalue(i,1,k) = 0;
-					f->lvalue(i,res.y-1,k) = 0;
-					f->lvalue(i,res.y-2,k) = 0;
+					f->lvalue(i,0,k) =			0.0f;
+					f->lvalue(i,1,k) =			0.0f;
+					f->lvalue(i,res.y-1,k) =	math::max(0.0f,f->lvalue(i,res.y-3,k));
+					f->lvalue(i,res.y-2,k) =	math::max(0.0f,f->lvalue(i,res.y-3,k));
 				}
 			break;
 

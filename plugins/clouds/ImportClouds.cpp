@@ -44,6 +44,7 @@ void ImportClouds::update(core::GraphNodeSocket *output)
 			{
 				std::string &name = *it;
 
+
 				houdini::HouGeo::Primitive::Ptr prim = hgeo->getPrimitive(primIndex);
 				if(std::dynamic_pointer_cast<houdini::HouGeo::HouVolume>(prim) )
 				{
@@ -51,7 +52,6 @@ void ImportClouds::update(core::GraphNodeSocket *output)
 					// attach primitive to simdata
 					so->addSubData( QString::fromStdString(name), volprim->field );
 
-					//qDebug() << volprim->field->
 				}
 			}
 		}
@@ -72,3 +72,4 @@ void ImportClouds::update(core::GraphNodeSocket *output)
 		*/
 	}
 }
+
