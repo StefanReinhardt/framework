@@ -18,6 +18,11 @@ void Project2D::applyImpl( SimObject::Ptr so, float dt )
 {
 	timer.start();
 
+	// A x = b
+	// x = pressure;
+	// A = coefficient matrix
+	// b = divergence
+
 	qDebug() << "Project2D::apply";
 
 	CloudData::Ptr cd = std::dynamic_pointer_cast<CloudData>(so);
@@ -58,7 +63,7 @@ void Project2D::applyImpl( SimObject::Ptr so, float dt )
 			}
 	}
 
-	//cd->setBounds2D(0, div);
+	cd->setBounds2D(0, div);
 	cd->setBounds2D(0, q);
 	//so->setSubData("div", div);
 
@@ -67,10 +72,10 @@ void Project2D::applyImpl( SimObject::Ptr so, float dt )
 	//solve for q
 
 	float temp = 0;
-	float w = 1.4f;
+	float w = 1.8f;
 	float error = std::numeric_limits<float>::max();
 
-	for(int l=0; true; l++)
+	for(int l=0; error>0.0001f; l++)
 	//for( int k=1;k<res.z-1;++k )
 	{
 		error=0;
@@ -83,17 +88,17 @@ void Project2D::applyImpl( SimObject::Ptr so, float dt )
 						(-div->lvalue(i,j,k) + q->lvalue(i-1,j,k) + q->lvalue(i+1,j,k) + q->lvalue(i,j-1,k) + q->lvalue(i,j+1,k)  )/4;
 				error = std::max(error,abs(q->lvalue(i,j,k)-temp));
 
-				// old without correction
-				temp = (-div->lvalue(i,j,k) + q->lvalue(i-1,j,k) + q->lvalue(i+1,j,k) + q->lvalue(i,j-1,k) + q->lvalue(i,j+1,k)  )/4;
-
 				q->lvalue(i,j,k)=temp;
 			}
-		qDebug() << "--------------------------------------------------------------------" << l << error;
-		if(l>50)
+
+		if(l>400)
 			break;
 
+		cd->setBounds2D(0,q);
 	}
-	cd->setBounds2D(0,q);
+	qDebug() << "--------------------------------------------------------------------"  << error;
+
+
 	//so->setSubData("q", q);
 
 
@@ -119,9 +124,12 @@ void Project2D::applyImpl( SimObject::Ptr so, float dt )
 		for( int j=1;j<res.y-1;++j )
 			for( int i=1;i<res.x-1;++i )
 			{
-				div->lvalue(i,j,0) = h*(//	vel->getScalarField(0)->lvalue(i+1,j,0) - vel->getScalarField(0)->lvalue(i,j,0));
-											vel->getScalarField(1)->lvalue(i,j+1,0) - vel->getScalarField(1)->lvalue(i,j,0));
+				div->lvalue(i,j,0) = h*(	vel->getScalarField(0)->lvalue(i+1,j,0) - vel->getScalarField(0)->lvalue(i,j,0)
+										+	vel->getScalarField(1)->lvalue(i,j+1,0) - vel->getScalarField(1)->lvalue(i,j,0));
+
 			}
+
+
 
 	//cd->setBounds2D(0,div);
 	if(so->hasSubData("div"))
