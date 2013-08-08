@@ -1,8 +1,12 @@
 #include "CloudData.h"
+#include <QFile>
+#include <qstringlist.h>
+#include <core/Core.h>
 
 
 CloudData::CloudData( Parameters parms ) : SimObject()
 {
+	m_useSoudingFile = true;
 	m_p = parms;
 	initialize();
 	reset();
@@ -49,10 +53,48 @@ void CloudData::initialize()
 	velocity->getScalarField(0)->fill(0.0f,math::Box3f(0.2f,0.1f,0.4f,0.8f,0.4f,0.6f));
 
 	velocity->getScalarField(1)->fill(0.0f);
-	velocity->getScalarField(1)->fill(0.50f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.4f,0.6f));
+	velocity->getScalarField(1)->fill(0.0f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.4f,0.6f));
 
 	velocity->getScalarField(2)->fill(0.0f);
 	velocity->getScalarField(2)->fill(0.0f,math::Box3f(0.4f,0.1f,0.4f,0.6f,0.4f,0.6f));
+
+
+
+
+	// read sounding
+	if(m_useSoudingFile)
+	{
+		QFile file(core::expand("$HERE/sounding.txt"));
+		if (file.open(QFile::ReadOnly)) {
+			char buf[1024];
+
+			for(int i=1; !file.atEnd(); i++)
+			{
+				qint64 lineLength = file.readLine(buf, sizeof(buf));
+
+				if (lineLength != -1 && i>6)
+				{
+					QString line = QString::fromUtf8(buf);
+					QStringList lineList = line.split(' ', QString::SkipEmptyParts);
+
+					if(lineList[0].toFloat())
+					{
+						qDebug()<<  lineList[0];
+						m_sndPRES.push_back(lineList[0].toFloat());
+						m_sndHGHT.push_back(lineList[1].toFloat());
+						m_sndTEMP.push_back(lineList[2].toFloat());
+						m_sndDWPT.push_back(lineList[3].toFloat());
+						m_sndRELH.push_back(lineList[4].toFloat());
+						m_sndMIXR.push_back(lineList[5].toFloat());
+					}
+					else
+						break; // Stop after value list ended (skip additional station info)
+				}
+			}
+		}
+
+	}
+
 
 }
 
@@ -103,11 +145,23 @@ void CloudData::reset()
 	{
 		for(int i= 0; i<m_res.x; i++)
 			for(int k= 0; k<m_res.z; k++)
-				qv->lvalue(i,j,k) = 		qvs(m_tLut[j], m_pLut[j]) * m_p.hum;
+			{
+				float alt = ( (float)j / (float)m_res.y ) * (m_p.maxAlt-m_p.minAlt) + m_p.minAlt;
 
+				if(m_useSoudingFile)
+					qv->lvalue(i,j,k) = 0.001f*(soundingValue(m_sndMIXR, alt) * 100.0f) / soundingValue(m_sndRELH, alt);   // qvs = (100% * qv) / humidity%   convert g/kg to kg/kg
+
+				else
+					qv->lvalue(i,j,k) = 		qvs(m_tLut[j], m_pLut[j]) * m_p.hum;
+			}
 		m_qv0Lut.push_back(qv->lvalue(0,j,0));
 	}
 	m_qv1 = qv->lvalue(0,m_res.y-1,0);
+
+
+
+
+
 
 
 	//************************************************************
@@ -633,12 +687,18 @@ void CloudData::setBounds2D(int b, ScalarField::Ptr f)
 
 float CloudData::absPressure(float alt)
 {
-	return  m_p0* pow(( 1- ( (alt*m_p.tlr)/m_p.t0 ) ),(m_gravity/(m_p.tlr*m_rd)) ) ;
+	if(m_useSoudingFile)
+		return soundingValue(m_sndPRES, alt) * 100; // hPa in Pa
+	else
+		return  m_p0* pow(( 1- ( (alt*m_p.tlr)/m_p.t0 ) ),(m_gravity/(m_p.tlr*m_rd)) ) ;
 }
 
 float CloudData::absTemp(float alt)
 {
-	return m_p.t0 - alt * m_p.tlr;
+	if(m_useSoudingFile)
+		return soundingValue(m_sndTEMP, alt) + 273.15f; // C in K
+	else
+		return m_p.t0 - alt * m_p.tlr;
 }
 
 float CloudData::potTemp(float absT, float absP)
@@ -665,4 +725,27 @@ float CloudData::qvs(float t, float p)
 float CloudData::pvs(float t)
 {
 	return  610.78f * exp( 17.27f * (t-273.16f)/(t-35.86f) );		// Pressure at saturation
+}
+
+
+float CloudData::soundingValue(std::vector<float> snd, float alt)
+{
+	int i = 0;
+	for(auto it = m_sndHGHT.begin(); it != m_sndHGHT.end();  it++ , i++)
+	{
+		if(m_sndHGHT[i]>alt) break;
+	}
+
+	if(i-1 < 0)
+		return snd[0]; //hPa in Pa
+	else
+	{
+		float h1 = m_sndHGHT[i];
+		float h0 = m_sndHGHT[math::max(0,i-1)];
+		float dist = abs(h1-h0);
+		float w1 = 1-(abs(h1-alt) / dist);
+		float w0 = 1-(abs(alt-h0) / dist);
+
+		return snd[i]* w1 + snd[math::max(0,i-1)]* w0; // interpolation
+	}
 }

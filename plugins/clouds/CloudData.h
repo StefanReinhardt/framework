@@ -84,6 +84,17 @@ public:
 	std::vector<float>                   m_pLut;			// absolute Pressure at altitude in kPa
 	std::vector<float>                   m_qv0Lut;			// initial Vapor distribution Lookup
 
+	// sounding Data
+	bool                                 m_useSoudingFile;
+	std::vector<float>                   m_sndPRES;			// Pressure				in hPa
+	std::vector<float>                   m_sndHGHT;			// Height				in meter
+	std::vector<float>                   m_sndTEMP;			// Temperature			in C
+	std::vector<float>                   m_sndDWPT;			// Dewpoint				in C
+	std::vector<float>                   m_sndRELH;			// relative humidity	in percent
+	std::vector<float>                   m_sndMIXR;			// Mixing Ratio			in g/kg
+
+
+
 	// Cloud Control Parms
 	std::vector<float>                   m_Kp, m_Ki;
 	std::vector<int>                     m_htar, m_hc;
@@ -100,6 +111,7 @@ public:
 	float                                potTempToTemp(float pt, float absP);
 	float                                qvs(float t, float p);
 	float                                pvs(float t);
+	float                                soundingValue(std::vector<float> snd, float alt);
 
 };
 

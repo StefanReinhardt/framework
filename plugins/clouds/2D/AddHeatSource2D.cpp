@@ -32,6 +32,7 @@ void AddHeatSource2D::applyImpl(SimObject::Ptr so, float dt)
 	math::V3i res = pt->getResolution();
 
 	ScalarField::Ptr qv = cd->getSubData<ScalarField>("qv");
+	ScalarField::Ptr vel_x = cd->getSubData<VectorField>("velocity")->getScalarField(0);
 	ScalarField::Ptr vel_y = cd->getSubData<VectorField>("velocity")->getScalarField(1);
 
 	math::PerlinNoise noise = math::PerlinNoise();
@@ -88,7 +89,7 @@ void AddHeatSource2D::applyImpl(SimObject::Ptr so, float dt)
 				//qv->lvalue(i,1,k) = qv->lvalue(i,0,k) * (1.10f + (0.20f * random));
 
 			if(m_emitVel)
-				vel_y->lvalue(i,j+1,k) = (m_strenght / cd->m_cellSize) * random  * bool(core::getVariable("$F").toInt()<100) ;
+				vel_x->lvalue(i,j+1,k) = (m_strenght / cd->m_cellSize) * random  * bool(core::getVariable("$F").toInt()<1000) ;
 				//vel_y->lvalue(i,j+1,k) = 2.6f * random;
 		}
 

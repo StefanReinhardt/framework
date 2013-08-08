@@ -103,8 +103,6 @@ void CloudRenderer::render(gl::Context* context)
 		// render balloon ---
 		if( cd->m_info.contains("balloon_x") )
 		{
-			float b_qv, b_qc, b_pt;
-
 			// get balloon position in local space
 			math::V3f b_vsP( cd->m_info["balloon_x"].toFloat(), cd->m_info["balloon_y"].toFloat(), 0.5f );
 			qDebug() << "!!!!!!!!!!!!!! " << b_vsP.x << " " << b_vsP.y << " " << b_vsP.z;

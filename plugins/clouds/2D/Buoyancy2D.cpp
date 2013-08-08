@@ -46,8 +46,6 @@ void Buoyancy2D::applyImpl(SimObject::Ptr so, float dt)
 
 
 
-	float vpt,avpt;
-
 	int k = 0;
 	for (int i=0; i<res.x; i++)
 		for (int j=0; j<res.y; j++)
