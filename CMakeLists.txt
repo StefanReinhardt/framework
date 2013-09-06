@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.8)
-project(cloudshop)
+project(framework)
 
 #generates qt moc and ui sources from the list of source files which have been given as parameter
 MACRO (generateQtOutputs sources )
@@ -25,13 +25,11 @@ MACRO (generateQtOutputs sources )
         #source_group(generated FILES ${${ui_outputs}})
 ENDMACRO (generateQtOutputs)
 
-# if its david then binaries will go to seperate bin directory one level above
-#if( $ENV{USERNAME} STREQUAL "koernedd" )
+# currently binaries will go to seperate bin directory one level above
 get_filename_component(bin_directory ${CMAKE_CURRENT_SOURCE_DIR}/../bin ABSOLUTE)
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${bin_directory} )
-#endif( $ENV{USERNAME} STREQUAL "koernedd" )
 
-set( APP_NAME cloudshop )
+set( APP_NAME framework )
 MESSAGE( STATUS "APP_NAME  :         " ${APP_NAME} )
 
 

@@ -6,7 +6,7 @@
 
 CloudData::CloudData( Parameters parms ) : SimObject()
 {
-	m_useSoudingFile = true;
+	m_useSoudingFile = false;
 	m_p = parms;
 	initialize();
 	reset();
